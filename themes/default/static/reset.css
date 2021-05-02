@@ -1,0 +1,67 @@
+@charset "UTF-8";
+
+/* unicode文字方向指定 */
+* {
+    direction: ltr;
+    unicode-bidi: bidi-override;
+}
+
+ruby, rb, rt, rbc, rtc { unicode-bidi: normal; }
+
+/* リセット */
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body,div,pre,p,blockquote,
+form,fieldset,input,textarea,select,option,
+dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,
+table,th,td,embed,object {
+	margin: 0;
+	padding: 0;
+	vertical-align: baseline;
+}
+
+
+html{
+overflow-y:scroll;
+}
+ol,ul{
+list-style:none;
+}
+fieldset,img{
+border:0;
+}
+
+img {
+	border-width: 0;
+	border-style: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+caption,th{
+text-align:left;
+}
+address,caption,cite,code,dfn,em,strong,th,ver{
+font-style:normal;
+}
+
+/* ------IE6用------ */
+br {letter-spacing:0;}
+dl {_height: 1%;}
+/* ----------------- */
+
+/* ---IE用--- */
+li,ul,a{zoom:1;}
+
+
+/* ------禁則処理------ */
+body {
+	word-break: normal !important;
+	word-wrap: break-word;
+}
+/* ----------------- */
+

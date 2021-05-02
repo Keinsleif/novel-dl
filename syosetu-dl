@@ -1,0 +1,185 @@
+#!/usr/bin/python3
+
+import time,re,requests,sys,os,argparse
+import urllib.parse
+from bs4 import BeautifulSoup
+
+THEME="default"
+
+CONFIG_DIR=os.path.dirname(os.getcwd()+"/"+__file__)+"/"
+STATIC_DIR=CONFIG_DIR+"themes/"+THEME+"/"
+BASE_PATH=STATIC_DIR+"base.html"
+INDEX_PATH=STATIC_DIR+"index.html"
+SINGLE_PATH=STATIC_DIR+"single.html"
+
+parser=argparse.ArgumentParser()
+parser.add_argument('arg',help="default:url")
+parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
+parser.add_argument('-d',"--dir",default="",help="set download directory")
+#parser.add_argument('-t',"--type",default="html",help="set type of output files (html/text)")
+args=parser.parse_args()
+
+ret=urllib.parse.urlparse(args.arg)
+if re.match(r'.*syosetu.com',ret.hostname):
+	type="narou"
+	ncode=re.match(r'/(n[0-9a-zA-Z]+)',ret.path).group(1)
+elif re.match(r'.*kakuyomu.jp',ret.hostname):
+	type="kakuyomu"
+	ncode=re.match(r'/works/([0-9]+)',ret.path).group(1)
+else:
+	print("That url is not supported")
+	sys.exit()
+
+if args.axel:
+	lazy=0
+else:
+	lazy=1
+
+if args.dir:
+	ndir=args.dir+"/"
+else:
+	ndir=ncode+"/"
+
+with open(BASE_PATH,"r") as f:
+	base_html=f.read()
+with open(INDEX_PATH,"r") as f:
+	index_html=f.read()
+with open(SINGLE_PATH,"r") as f:
+	single_html=f.read()
+
+base_url="https://"+ret.hostname+"/"
+headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
+cookie={'over18': 'yes'}
+if type=="narou":
+	info_url = base_url+ncode
+	info_res = requests.get(url=info_url,headers=headers,cookies=cookie).content
+	top_data = BeautifulSoup(info_res, "html.parser")
+	index_raw=top_data.select_one(".index_box")
+	if index_raw:
+		raws=index_raw.select(".novel_sublist2")
+		num_parts=len(raws)
+	else:
+		num_parts=1
+		if not args.dir:
+			ndir=""
+		with open(SINGLE_PATH,"r") as f:
+			base_html=f.read()
+	title=top_data.select_one("title").text
+elif type=="kakuyomu":
+	info_url = base_url+"works/"+ncode
+	info_res = requests.get(url=info_url,headers=headers).content
+	top_data = BeautifulSoup(info_res, "html.parser")
+	index_raw=top_data.select_one(".widget-toc-items")
+	raws=index_raw.select("li.widget-toc-episode")
+	num_parts = len(raws)
+	title=top_data.select_one("#workTitle").text
+
+novels=[]
+if os.path.isdir(ndir) and num_parts!=1:
+	files=os.listdir(ndir)
+	for file in files:
+		base,ext=os.path.splitext(file)
+		if ext=='.txt' or ext=='.html':
+			novels.append(base)
+elif ndir!="":
+	os.mkdir(ndir)
+
+if num_parts==1:
+	style=""
+	files=os.listdir(STATIC_DIR+"static/")
+	for file in files:
+		with open(STATIC_DIR+"static/"+file,"r") as f:
+			style=style+f.read()
+
+	if type=="narou":
+		content=top_data.select_one("#novel_honbun")
+	elif type=="kakuyomu":
+		url=base_url+raws[0].find('a')['href'].replace("/","",1)
+		res = requests.get(url=url,headers=headers).content
+		soup = BeautifulSoup(res, "html.parser")
+		subtitle=soup.select_one(".widget-episodeTitle").text
+		content=str(soup.select_one(".widget-episodeBody"))
+		content=re.sub(r'<div class="widget-episodeBody.*?>','<div class="novel_view" id="novel_honbun">',content)
+		content=content.replace(' class="blank"',"")
+		for i in range(0,num_parts):
+			content=re.sub(r'id="p'+str(i)+'"','id="L'+str(i)+'"',content)
+	contents=single_html.format(title=title,content=content,style=style)
+	with open(ndir+title+".html", "w", encoding="utf-8") as f:
+		f.write(contents)
+	print("part 1 downloaded (total: {:d} parts)".format(num_parts))  # 進捗を表示
+	sys.exit()
+
+
+for part in range(1, num_parts+1):
+
+	if str(part) in novels:
+		print("part {:d} skipped (total: {:d} parts)".format(part, num_parts))
+		continue
+
+	if type=="narou":
+		url = base_url+"{}/{:d}/".format(ncode, part)
+		res = requests.get(url=url,headers=headers,cookies=cookie).content
+		soup = BeautifulSoup(res, "html.parser")
+		subtitle=soup.select_one(".novel_subtitle").text
+		body=soup.select_one("#novel_honbun")
+
+	elif type=="kakuyomu":
+		url = base_url+raws[part-1].find('a')['href'].replace("/","",1)
+		res = requests.get(url=url,headers=headers).content
+		soup = BeautifulSoup(res, "html.parser")
+		subtitle=soup.select_one(".widget-episodeTitle").text
+		body=str(soup.select_one(".widget-episodeBody"))
+		body=re.sub(r'<div class="widget-episodeBody.*?>','<div class="novel_view" id="novel_honbun">',body)
+		body=body.replace(' class="blank"',"")
+		for i in range(0,num_parts):
+			body=re.sub(r'id="p'+str(i)+'"','id="L'+str(i)+'"',body)
+
+	if part==1:
+		ppart="#"
+		npart=part+1
+	elif part==num_parts:
+		ppart=part-1
+		npart="#"
+	else:
+		ppart=part-1
+		npart=part+1
+
+	contents = base_html.format(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,content=body)
+
+	with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
+			f.write(contents)
+
+	print("part {:d} downloaded (total: {:d} parts)".format(part, num_parts))
+	time.sleep(lazy)
+
+if type=="narou":
+	index='<div class="index_box">\n'
+	for i in range(0,num_parts):
+		index=index+str(raws[i]).replace("/"+ncode+"/"+str(i+1)+"/",str(i+1)+".html",1)
+	index=index+"\n</div>"
+	desc=top_data.select_one("#novel_ex")
+elif type=="kakuyomu":
+	template='<dl class="novel_sublist2">\n<dd class="subtitle">\n<a href="{link}">{title}</a>\n</dd>\n<dt class="long_update">{date}</dt>\n</dl>\n'
+	index='<div class="index_box">\n'
+	for i in range(0,num_parts):
+		timestamp=raws[i].find("time")['datetime'].replace("-","/",2).replace("T"," ",1)
+		timestamp=re.sub(r':\d\dZ$','',timestamp)
+		index=index+template.format(link=str(i+1)+".html",title=raws[i].select_one(".widget-toc-episode-titleLabel").text,date=timestamp)
+	index=index+"</div>"
+	desc=str(top_data.select_one("#introduction"))
+	desc=re.sub(r'<p .*?id="introduction".*?>','<div id="novel_ex">',desc)
+	desc=re.sub(r'</span>.*?<span.*?</span>.*?</span>','',desc)
+	desc=re.sub(r'<span.*?>','',desc)
+	desc=desc.replace('</p>','</div>',1)
+contents=index_html.format(title=title,desc=desc,index=index)
+with open(ndir+"/index.html","w") as f:
+		f.write(contents)
+
+if not os.path.isdir(ndir+"static"):
+	os.mkdir(ndir+"static")
+files=os.listdir(STATIC_DIR+"static")
+for file in files:
+	with open(STATIC_DIR+"static/"+file,"r") as f1:
+		with open(ndir+"static/"+file,"w") as f2:
+			f2.write(f1.read())
+
