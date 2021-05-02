@@ -9,25 +9,20 @@
 <meta http-equiv="Content-Style-Type" content="text/css" />
 <meta name="format-detection" content="telephone=no" />
 
-
 <link rel="stylesheet" type="text/css" href="static/reset.css" media="screen,print" /><!--footer?-->
 <link rel="stylesheet" type="text/css" href="static/kotei.css" media="screen,print" />
 </head>
-
 <body>
 
 <a id="pageBottom" href="#footer">↓</a>
 <div id="main"></div>
-
 <div id="novel_contents">
 <div id="novel_color">
 <br>
 <p class="novel_title">{{title}}</p>
-
 <div id="novel_ex">
 {{desc|safe}}
 </div>
-
 <div class="index_box">
 {% for dex in index %}
 {% if dex['type']==1 %}
@@ -42,14 +37,10 @@
 {% endif %}
 {% endfor %}
 </div>
-
 </div></div>
 
 <br>
-
 <a id="pageTop" href="#main">↑</a>
-
-
 
 <!-- フッタここから -->
 <div id="footer">
@@ -67,6 +58,5 @@
 </ul>
 </div><!--footer-->
 <!-- フッタここまで -->
-
 </body>
 </html>

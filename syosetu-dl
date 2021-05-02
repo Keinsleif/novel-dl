@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 
 THEME="default"
 
-CONFIG_DIR=os.path.dirname(os.getcwd()+"/"+__file__)+"/"
+CONFIG_DIR=os.path.dirname(os.path.abspath(__file__))+"/"
 STATIC_DIR=CONFIG_DIR+"themes/"+THEME+"/"
 BASE_PATH="base.html"
 INDEX_PATH="index.html"
@@ -17,6 +17,7 @@ parser=argparse.ArgumentParser()
 parser.add_argument('arg',help="default:url")
 parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
 parser.add_argument('-d',"--dir",default="",help="set download directory")
+parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
 args=parser.parse_args()
 
 ret=urllib.parse.urlparse(args.arg)
@@ -36,9 +37,9 @@ else:
 	lazy=1
 
 if args.dir:
-	ndir=args.dir+"/"
+	ndir=os.path.abspath(args.dir)+"/"
 else:
-	ndir=ncode+"/"
+	ndir=os.getcwd()+"/"+ncode+"/"
 
 env=Environment(loader=FileSystemLoader(STATIC_DIR,encoding='utf8'))
 base_html=env.get_template(BASE_PATH)
@@ -117,7 +118,7 @@ if type=="narou":
 			index.append({'type': 1,'text': ele.text})
 		elif re.match(r'.+novel_sublist2',str(ele)):
 			index.append({'type': 2,'text': ele.a.text,'part': part,'time': ele.dt.text.replace("（改）","")})
-			part=+1
+			part=part+1
 	desc="".join([str(i) for i in top_data.select_one("#novel_ex").contents])
 
 elif type=="kakuyomu":
@@ -130,6 +131,7 @@ elif type=="kakuyomu":
 		elif re.match(r'.+widget-toc-episode',str(ele)):
 			timestamp=re.sub(r':\d\dZ$','',ele.time['datetime'].replace("-","/",2).replace("T"," ",1))
 			index.append({'type': 2,'text': ele.span.text, 'part': part, 'time': timestamp})
+			part=part+1
 	desc=top_data.select_one("#introduction")
 	if desc.select_one(".ui-truncateTextButton-expandButton"):
 		desc.select_one(".ui-truncateTextButton-expandButton").decompose()
@@ -145,12 +147,17 @@ if not os.path.islink(ndir+"static"):
 	elif os.path.isfile(ndir+"static"):
 		os.remove(ndir+"static")
 	#os.symlink(STATIC_DIR+"static",ndir+"static")
-	shutil.copytree(STATIC_DIR+"static",ndir+"static")
+	os.mkdir(ndir+"static")
+	files=os.listdir(STATIC_DIR+"static")
+	for file in files:
+		with open(STATIC_DIR+"static/"+file,"r") as f1:
+			with open(ndir+"static/"+file,"w") as f2:
+				f2.write(f1.read())
 
 
 for part in range(1, num_parts+1):
 
-	if str(part) in novels:
+	if str(part) in novels and not args.renew:
 		print("part {:d} skipped (total: {:d} parts)".format(part, num_parts))
 		continue
 
@@ -159,6 +166,7 @@ for part in range(1, num_parts+1):
 		res = requests.get(url=url,headers=headers,cookies=cookie).content
 		soup = bs4(res,"html.parser")
 		subtitle=soup.select_one(".novel_subtitle").text
+		body=soup.select_one("#novel_honbun")
 		body=[i.contents[0] for i in body("p")]
 
 	elif type=="kakuyomu":
