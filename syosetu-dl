@@ -3,14 +3,15 @@
 import time,re,requests,sys,os,argparse
 import urllib.parse
 from bs4 import BeautifulSoup
+from jinja2 import Environment, FileSystemLoader
 
 THEME="default"
 
 CONFIG_DIR=os.path.dirname(os.getcwd()+"/"+__file__)+"/"
 STATIC_DIR=CONFIG_DIR+"themes/"+THEME+"/"
-BASE_PATH=STATIC_DIR+"base.html"
-INDEX_PATH=STATIC_DIR+"index.html"
-SINGLE_PATH=STATIC_DIR+"single.html"
+BASE_PATH="base.html"
+INDEX_PATH="index.html"
+SINGLE_PATH="single.html"
 
 parser=argparse.ArgumentParser()
 parser.add_argument('arg',help="default:url")
@@ -40,12 +41,10 @@ if args.dir:
 else:
 	ndir=ncode+"/"
 
-with open(BASE_PATH,"r") as f:
-	base_html=f.read()
-with open(INDEX_PATH,"r") as f:
-	index_html=f.read()
-with open(SINGLE_PATH,"r") as f:
-	single_html=f.read()
+env=Environment(loader=FileSystemLoader(STATIC_DIR,encoding='utf8'))
+base_html=env.get_template(BASE_PATH)
+index_html=env.get_template(INDEX_PATH)
+single_html=env.get_template(SINGLE_PATH)
 
 base_url="https://"+ret.hostname+"/"
 headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
@@ -62,8 +61,6 @@ if type=="narou":
 		num_parts=1
 		if not args.dir:
 			ndir=""
-		with open(SINGLE_PATH,"r") as f:
-			base_html=f.read()
 	title=top_data.select_one("title").text
 elif type=="kakuyomu":
 	info_url = base_url+"works/"+ncode
@@ -103,7 +100,7 @@ if num_parts==1:
 		content=content.replace(' class="blank"',"")
 		for i in range(0,num_parts):
 			content=re.sub(r'id="p'+str(i)+'"','id="L'+str(i)+'"',content)
-	contents=single_html.format(title=title,content=content,style=style)
+	contents=single_html.render(title=title,content=content,style=style)
 	with open(ndir+title+".html", "w", encoding="utf-8") as f:
 		f.write(contents)
 	print("part 1 downloaded (total: {:d} parts)".format(num_parts))  # 進捗を表示
@@ -144,7 +141,7 @@ for part in range(1, num_parts+1):
 		ppart=part-1
 		npart=part+1
 
-	contents = base_html.format(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,content=body)
+	contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,content=body)
 
 	with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
 			f.write(contents)
@@ -171,7 +168,7 @@ elif type=="kakuyomu":
 	desc=re.sub(r'</span>.*?<span.*?</span>.*?</span>','',desc)
 	desc=re.sub(r'<span.*?>','',desc)
 	desc=desc.replace('</p>','</div>',1)
-contents=index_html.format(title=title,desc=desc,index=index)
+contents=index_html.render(title=title,desc=desc,index=index)
 with open(ndir+"/index.html","w") as f:
 		f.write(contents)
 

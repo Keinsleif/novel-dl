@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<title>{title}</title>
+<title>{{title}}</title>
 
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
@@ -23,11 +22,11 @@
 <div id="novel_contents">
 <div id="novel_color">
 <br>
-<p class="novel_title">{title}</p>
+<p class="novel_title">{{title}}</p>
 
-{desc}
+{{desc|safe}}
 
-{index}
+{{index|safe}}
 
 </div></div>
 

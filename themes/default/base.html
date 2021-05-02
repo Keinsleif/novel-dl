@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<title>{title}--{subtitle}</title>
+<title>{{title}}--{{subtitle}}</title>
 
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
@@ -21,28 +21,28 @@
 <div id="main"></div>
 <div class="contents1">
 
-<a href="index.html" class="margin_r20">{title}</a>
+<a href="index.html" class="margin_r20">{{title}}</a>
 
 </div><!--contents1-->
 
 <div id="novel_contents">
 <div id="novel_color">
 <div class="novel_bn">
-<a href="{ppart}.html">&lt;&lt;&nbsp;前へ</a><a href="{npart}.html">次へ&nbsp;&gt;&gt;</a></div><!--novel_bn-->
+<a href="{{ppart}}.html">&lt;&lt;&nbsp;前へ</a><a href="{{npart}}.html">次へ&nbsp;&gt;&gt;</a></div><!--novel_bn-->
 
 
-<div id="novel_no">{part}/{total}</div>
+<div id="novel_no">{{part}}/{{total}}</div>
 
 
-<p class="novel_subtitle">{subtitle}</p>
+<p class="novel_subtitle">{{subtitle}}</p>
 
 
-{content}
+{{content|safe}}
 
 
 <div class="novel_bn">
-<a href="{ppart}.html">&lt;&lt;&nbsp;前へ</a>
-<a href="{npart}.html">次へ&nbsp;&gt;&gt;</a>
+<a href="{{ppart}}.html">&lt;&lt;&nbsp;前へ</a>
+<a href="{{npart}}.html">次へ&nbsp;&gt;&gt;</a>
 <a href="index.html">目次</a></div>
 
 </div></div>
