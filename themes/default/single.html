@@ -29,9 +29,11 @@
 
 <p class="novel_subtitle">{{title}}</p>
 
-
-{{content|safe}}
-
+<div id="novel_honbun" class="novel_view">
+{% for i in range(1,lines+1) %}
+<p id="L{{ i }}">{{ contents[i] }}</p>
+{% endfor %}
+</div>
 
 </div></div>
 

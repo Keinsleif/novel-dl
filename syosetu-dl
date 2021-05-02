@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-import time,re,requests,sys,os,argparse
+import time,re,requests,sys,os,shutil,argparse
 import urllib.parse
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs4
 from jinja2 import Environment, FileSystemLoader
 
 THEME="default"
@@ -17,7 +17,6 @@ parser=argparse.ArgumentParser()
 parser.add_argument('arg',help="default:url")
 parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
 parser.add_argument('-d',"--dir",default="",help="set download directory")
-#parser.add_argument('-t',"--type",default="html",help="set type of output files (html/text)")
 args=parser.parse_args()
 
 ret=urllib.parse.urlparse(args.arg)
@@ -49,10 +48,11 @@ single_html=env.get_template(SINGLE_PATH)
 base_url="https://"+ret.hostname+"/"
 headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
 cookie={'over18': 'yes'}
+
 if type=="narou":
 	info_url = base_url+ncode
 	info_res = requests.get(url=info_url,headers=headers,cookies=cookie).content
-	top_data = BeautifulSoup(info_res, "html.parser")
+	top_data = bs4(info_res,"html.parser")
 	index_raw=top_data.select_one(".index_box")
 	if index_raw:
 		raws=index_raw.select(".novel_sublist2")
@@ -62,10 +62,11 @@ if type=="narou":
 		if not args.dir:
 			ndir=""
 	title=top_data.select_one("title").text
+
 elif type=="kakuyomu":
 	info_url = base_url+"works/"+ncode
 	info_res = requests.get(url=info_url,headers=headers).content
-	top_data = BeautifulSoup(info_res, "html.parser")
+	top_data = bs4(info_res,"html.parser")
 	index_raw=top_data.select_one(".widget-toc-items")
 	raws=index_raw.select("li.widget-toc-episode")
 	num_parts = len(raws)
@@ -85,26 +86,66 @@ if num_parts==1:
 	style=""
 	files=os.listdir(STATIC_DIR+"static/")
 	for file in files:
-		with open(STATIC_DIR+"static/"+file,"r") as f:
-			style=style+f.read()
+		if os.path.splitext(file)[1]==".css":
+			with open(STATIC_DIR+"static/"+file,"r") as f:
+				style=style+f.read()
 
 	if type=="narou":
-		content=top_data.select_one("#novel_honbun")
+		body=top_data.select_one("#novel_honbun")
+		body=[i.contents[0] for i in body("p")]
+
 	elif type=="kakuyomu":
 		url=base_url+raws[0].find('a')['href'].replace("/","",1)
 		res = requests.get(url=url,headers=headers).content
-		soup = BeautifulSoup(res, "html.parser")
+		soup = bs4(res,"html.parser")
 		subtitle=soup.select_one(".widget-episodeTitle").text
-		content=str(soup.select_one(".widget-episodeBody"))
-		content=re.sub(r'<div class="widget-episodeBody.*?>','<div class="novel_view" id="novel_honbun">',content)
-		content=content.replace(' class="blank"',"")
-		for i in range(0,num_parts):
-			content=re.sub(r'id="p'+str(i)+'"','id="L'+str(i)+'"',content)
-	contents=single_html.render(title=title,content=content,style=style)
+		body=soup.select_one(".widget-episodeBody")
+		body=[i.contents[0] for i in body("p")]
+	contents=single_html.render(title=title,contents=body,style=style,lines=len(body))
 	with open(ndir+title+".html", "w", encoding="utf-8") as f:
 		f.write(contents)
-	print("part 1 downloaded (total: {:d} parts)".format(num_parts))  # 進捗を表示
+	print("part 1 downloaded (total: {:d} parts)".format(num_parts))
 	sys.exit()
+
+
+if type=="narou":
+	eles=bs4(str(index_raw).replace("\n",""),"html.parser").contents[0].contents
+	index=[]
+	part=1
+	for ele in eles:
+		if re.match(r'.+chapter_title',str(ele)):
+			index.append({'type': 1,'text': ele.text})
+		elif re.match(r'.+novel_sublist2',str(ele)):
+			index.append({'type': 2,'text': ele.a.text,'part': part,'time': ele.dt.text.replace("（改）","")})
+			part=+1
+	desc="".join([str(i) for i in top_data.select_one("#novel_ex").contents])
+
+elif type=="kakuyomu":
+	eles=bs4(str(index_raw).replace("\n",""),"html.parser").contents[0].contents
+	index=[]
+	part=1
+	for ele in eles:
+		if re.match(r'.+widget-toc-chapter',str(ele)):
+			index.append({'type': 1,'text': ele.text})
+		elif re.match(r'.+widget-toc-episode',str(ele)):
+			timestamp=re.sub(r':\d\dZ$','',ele.time['datetime'].replace("-","/",2).replace("T"," ",1))
+			index.append({'type': 2,'text': ele.span.text, 'part': part, 'time': timestamp})
+	desc=top_data.select_one("#introduction")
+	if desc.select_one(".ui-truncateTextButton-expandButton"):
+		desc.select_one(".ui-truncateTextButton-expandButton").decompose()
+		desc.span.unwrap()
+	desc="".join([str(i) for i in desc.contents])
+contents=index_html.render(title=title,desc=desc,index=index)
+with open(ndir+"/index.html","w") as f:
+		f.write(contents)
+
+if not os.path.islink(ndir+"static"):
+	if os.path.isdir(ndir+"static"):
+		shutil.rmtree(ndir+"static")
+	elif os.path.isfile(ndir+"static"):
+		os.remove(ndir+"static")
+	#os.symlink(STATIC_DIR+"static",ndir+"static")
+	shutil.copytree(STATIC_DIR+"static",ndir+"static")
 
 
 for part in range(1, num_parts+1):
@@ -116,20 +157,17 @@ for part in range(1, num_parts+1):
 	if type=="narou":
 		url = base_url+"{}/{:d}/".format(ncode, part)
 		res = requests.get(url=url,headers=headers,cookies=cookie).content
-		soup = BeautifulSoup(res, "html.parser")
+		soup = bs4(res,"html.parser")
 		subtitle=soup.select_one(".novel_subtitle").text
-		body=soup.select_one("#novel_honbun")
+		body=[i.contents[0] for i in body("p")]
 
 	elif type=="kakuyomu":
 		url = base_url+raws[part-1].find('a')['href'].replace("/","",1)
 		res = requests.get(url=url,headers=headers).content
-		soup = BeautifulSoup(res, "html.parser")
+		soup = bs4(res,"html.parser")
 		subtitle=soup.select_one(".widget-episodeTitle").text
-		body=str(soup.select_one(".widget-episodeBody"))
-		body=re.sub(r'<div class="widget-episodeBody.*?>','<div class="novel_view" id="novel_honbun">',body)
-		body=body.replace(' class="blank"',"")
-		for i in range(0,num_parts):
-			body=re.sub(r'id="p'+str(i)+'"','id="L'+str(i)+'"',body)
+		body=soup.select_one(".widget-episodeBody")
+		body=[i.contents[0] for i in body("p")]
 
 	if part==1:
 		ppart="#"
@@ -141,7 +179,7 @@ for part in range(1, num_parts+1):
 		ppart=part-1
 		npart=part+1
 
-	contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,content=body)
+	contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,contents=body,lines=len(body))
 
 	with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
 			f.write(contents)
@@ -149,34 +187,4 @@ for part in range(1, num_parts+1):
 	print("part {:d} downloaded (total: {:d} parts)".format(part, num_parts))
 	time.sleep(lazy)
 
-if type=="narou":
-	index='<div class="index_box">\n'
-	for i in range(0,num_parts):
-		index=index+str(raws[i]).replace("/"+ncode+"/"+str(i+1)+"/",str(i+1)+".html",1)
-	index=index+"\n</div>"
-	desc=top_data.select_one("#novel_ex")
-elif type=="kakuyomu":
-	template='<dl class="novel_sublist2">\n<dd class="subtitle">\n<a href="{link}">{title}</a>\n</dd>\n<dt class="long_update">{date}</dt>\n</dl>\n'
-	index='<div class="index_box">\n'
-	for i in range(0,num_parts):
-		timestamp=raws[i].find("time")['datetime'].replace("-","/",2).replace("T"," ",1)
-		timestamp=re.sub(r':\d\dZ$','',timestamp)
-		index=index+template.format(link=str(i+1)+".html",title=raws[i].select_one(".widget-toc-episode-titleLabel").text,date=timestamp)
-	index=index+"</div>"
-	desc=str(top_data.select_one("#introduction"))
-	desc=re.sub(r'<p .*?id="introduction".*?>','<div id="novel_ex">',desc)
-	desc=re.sub(r'</span>.*?<span.*?</span>.*?</span>','',desc)
-	desc=re.sub(r'<span.*?>','',desc)
-	desc=desc.replace('</p>','</div>',1)
-contents=index_html.render(title=title,desc=desc,index=index)
-with open(ndir+"/index.html","w") as f:
-		f.write(contents)
-
-if not os.path.isdir(ndir+"static"):
-	os.mkdir(ndir+"static")
-files=os.listdir(STATIC_DIR+"static")
-for file in files:
-	with open(STATIC_DIR+"static/"+file,"r") as f1:
-		with open(ndir+"static/"+file,"w") as f2:
-			f2.write(f1.read())
 

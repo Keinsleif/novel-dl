@@ -24,9 +24,24 @@
 <br>
 <p class="novel_title">{{title}}</p>
 
+<div id="novel_ex">
 {{desc|safe}}
+</div>
 
-{{index|safe}}
+<div class="index_box">
+{% for dex in index %}
+{% if dex['type']==1 %}
+ <div class="chapter_title">{{dex['text']}}</div>
+{% elif dex['type']==2 %}
+<dl class="novel_sublist2">
+<dd class="subtitle">
+<a href="{{dex['part']}}.html">{{dex['text']}}</a>
+</dd>
+<dt class="long_update">{{dex['time']}}</dt>
+</dl>
+{% endif %}
+{% endfor %}
+</div>
 
 </div></div>
 
