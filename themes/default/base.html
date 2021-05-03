@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<title>{{title}}--{{subtitle}}</title>
+<title>{{subtitle}} - {{title}}</title>
 
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
@@ -30,8 +30,8 @@
 <p class="novel_subtitle">{{subtitle}}</p>
 
 <div id="novel_honbun" class="novel_view">
-{% for i in range(1,lines+1) %}
-<p id="L{{ i }}">{{ contents[i] }}</p>
+{% for i in range(0,lines) %}
+<p id="L{{ i+1 }}">{{ contents[i] }}</p>
 {% endfor %}
 </div>
 

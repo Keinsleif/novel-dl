@@ -13,11 +13,27 @@ BASE_PATH="base.html"
 INDEX_PATH="index.html"
 SINGLE_PATH="single.html"
 
+def raise_error(e,exit=True):
+	print(e,file=sys.stderr)
+	if exit:
+		sys.exit(1)
+
+def get_data(url):
+	headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
+	cookie={'over18': 'yes'}
+	data=requests.get(url=url,headers=headers,cookies=cookie)
+	if int(data.status_code/100)==5:
+		raise_error("Network Error (5xx)")
+	elif int(data.status_code/100)==4:
+		raise_error("The novel not found")
+	return data.content
+
 parser=argparse.ArgumentParser()
 parser.add_argument('arg',help="default:url")
 parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
 parser.add_argument('-d',"--dir",default="",help="set download directory")
 parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
+parser.add_argument('-e',"--episode",default="",help="set download episode")
 args=parser.parse_args()
 
 ret=urllib.parse.urlparse(args.arg)
@@ -30,32 +46,23 @@ elif re.match(r'.*kakuyomu.jp',ret.hostname):
 else:
 	print("That url is not supported")
 	sys.exit()
-
 if args.axel:
 	lazy=0
 else:
 	lazy=1
 
-if args.dir:
-	ndir=os.path.abspath(args.dir)+"/"
-else:
-	ndir=os.getcwd()+"/"+ncode+"/"
 
 env=Environment(loader=FileSystemLoader(STATIC_DIR,encoding='utf8'))
 base_html=env.get_template(BASE_PATH)
 index_html=env.get_template(INDEX_PATH)
 single_html=env.get_template(SINGLE_PATH)
-
 base_url="https://"+ret.hostname+"/"
-headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
-cookie={'over18': 'yes'}
 
 if type=="narou":
-	info_url = base_url+ncode
-	info_res = requests.get(url=info_url,headers=headers,cookies=cookie).content
+	info_res = get_data(base_url+ncode)
 	top_data = bs4(info_res,"html.parser")
 	index_raw=top_data.select_one(".index_box")
-	if index_raw:
+	if index_raw or not args.episode:
 		raws=index_raw.select(".novel_sublist2")
 		num_parts=len(raws)
 	else:
@@ -65,25 +72,50 @@ if type=="narou":
 	title=top_data.select_one("title").text
 
 elif type=="kakuyomu":
-	info_url = base_url+"works/"+ncode
-	info_res = requests.get(url=info_url,headers=headers).content
+	info_res = get_data(base_url+"works/"+ncode)
 	top_data = bs4(info_res,"html.parser")
 	index_raw=top_data.select_one(".widget-toc-items")
 	raws=index_raw.select("li.widget-toc-episode")
 	num_parts = len(raws)
 	title=top_data.select_one("#workTitle").text
 
-novels=[]
-if os.path.isdir(ndir) and num_parts!=1:
-	files=os.listdir(ndir)
-	for file in files:
-		base,ext=os.path.splitext(file)
-		if ext=='.txt' or ext=='.html':
-			novels.append(base)
-elif ndir!="":
-	os.mkdir(ndir)
+if args.episode:
+#	if re.match("^\d*$",args.episode):
+#		raise_error("Incorrect Episode number")
+	if int(args.episode)>num_parts or int(args.episode)<0:
+		args.episode=""
 
-if num_parts==1:
+novels=[]
+if num_parts==1 or args.episode:
+	if args.dir:
+		ndir=os.path.abspath(args.dir)+"/"
+		if not os.path.isdir(ndir):
+			os.mkdir(ndir)
+	else:
+		ndir=""
+
+else:
+	if args.dir:
+		ndir=os.path.abspath(args.dir)+"/"
+		if not os.path.isdir(ndir):
+			os.mkdir(ndir)
+		else:
+			files=os.listdir(ndir)
+			for file in files:
+				if os.path.splitext(file)[1]=='.html':
+					novels.append(base)
+	else:
+		ndir=os.getcwd()+ncode
+		if not os.path.isdir(ndir):
+			os.mkdir(ndir)
+		else:
+			files=os.listdir(ndir)
+			for file in files:
+				if os.path.splitext(file)[1]=='.html':
+					novels.append(base)
+
+
+if num_parts==1 or args.episode:
 	style=""
 	files=os.listdir(STATIC_DIR+"static/")
 	for file in files:
@@ -92,16 +124,33 @@ if num_parts==1:
 				style=style+f.read()
 
 	if type=="narou":
-		body=top_data.select_one("#novel_honbun")
-		body=[i.contents[0] for i in body("p")]
+		if args.episode:
+			data=get_data(base_url+ncode+"/"+args.episode)
+			soup=bs4(data,"html.parser")
+			body=soup.select_one("#novel_honbun")
+			title=soup.select_one(".novel_subtitle").text
+		else:
+			body=top_data.select_one("#novel_honbun")
+		l=[bs4(str(i),"html.parser") for i in body("p")]
+		[i.p.unwrap() for i in l]
+		body=[str(i) for i in l]
 
 	elif type=="kakuyomu":
-		url=base_url+raws[0].find('a')['href'].replace("/","",1)
-		res = requests.get(url=url,headers=headers).content
+		if args.episode:
+			try:
+				url=base_url+raws[args.episode].a['href'].replace("/","",1)
+			except IndexError:
+				raise_error("Incorrect episode number")
+		else:
+			url=base_url+raws[0].find('a')['href'].replace("/","",1)
+		res = get_data(url=url)
 		soup = bs4(res,"html.parser")
 		subtitle=soup.select_one(".widget-episodeTitle").text
 		body=soup.select_one(".widget-episodeBody")
-		body=[i.contents[0] for i in body("p")]
+		l=[bs4(str(i),"html.parser") for i in body("p")]
+		[i.p.unwrap() for i in l]
+		body=[str(i) for i in l]
+
 	contents=single_html.render(title=title,contents=body,style=style,lines=len(body))
 	with open(ndir+title+".html", "w", encoding="utf-8") as f:
 		f.write(contents)
@@ -162,20 +211,22 @@ for part in range(1, num_parts+1):
 		continue
 
 	if type=="narou":
-		url = base_url+"{}/{:d}/".format(ncode, part)
-		res = requests.get(url=url,headers=headers,cookies=cookie).content
+		res = get_data(base_url+ncode+"/{:d}/".format(part))
 		soup = bs4(res,"html.parser")
 		subtitle=soup.select_one(".novel_subtitle").text
 		body=soup.select_one("#novel_honbun")
-		body=[i.contents[0] for i in body("p")]
+		l=[bs4(str(i),"html.parser") for i in body("p")]
+		[i.p.unwrap() for i in l]
+		body=[str(i) for i in l]
 
 	elif type=="kakuyomu":
-		url = base_url+raws[part-1].find('a')['href'].replace("/","",1)
-		res = requests.get(url=url,headers=headers).content
+		res = get_data(base_url+raws[part-1].find('a')['href'].replace("/","",1))
 		soup = bs4(res,"html.parser")
 		subtitle=soup.select_one(".widget-episodeTitle").text
 		body=soup.select_one(".widget-episodeBody")
-		body=[i.contents[0] for i in body("p")]
+		l=[bs4(str(i),"html.parser") for i in body("p")]
+		[i.p.unwrap() for i in l]
+		body=[str(i) for i in l]
 
 	if part==1:
 		ppart="#"
