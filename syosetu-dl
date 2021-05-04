@@ -34,6 +34,8 @@ parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration
 parser.add_argument('-d',"--dir",default="",help="set download directory")
 parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
 parser.add_argument('-e',"--episode",default="",help="set download episode")
+parser.add_argument("--without-style",action='store_true',help="generate single page with css (with -e option)")
+#parser.add_argument('-o',"--output",default="",help="set download filename (with single novel or -e option)")
 args=parser.parse_args()
 
 ret=urllib.parse.urlparse(args.arg)
@@ -128,7 +130,7 @@ if num_parts==1 or args.episode:
 			data=get_data(base_url+ncode+"/"+args.episode)
 			soup=bs4(data,"html.parser")
 			body=soup.select_one("#novel_honbun")
-			title=soup.select_one(".novel_subtitle").text
+			subtitle=soup.select_one(".novel_subtitle").text
 		else:
 			body=top_data.select_one("#novel_honbun")
 		l=[bs4(str(i),"html.parser") for i in body("p")]
@@ -138,7 +140,7 @@ if num_parts==1 or args.episode:
 	elif type=="kakuyomu":
 		if args.episode:
 			try:
-				url=base_url+raws[args.episode].a['href'].replace("/","",1)
+				url=base_url+raws[int(args.episode)].a['href'].replace("/","",1)
 			except IndexError:
 				raise_error("Incorrect episode number")
 		else:
@@ -151,9 +153,27 @@ if num_parts==1 or args.episode:
 		[i.p.unwrap() for i in l]
 		body=[str(i) for i in l]
 
-	contents=single_html.render(title=title,contents=body,style=style,lines=len(body))
-	with open(ndir+title+".html", "w", encoding="utf-8") as f:
-		f.write(contents)
+	if args.episode:
+		part=int(args.episode)
+		if part==1:
+			ppart="#"
+			npart=part+1
+		elif part==num_parts:
+			ppart=part-1
+			npart="#"
+		else:
+			ppart=part-1
+			npart=part+1
+		if args.without_style:
+			contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,contents=body,lines=len(body))
+		else:
+			contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,contents=body,lines=len(body),style=style)
+		with open(ndir+args.episode+".html", "w", encoding="utf-8") as f:
+			f.write(contents)
+	else:
+		contents=single_html.render(title=title,contents=body,style=style,lines=len(body))
+		with open(ndir+title+".html", "w", encoding="utf-8") as f:
+			f.write(contents)
 	print("part 1 downloaded (total: {:d} parts)".format(num_parts))
 	sys.exit()
 
