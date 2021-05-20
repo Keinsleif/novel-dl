@@ -3,25 +3,21 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>{{title}}</title>
+
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="format-detection" content="telephone=no" />
-
-<title>{{ title }}</title>
 
 <link rel="shortcut icon" href="static/narou.ico" />
 <link rel="icon" href="static/narou.ico" />
 <link rel="apple-touch-icon-precomposed" href="static/apple-touch-icon-precomposed.png" />
 
-<link rel="stylesheet" type="text/css" href="static/novel_smpview.css" media="screen,print" /><!--mobile-->
 <link rel="stylesheet" type="text/css" href="static/reset.css" media="screen,print" /><!--footer?-->
 <link rel="stylesheet" type="text/css" href="static/kotei.css" media="screen,print" />
 </head>
-
-
 <body>
-<div id="pc">
+
 <a id="pageBottom" href="#footer">↓</a>
 <div id="main"></div>
 <div id="novel_contents">
@@ -66,69 +62,5 @@
 </ul>
 </div><!--footer-->
 <!-- フッタここまで -->
-</div>
-
-
-<div id="sp">
-<div id="main_window">
-<div id="novel_contents">
-<div id="novel_color">
-
-<div class="novel_title">{{ title }}</div>
-
-<div id="novel_ex">
-{{desc|safe}}
-</div>
-
-<div class="novel_sublist">
-<ul>
-{% for dex in index %}
-{% if dex['type']==1 %}
-<li class="chapter">{{dex['text']}}</li>
-{% elif dex['type']==2 %}
-<li>
-<a href="{{dex['part']}}.html">{{dex['text']}}</a>
-<br />
-<span class="kaikou">{{dex['time']}}</span>
-</li>
-{% endif %}
-{% endfor %}
-</ul>
-</div><!--novel_sublist-->
-
-</div><!-- /#novel_color -->
-</div><!--novel_contents-->
-
-<!-- フッタここから -->
-<div class="upper"><a href="#top">▲ページの上部へ</a></div>
-<div id="footer">
-<div id="footernavi">
-<p>
-<a href="https://syosetu.com">小説家になろう</a>
-|
-<a href="https://syosetu.com/user/top">ホーム</a>
-|
-<a href="https://kakuyomy.jp">カクヨム</a>
-|
-<a href="https://kakuyomy.jp/my/antenna/works">ホーム</a>
-</p>
-<form action="https://yomou.syosetu.com/search.php">
-<input name="word" size="14" type="text" />
-<input value="検索" type="submit" />
-</form>
-</div><!--footernavi-->
-</div><!--footer-->
-<!-- フッタここまで -->
-</div>
-</div>
-
-
-<script>
-	if (navigator.userAgent.match(/(iPhone|iPod|Android.*Mobile)/i)){
-		document.getElementById("pc").style.display ="none";
-		document.getElementById("sp").style.display ="block";
-	} else{
-		document.getElementById("pc").style.display ="block";
-		document.getElementById("sp").style.display ="none";
-	}
-</script>
+</body>
+</html>

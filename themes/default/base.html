@@ -1,25 +1,28 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<title>{{subtitle}} - {{title}}</title>
-
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="format-detection" content="telephone=no" />
+
+<title>{{subtitle}} - {{title}}</title>
 
 <link rel="shortcut icon" href="static/narou.ico" />
 <link rel="icon" href="static/narou.ico" />
 <link rel="apple-touch-icon-precomposed" href="static/apple-touch-icon-precomposed.png" />
 
+<link rel="stylesheet" type="text/css" href="static/novel_smpview.css" media="screen,print" /><!--mobile-->
 <link rel="stylesheet" type="text/css" href="static/reset.css" media="screen,print" /><!--footer?-->
 <link rel="stylesheet" type="text/css" href="static/kotei.css" media="screen,print" />
 <style>{{ style }}</style>
 </head>
-<body>
 
+
+<body>
+<div id="pc">
 <a id="pageBottom" href="#footer">↓</a>
 <div id="main"></div>
 <div class="contents1">
@@ -65,5 +68,87 @@
 </ul>
 </div><!--footer-->
 <!-- フッタここまで -->
+</div>
+
+
+<div id="sp">
+
+<div id="main_window">
+<div id="novel_contents">
+
+<div id="novel_color">
+<div class="contents1">
+<a href="index.html">{{title}}</a>
+</div><!--contents1-->
+</div><!--#novel_color-->
+
+<div class="novel_bn">
+<div class="link_prev">
+<a rel="prev" href="{{ppart}}.html">&lt;&lt;&nbsp;前へ&nbsp;</a></div>
+<div class="link_back">
+<a href="index.html">目次</a>
+</div>
+<div class="link_next">
+<a rel="next" href="{{npart}}.html">&nbsp;次へ&nbsp;&gt;&gt;</a></div>
+</div><!-- novel_bn -->
+
+<div id="novel_no">{{part}}/{{total}}</div>
+
+<div class="novel_subtitle">{{subtitle}}</div>
+
+<div id="novel_honbun" class="novel_view">
+{% for i in range(0,lines) %}
+<p id="L{{ i+1 }}">{{ contents[i] }}</p>
+{% endfor %}
+</div>
+
+</div><!--novel_color-->
+
+<div class="novel_bn footer">
+<div class="link_prev">
+<a rel="prev" href="{{ppart}}.html">&lt;&lt;&nbsp;前へ&nbsp;</a></div>
+
+<div class="link_back">
+<a href="index.html">目次</a>
+</div>
+
+<div class="link_next">
+<a rel="next" href="{{npart}}.html">&nbsp;次へ&nbsp;&gt;&gt;</a>
+</div>
+</div><!-- novel_bn -->
+
+</div><!--novel_contents-->
+
+<!-- フッタここから -->
+<div class="upper"><a href="#top">▲ページの上部へ</a></div>
+<div id="footer">
+<div id="footernavi">
+<p>
+<a href="https://syosetu.com">小説家になろう</a>
+|
+<a href="https://syosetu.com/user/top">ホーム</a>
+|
+<a href="https://kakuyomy.jp">カクヨム</a>
+|
+<a href="https://kakuyomy.jp/my/antenna/works">ホーム</a></p>
+<form action="https://yomou.syosetu.com/search.php">
+<input name="word" size="21" type="text" />
+<input value="検索" type="submit" />
+</form>
+</div><!--footernavi-->
+</div><!--footer-->
+<!-- フッタここまで -->
+</div>
+
+
+<script>
+	if (navigator.userAgent.match(/(iPhone|iPod|Android.*Mobile)/i)){
+		document.getElementById("pc").style.display ="none";
+		document.getElementById("sp").style.display ="block";
+	} else{
+		document.getElementById("pc").style.display ="block";
+		document.getElementById("sp").style.display ="none";
+	}
+</script>
 </body>
 </html>

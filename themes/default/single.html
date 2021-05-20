@@ -1,19 +1,20 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<title>{{title}}</title>
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="format-detection" content="telephone=no" />
+<title>{{title}}</title>
 <style>
 {{style}}
 </style>
 </head>
 
 <body>
+<div id="pc">
 <a id="pageBottom" href="#footer">↓</a>
 <div id="main"></div>
 <div class="contents1">
@@ -48,5 +49,54 @@
 </ul>
 </div><!--footer-->
 <!-- フッタここまで -->
+</div>
+
+
+<div id="sp">
+<div id="main_window">
+<div id="novel_contents">
+<div id="novel_color">
+
+<div class="novel_title">{{title}}</div><!-- novel_title -->
+
+<div id="novel_honbun" class="novel_view">
+{% for i in range(0,lines) %}
+<p id="L{{ i+1 }}">{{ contents[i] }}</p>
+{% endfor %}
+</div><!-- novel_view -->
+</div></div>
+<!-- フッタここから -->
+<div class="upper"><a href="#top">▲ページの上部へ</a></div>
+<div id="footer">
+<div id="footernavi">
+<p>
+<a href="https://syosetu.com">小説家になろう</a>
+|
+<a href="https://syosetu.com/user/top">ホーム</a>
+|
+<a href="https://kakuyomy.jp">カクヨム</a>
+|
+<a href="https://kakuyomy.jp/my/antenna/works">ホーム</a>
+</p>
+<form action="https://yomou.syosetu.com/search.php">
+<input name="word" size="21" type="text" />
+<input value="検索" type="submit" />
+</form>
+</div><!--footernavi-->
+</div><!--footer-->
+<!-- フッタここまで -->
+</div>
+</div>
+
+
+<script>
+	if (navigator.userAgent.match(/(iPhone|iPod|Android.*Mobile)/i)){
+		document.getElementById("pc").style.display ="none";
+		document.getElementById("sp").style.display ="block";
+	} else{
+		document.getElementById("pc").style.display ="block";
+		document.getElementById("sp").style.display ="none";
+	}
+</script>
 </body>
 </html>
