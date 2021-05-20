@@ -9,9 +9,12 @@ THEME="default"
 
 CONFIG_DIR=os.path.dirname(os.path.abspath(__file__))+"/"
 STATIC_DIR=CONFIG_DIR+"themes/"+THEME+"/"
-BASE_PATH="base.html"
-INDEX_PATH="index.html"
-SINGLE_PATH="single.html"
+
+BASE_NAME="base"
+INDEX_NAME="index"
+SINGLE_NAME="single"
+FILE_EXT=".html"
+MEDIAS=["combine","pc","mobile"]
 
 def raise_error(e,exit=True):
 	print(e,file=sys.stderr)
@@ -34,14 +37,20 @@ parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration
 parser.add_argument('-d',"--dir",default="",help="set download directory")
 parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
 parser.add_argument('-e',"--episode",default="",help="set download episode")
-parser.add_argument("--without-style",action='store_true',help="generate single page with css (with -e option)")
-#parser.add_argument('-o',"--output",default="",help="set download filename (with single novel or -e option)")
+parser.add_argument('-s',"--short",action='store_true',help="generate episode page like short story (with -e option)")
+parser.add_argument('-m',"--media",default="combine",help="set html media type ([combine]/pc/mobile)")
+#parser.add_argument('-o',"--output",default="",help="set download filename (with single novel or -se option)")
 args=parser.parse_args()
 
+if args.short and not args.episode:
+	parser.error('The -s,--short argument requires -e,--episode')
+if not args.media in MEDIAS:
+	parser.error('Invalid media type')
+
 env=Environment(loader=FileSystemLoader(STATIC_DIR,encoding='utf8'))
-base_html=env.get_template(BASE_PATH)
-index_html=env.get_template(INDEX_PATH)
-single_html=env.get_template(SINGLE_PATH)
+base_html=env.get_template(BASE_NAME+"_"+args.media+FILE_EXT)
+index_html=env.get_template(INDEX_NAME+"_"+args.media+FILE_EXT)
+single_html=env.get_template(SINGLE_NAME+"_"+args.media+FILE_EXT)
 ret=urllib.parse.urlparse(args.arg)
 base_url="https://"+ret.hostname+"/"
 if re.match(r'.*syosetu.com',ret.hostname):
@@ -63,7 +72,7 @@ if type=="narou":
 	info_res = get_data(base_url+ncode)
 	top_data = bs4(info_res,"html.parser")
 	index_raw=top_data.select_one(".index_box")
-	if index_raw or not args.episode:
+	if index_raw and not args.episode:
 		raws=index_raw.select(".novel_sublist2")
 		num_parts=len(raws)
 	else:
@@ -119,12 +128,13 @@ else:
 
 
 if num_parts==1 or args.episode:
-	style=""
+	style={}
 	files=os.listdir(STATIC_DIR+"static/")
 	for file in files:
-		if os.path.splitext(file)[1]==".css":
+		base,ext=os.path.splitext(file)
+		if ext==".css":
 			with open(STATIC_DIR+"static/"+file,"r") as f:
-				style=style+f.read()
+				style[base]=f.read()
 
 	if type=="narou":
 		if args.episode:
@@ -154,7 +164,7 @@ if num_parts==1 or args.episode:
 		[i.p.unwrap() for i in l]
 		body=[str(i) for i in l]
 
-	if args.episode:
+	if args.episode and not args.short:
 		part=int(args.episode)
 		if part==1:
 			ppart="#"
@@ -165,10 +175,7 @@ if num_parts==1 or args.episode:
 		else:
 			ppart=part-1
 			npart=part+1
-		if args.without_style:
-			contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,contents=body,lines=len(body))
-		else:
-			contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,contents=body,lines=len(body),style=style)
+		contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,contents=body,lines=len(body))
 		with open(ndir+args.episode+".html", "w", encoding="utf-8") as f:
 			f.write(contents)
 	else:

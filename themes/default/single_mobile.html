@@ -5,9 +5,21 @@
 <title>THE END</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="format-detection" content="telephone=no" />
-<style>
-{{style}}
+{% for s in style %}
+<style id="{{ s }}">
+{{ style[s] }}
 </style>
+{% endfor %}
+<script>
+	window.onload=function(){
+		for (var i=0;i<document.styleSheets.length;i++) {
+			var ownerNode = document.styleSheets[i].ownerNode;
+			if (!["novel_smpview"].includes(ownerNode.id) && ownerNode.type=="") {
+				document.styleSheets[i].disabled = true;
+			}
+		}
+	}
+</script>
 </head>
 <body>
 
