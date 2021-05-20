@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>{{title}}</title>
+
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta name="format-detection" content="telephone=no" />
+
+<link rel="shortcut icon" href="static/narou.ico" />
+<link rel="icon" href="static/narou.ico" />
+<link rel="apple-touch-icon-precomposed" href="static/apple-touch-icon-precomposed.png" />
+
+<link rel="stylesheet" type="text/css" href="static/reset.css" media="screen,print" />
+<link rel="stylesheet" type="text/css" href="static/kotei.css" media="screen,print" />
+<link rel="stylesheet" type="text/css" href="static/dark.css" media="screen,print" />
+</head>
+<body>
+
+<a id="pageBottom" href="#footer">↓</a>
+<div id="main"></div>
+<div id="novel_contents">
+<div id="novel_color">
+<br>
+<p class="novel_title">{{title}}</p>
+<div id="novel_ex">
+{{desc|safe}}
+</div>
+<div class="index_box">
+{% for dex in index %}
+{% if dex['type']==1 %}
+ <div class="chapter_title">{{dex['text']}}</div>
+{% elif dex['type']==2 %}
+<dl class="novel_sublist2">
+<dd class="subtitle">
+<a href="{{dex['part']}}.html">{{dex['text']}}</a>
+</dd>
+<dt class="long_update">{{dex['time']}}</dt>
+</dl>
+{% endif %}
+{% endfor %}
+</div>
+</div></div>
+
+<br>
+<a id="pageTop" href="#main">↑</a>
+
+<!-- フッタここから -->
+<div id="footer">
+<ul class="undernavi">
+<li><a href="https://syosetu.com">小説家になろう</a></li>
+<li><a href="https://syosetu.com/user/top">ーホーム</a></li>
+<li><a href="https://kakuyomy.jp">カクヨム</a></li>
+<li><a href="https://kakuyomy.jp/my/antenna/works">ーホーム</a></li>
+<li id="search">
+<form action="https://yomou.syosetu.com/search.php">
+<input name="word" size="21" type="text" />
+<input value="検索" type="submit" />
+</form>
+</li>
+</ul>
+</div><!--footer-->
+<!-- フッタここまで -->
+</body>
+</html>

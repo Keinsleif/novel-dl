@@ -5,15 +5,13 @@ import urllib.parse
 from bs4 import BeautifulSoup as bs4
 from jinja2 import Environment, FileSystemLoader
 
-THEME="default"
-
 CONFIG_DIR=os.path.dirname(os.path.abspath(__file__))+"/"
-STATIC_DIR=CONFIG_DIR+"themes/"+THEME+"/"
 
 BASE_NAME="base"
 INDEX_NAME="index"
 SINGLE_NAME="single"
 FILE_EXT=".html"
+THEMES=["default","default-dark"]
 MEDIAS=["combine","pc","mobile"]
 
 def raise_error(e,exit=True):
@@ -39,14 +37,19 @@ parser.add_argument('-r',"--renew",action='store_true',help="force to update all
 parser.add_argument('-e',"--episode",default="",help="set download episode")
 parser.add_argument('-s',"--short",action='store_true',help="generate episode page like short story (with -e option)")
 parser.add_argument('-m',"--media",default="combine",help="set html media type ([combine]/pc/mobile)")
+parser.add_argument('-t',"--theme",default="default",help="set syosetu theme (default,default-dark)")
 #parser.add_argument('-o',"--output",default="",help="set download filename (with single novel or -se option)")
 args=parser.parse_args()
 
 if args.short and not args.episode:
 	parser.error('The -s,--short argument requires -e,--episode')
+if not args.theme in THEMES:
+	parser.error('Invalid theme name')
 if not args.media in MEDIAS:
 	parser.error('Invalid media type')
 
+THEME=args.theme
+STATIC_DIR=CONFIG_DIR+"themes/"+THEME+"/"
 env=Environment(loader=FileSystemLoader(STATIC_DIR,encoding='utf8'))
 base_html=env.get_template(BASE_NAME+"_"+args.media+FILE_EXT)
 index_html=env.get_template(INDEX_NAME+"_"+args.media+FILE_EXT)

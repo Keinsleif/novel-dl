@@ -1,0 +1,730 @@
+@charset "UTF-8";
+
+/* ページの基本レイアウト */
+
+body {
+	font-family: 'Lucida Grande', sans-serif;
+	font-size: 14px;
+	background: #ffffff;
+	color: #444444;
+	-webkit-text-size-adjust: 100%;
+}
+
+a {
+	text-decoration: none;
+	color: #0033cc;
+	outline:none;
+}
+
+a:visited {
+	color:#885577;
+}
+
+a:hover {
+	text-decoration: none;
+	color: #339933;
+}
+
+
+input[type="radio"] {
+	margin-left: 20px;
+	margin-right: 5px;
+}
+
+input[type="checkbox"] {
+	margin-left: 0;
+	margin-right: 5px;
+}
+
+
+textarea:focus,input[type="text"]:focus {
+	box-shadow: 0 0 3px #cccccc;
+	border:1px solid #999999 !important;
+}
+
+
+.clearfix:after {
+	content: "";
+	display: block;
+	clear: both;
+}
+
+.a_line {
+	clear: both;
+	margin: 5px 0 0;
+	text-align: right;
+}
+
+.description{
+	font-size:90%;
+	line-height:150%;
+}
+
+
+/******** 大枠 ********/
+
+#novel_header {
+	width:100%;
+	text-align:left;
+	height: 48px;
+	background:url(/novelview/img/novelheader_bg.png) repeat-x top left #ffffff;
+	position: fixed;
+	top:0;
+	left:0;
+	z-index: 3;
+}
+
+#container {
+	margin: 55px auto 0;
+
+		margin-top:0px\9; /* IE8 and below */
+		padding-top:55px\9; /* IE8 and below */
+		*margin-top:0px; /* IE7 and below */
+		*padding-top:55px; /* IE7 and below */
+		_margin-top:0px; /* IE6 */
+		_padding-top:55px; /* IE6 */
+	z-index: 2;
+}
+
+.contents1 {
+	margin: 0 auto 15px;
+	padding: 8px 20px;
+	background:#ffffff;
+	line-height:180%;
+	width:700px;
+}
+
+/* 凍結解除の案内 */
+.attention_suspended {
+	margin: 0 auto 30px auto;
+	padding-top: 10px;
+	width: 730px;
+}
+
+#footer {
+	padding: 10px 0 20px 50px;
+	clear: both;
+	border-top:1px solid #cccccc;
+	background:#ffffff;
+}
+
+
+
+/******** footer ********/
+.upper {
+	margin: 20px 20px 10px 0;
+	text-align: right;
+	font-size:90%;
+}
+
+ul:after {
+	content: "";
+	display: block;
+	clear: both;
+}
+
+#novel_footer {
+	margin: 20px auto;
+	padding: 10px 5px;
+	border-top:3px double #999999;
+	border-bottom:3px double #999999;
+	width: 730px;
+	box-sizing: border-box;
+}
+
+#novel_footer .undernavi li {
+	margin: 0 10px;
+	float: left;
+	text-align: center;
+	font-size:110%;
+}
+
+#novel_footer .undernavi a {
+	height: 20px;
+	font-weight:bold;
+}
+
+
+#footer .undernavi li {
+	margin: 0 30px 0 0;
+	padding: 5px 0 0 0;
+	float: left;
+	text-align: center;
+}
+
+#footer .undernavi a {
+	height: 20px;
+}
+
+#footer .undernavi a {
+	color: #0033cc;
+}
+
+#footer .undernavi a:visited {
+		color:#885577;
+}
+
+#footer .undernavi a:hover {
+	color: #339933;
+}
+
+#search {
+	padding: 0;
+}
+
+#search input[type="text"]{
+	width: 150px;
+	padding: 2px;
+	font-size:120%;
+}
+
+/******** contents ********/
+#novel_contents {
+	margin: 0;
+	padding: 0 0 10px 0;
+	text-align:left;
+	line-height: 180%;
+	clear:both;
+
+	position: relative;
+	top:10px;
+	left:0;
+}
+
+#novel_color{
+	font-family: "メイリオ", "Meiryo", 'Lucida Grande', "sans-serif";
+	font-size: 16px;
+	margin: 0 auto;
+	width: 730px;
+}
+
+
+.series_title {
+		margin: 0 auto 5px;
+		text-align: center;
+		line-height: 150%;
+}
+
+.chapter_title {
+		line-height: 150%;
+}
+
+
+.novel_title,.novel_subtitle {
+	margin: 0 auto 10px;
+	text-align: center;
+	font-size: 170%;
+	font-weight: bold;
+	line-height: 150%;
+}
+
+.margin_l10r20{
+	margin-left: 10px;
+	margin-right: 20px;
+}
+.margin_r20{
+	margin-right: 20px;
+}
+
+.novel_writername {
+	 margin:20px 0;
+	text-align: right;
+	font-size: 95%;
+}
+
+.novel_view{
+	line-height: 180%;
+}
+
+
+#novel_no {
+	margin: 0 10px 10px 0;
+	text-align: right;
+	color:#999999;
+	font-size: 90%;
+}
+
+#novel_p {
+	margin:0px auto 30px;
+	padding: 20px 20px 30px 20px;
+	width: 600px;
+	border-bottom: 3px double #999999;
+}
+
+#novel_a {
+	margin: 40px auto 30px;
+	padding: 20px 20px 30px 20px;
+	width: 600px;
+	border-top: 3px double #999999;
+}
+
+#novel_honbun {
+	margin:30px auto 50px;
+	padding: 0 20px 0 20px;
+	width: 600px;
+}
+
+
+#novel_ex{
+	margin: 20px auto 50px;
+	line-height: 180%;
+	overflow: hidden;
+	text-align: left;
+	font-size:95%;
+}
+
+
+/* 目次 */
+#novel_sublist {
+	margin: 0 auto 30px;
+	padding: 0;
+	width: 720px;
+	text-align: left;
+	overflow: hidden;
+}
+
+#novel_sublist tr {
+	border-bottom:1px solid #ffffff;
+}
+
+#novel_sublist tr:hover {
+	border-bottom:1px solid #99ddff;
+}
+
+#novel_sublist tr.chapter{
+	border:none;
+}
+
+th.chapter_title {
+	font-size: 110%;
+	padding: 20px 0 10px 0;
+}
+
+td.subtitle{
+	padding: 10px 10px 0 5px;
+	width: 520px;
+	font-size: 95%;
+}
+
+td.long_update{
+	padding: 10px 0 0 0;
+	width: 190px;
+	vertical-align:top;
+	font-size: 90%;
+}
+
+
+
+/* 目次2 */
+.index_box {
+	margin: 0 auto 30px;
+	width: 720px;
+}
+
+div.chapter_title {
+	font-size: 110%;
+	padding: 30px 0 0 0;
+	font-weight:bold;
+}
+
+dl.novel_sublist2 {
+	overflow: hidden;
+	border-bottom:1px solid #ffffff;
+}
+
+dl.novel_sublist2:hover {
+	border-bottom:1px solid #99ddff;
+}
+
+dl.novel_sublist2 dd{
+	padding: 10px 10px 2px 5px;
+	width: 515px;
+	font-size: 95%;
+	float:left;
+}
+
+dl.novel_sublist2 dt{
+	padding: 10px 0 2px 0;
+	width: 190px;
+	text-align: left;
+	font-size: 90%;
+	float:right;
+	white-space: nowrap;
+}
+
+
+
+
+
+/******* 広告 *******/
+.koukoku_728 {
+	margin:20px auto;
+	width:728px;
+	clear:both;
+}
+
+.koukoku_auto {
+	margin:40px auto 20px;
+	text-align:center;
+}
+
+.koukoku_text {
+	margin:10px auto;
+	width:728px;
+	clear:both;
+}
+
+.contents1 .koukoku_468 {
+	margin:10px 0 0 0;
+	width:468px;
+	height:60px;
+	background:#cccccc;
+}
+
+#longstop{
+	margin:10px 0 10px 0;
+}
+
+
+.novel_bn {
+		text-align: center;
+}
+
+
+.novel_bn a {
+		font-size: 90%;
+		margin: 0 10px;
+}
+
+
+/******** ページトップに戻る ********/
+#pageTop{
+		background:#ccdddd;
+		border-radius:5px;
+		font-size: 90%;
+		color:#666666;
+		text-shadow: 1px 1px 0 #ffffff;
+		padding: 10px;
+		position:fixed;
+		bottom:20px;
+		right:20px;
+}
+#pageTop:hover{
+		color:#ffffff;
+		text-shadow: none;
+		background:#99bbcc;
+}
+
+
+/******** ページ下に移動する ********/
+#pageBottom{
+		background:#ccdddd;
+		border-radius:5px;
+		color:#666666;
+		text-shadow: 1px 1px 0 #ffffff;
+		padding: 10px;
+		position:fixed;
+		top:20px;
+		right:20px;
+		z-index: 3;
+}
+#pageBottom:hover{
+		color:#ffffff;
+		text-shadow: none;
+		background:#99bbcc;
+}
+
+/* 公式企画応援ボタン */
+.wrap_eventpoint {
+	margin: 0 auto;
+	width: 470px;
+	height: 270px;
+	padding-top: 200px;
+	box-sizing: border-box;
+	background-image: url(/novelview/img/event/bg_support_pc.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+	border-radius: 10px;
+	text-align: center;
+}
+
+.wrap_eventpoint button {
+	display: inline-block;
+	font-size: 16px;
+	cursor: pointer;
+	outline: 0;
+	text-decoration: none;
+	text-align: center;
+	border-radius: 2em;
+	padding: 0.5em 1em;
+	color: #fff;
+	border: 2px solid #edc844;
+	background-color: rgba(237, 200, 68, 0.5);
+	transition: all 0.2s;
+}
+
+.wrap_eventpoint button:hover {
+	border-color: #f1d673;
+	background-color: rgba(237, 200, 68, 0.75);
+}
+
+
+/* 前回の評価 */
+
+#my_novelpoint {
+	margin: 0;
+}
+
+hr.style{
+	margin: 20px 0;
+	border:0;
+	border-top:1px dotted #999999;
+}
+
+#my_novelpoint b{
+	margin: 0 15px 0 0;
+}
+
+#my_novelpoint .button_box {
+	margin: 15px 0 5px 0;
+}
+
+#my_novelpoint a.button {
+	padding: 5px 0;
+	text-align: center;
+			color: #333333 !important;
+	background:#eeeeee;
+	border-width: 0;
+	border: 2px solid #cccccc;
+	border-bottom: 2px solid #888888;
+	letter-spacing: 2px;
+	display:block;
+	width: 150px;
+}
+
+#my_novelpoint .button:hover {
+	cursor: pointer;
+			color: #333333;
+	background: #ddeefa;
+	border: 2px solid #aaccdc;
+}
+
+p.point_info {
+	text-align:left;
+	font-size:90%;
+	line-height: 150%;
+	color:#666666;
+}
+
+
+
+
+/******** IEだけ縦書きメニュー ********/
+a.tateyoko {
+	margin:10px 0 0 0;
+	font-size: 120%;
+	padding: 3px 7px;
+	border:1px solid #999999;
+	background:#ffffff;
+	color:#444444;
+}
+
+a.size {
+	margin-right:7px;
+	font-size: 120%;
+	padding: 3px 7px;
+	border:1px solid #999999;
+	background:#ffffff;
+	color:#444444;
+}
+
+a.size:hover,a.tateyoko:hover {
+	color:#444444;
+	background:#eeffff;
+}
+
+
+/* ボタン */
+.button_box {
+	margin: 15px 0 5px 0;
+	text-align:center;
+	clear: both;
+}
+
+.button_box a.button{
+	margin: 0 auto;
+}
+
+.button {
+	margin: 5px;
+	padding: 5px 15px 5px 15px;
+	text-align: center;
+			color: #333333;
+	background:#fffcde;
+	border-width: 0;
+	border: 2px solid #fcd27e;
+	letter-spacing: 2px;
+}
+
+.button:hover {
+	cursor: pointer;
+	color: #333333;
+	background: #ddeefa;
+	border: 2px solid #aaccdc;
+}
+
+a.button:visited {
+			color: #333333;
+}
+
+a.button {
+	display:inline-block;
+}
+
+
+.nothing{
+	margin: 20px 0 20px 0;
+	text-align: center;
+	color:#cc6666;
+}
+
+
+
+
+.attention{
+	color: #dd0000;
+}
+
+.clr {clear:both;}
+
+
+
+/* ランキングタグ */
+.center {
+	margin: 20px 0;
+	text-align: center;
+}
+
+
+
+
+
+
+/* カスタムレイアウト */
+/* 標準設定 */
+body.customlayout1 {background-color:#fff; background-image:none;}
+#novel_color.customlayout1 {color:#444;}
+#novel_contents.customlayout1 div.novelrankingtag {color:#444;}
+#novel_contents.customlayout1 a:link {color:#03c;}
+#novel_contents.customlayout1 a:visited {color:#857;}
+#novel_contents.customlayout1 a:hover {color:#393;}
+.novel_sublist2.underline.customlayout1 {border-bottom:1px solid #444;}
+dl.novel_sublist2.customlayout1 {border-color:#fff;}
+dl.novel_sublist2.customlayout1:hover {border-color:#9df;}
+
+/* ブラックモード1 */
+body.customlayout2 {background-color:#000; background-image:none;}
+#novel_color.customlayout2 {color:#fff;}
+#novel_contents.customlayout2 div.novelrankingtag {color:#fff;}
+#novel_contents.customlayout2 a:link {color:#fcf;}
+#novel_contents.customlayout2 a:visited {color:#857;}
+#novel_contents.customlayout2 a:hover {color:#f03;}
+.novel_sublist2.underline.customlayout2 {border-bottom:1px solid #fff;}
+dl.novel_sublist2.customlayout2 {border-color:#000;}
+dl.novel_sublist2.customlayout2:hover {border-color:#f03;}
+
+/* ブラックモード2 */
+body.customlayout3 {background-color:#000; background-image:none;}
+#novel_color.customlayout3 {color:#ccc;}
+#novel_contents.customlayout3 div.novelrankingtag {color:#ccc;}
+#novel_contents.customlayout3 a:link {color:#ff9;}
+#novel_contents.customlayout3 a:visited {color:#857;}
+#novel_contents.customlayout3 a:hover {color:#cf0;}
+.novel_sublist2.underline.customlayout3 {border-bottom:1px solid #ccc;}
+dl.novel_sublist2.customlayout3 {border-color:#000;}
+dl.novel_sublist2.customlayout3:hover {border-color:#cf0;}
+
+/* 通常1 */
+body.customlayout4 {background-color:#ccf; background-image:none;}
+#novel_color.customlayout4 {color:#444;}
+#novel_contents.customlayout4 div.novelrankingtag {color:#444;}
+#novel_contents.customlayout4 a:link {color:#00f;}
+#novel_contents.customlayout4 a:visited {color:#009;}
+#novel_contents.customlayout4 a:hover {color:#00f;}
+.novel_sublist2.underline.customlayout4 {border-bottom:1px solid #444;}
+dl.novel_sublist2.customlayout4 {border-color:#ccf;}
+dl.novel_sublist2.customlayout4:hover {border-color:#00f;}
+
+/* 通常2 */
+body.customlayout5 {background-color:#cfc; background-image:none;}
+#novel_color.customlayout5 {color:#444;}
+#novel_contents.customlayout5 div.novelrankingtag {color:#444;}
+#novel_contents.customlayout5 a:link {color:#00f;}
+#novel_contents.customlayout5 a:visited {color:#009;}
+#novel_contents.customlayout5 a:hover {color:#00f;}
+.novel_sublist2.underline.customlayout5 {border-bottom:1px solid #444;}
+dl.novel_sublist2.customlayout5 {border-color:#cfc;}
+dl.novel_sublist2.customlayout5:hover {border-color:#00f;}
+
+/* シンプル */
+body.customlayout6 {background-color:#fafafa; background-image:none;}
+#novel_color.customlayout6 {color:#444;}
+#novel_contents.customlayout6 div.novelrankingtag {color:#444;}
+#novel_contents.customlayout6 a:link {color:#00f;}
+#novel_contents.customlayout6 a:visited {color:#009;}
+#novel_contents.customlayout6 a:hover {color:#393;}
+.novel_sublist2.underline.customlayout6 {border-bottom:1px solid #444;}
+dl.novel_sublist2.customlayout6 {border-color:#fafafa;}
+dl.novel_sublist2.customlayout6:hover {border-color:#393;}
+
+/* おすすめ設定 */
+body.customlayout7 {background-color:#edf7ff; background-image:none;}
+#novel_color.customlayout7 {color:#000;}
+#novel_contents.customlayout7 div.novelrankingtag {color:#000;}
+#novel_contents.customlayout7 a:link {color:#00f;}
+#novel_contents.customlayout7 a:visited {color:#009;}
+#novel_contents.customlayout7 a:hover {color:#00f;}
+.novel_sublist2.underline.customlayout7 {border-bottom:1px solid #444;}
+dl.novel_sublist2.customlayout7 {border-color:#edf7ff;}
+dl.novel_sublist2.customlayout7:hover {border-color:#00f;}
+
+
+/* 標準レイアウト(元デザインパターンA) */
+#novel_contents {
+	margin: 0;
+	width: 100%;
+	padding: 0px 0px 10px 0px;
+}
+
+#novel_color {
+	color:#444444;
+	font-size: 16px;
+	margin: 0px auto;
+	width: 730px;
+}
+
+.novel_view{
+	line-height: 180%;
+}
+
+.novel_title,.novel_subtitle {
+	font-size: 170%;
+	line-height: 150%;
+}
+
+.novel_ex {
+	font-size: 110%;
+	line-height: 180%;
+}
+
+td.long_subtitle{
+	width: 520px;
+}
+
+td.long_update{
+	width: 190px;
+}
+
+table#novel_sublist tr {
+	border-bottom:1px solid #ffffff;
+}

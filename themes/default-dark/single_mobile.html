@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>THE END</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<meta name="format-detection" content="telephone=no" />
+{% for s in style %}
+<style id="{{ s }}">
+{{ style[s] }}
+</style>
+{% endfor %}
+<script>
+	window.onload=function(){
+		for (var i=0;i<document.styleSheets.length;i++) {
+			var ownerNode = document.styleSheets[i].ownerNode;
+			if (!["novel_smpview","dark"].includes(ownerNode.id) && ownerNode.type=="") {
+				document.styleSheets[i].disabled = true;
+			}
+		}
+	}
+</script>
+</head>
+<body>
+
+<div id="main_window">
+<div id="novel_contents">
+<div id="novel_color">
+
+<div class="novel_title">{{title}}</div><!-- novel_title -->
+
+<div id="novel_honbun" class="novel_view">
+{% for i in range(0,lines) %}
+<p id="L{{ i+1 }}">{{ contents[i] }}</p>
+{% endfor %}
+</div><!-- novel_view -->
+</div></div>
+<!-- フッタここから -->
+<div class="upper"><a href="#top">▲ページの上部へ</a></div>
+<div id="footer">
+<div id="footernavi">
+<p>
+<a href="https://syosetu.com">小説家になろう</a>
+|
+<a href="https://syosetu.com/user/top">ホーム</a>
+|
+<a href="https://kakuyomy.jp">カクヨム</a>
+|
+<a href="https://kakuyomy.jp/my/antenna/works">ホーム</a>
+</p>
+<form action="https://yomou.syosetu.com/search.php">
+<input name="word" size="21" type="text" />
+<input value="検索" type="submit" />
+</form>
+</div><!--footernavi-->
+</div><!--footer-->
+<!-- フッタここまで -->
+</div>
+</body>
+</html>

@@ -8,9 +8,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="format-detection" content="telephone=no" />
 <title>{{title}}</title>
-<style>
-{{style}}
+{% for s in style %}
+<style id="{{s}}">
+{{ style[s] }}
 </style>
+{% endfor %}
+<script>
+	function handleWindowResize(){
+		if (window.matchMedia('(max-width: 767px)').matches){
+			document.getElementById("pc").style.display ="none";
+			document.getElementById("sp").style.display ="block";
+			loadFiles=["novel_smpview","dark"];
+		} else{
+			document.getElementById("pc").style.display ="block";
+			document.getElementById("sp").style.display ="none";
+			loadFiles=["reset","kotei","dark"];
+		}
+		for (var i=0;i<document.styleSheets.length;i++) {
+			var ownerNode = document.styleSheets[i].ownerNode;
+			if (!loadFiles.includes(ownerNode.id) && ownerNode.type=="") {
+				document.styleSheets[i].disabled = true;
+			} else{
+				document.styleSheets[i].disabled = false;
+			}
+		}
+	}
+	window.onload=handleWindowResize
+	window.addEventListener('resize', handleWindowResize)
+</script>
 </head>
 
 <body>
@@ -87,16 +112,5 @@
 <!-- フッタここまで -->
 </div>
 </div>
-
-
-<script>
-	if (navigator.userAgent.match(/(iPhone|iPod|Android.*Mobile)/i)){
-		document.getElementById("pc").style.display ="none";
-		document.getElementById("sp").style.display ="block";
-	} else{
-		document.getElementById("pc").style.display ="block";
-		document.getElementById("sp").style.display ="none";
-	}
-</script>
 </body>
 </html>
