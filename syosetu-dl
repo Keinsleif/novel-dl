@@ -38,7 +38,12 @@ parser.add_argument("--without-style",action='store_true',help="generate single 
 #parser.add_argument('-o',"--output",default="",help="set download filename (with single novel or -e option)")
 args=parser.parse_args()
 
+env=Environment(loader=FileSystemLoader(STATIC_DIR,encoding='utf8'))
+base_html=env.get_template(BASE_PATH)
+index_html=env.get_template(INDEX_PATH)
+single_html=env.get_template(SINGLE_PATH)
 ret=urllib.parse.urlparse(args.arg)
+base_url="https://"+ret.hostname+"/"
 if re.match(r'.*syosetu.com',ret.hostname):
 	type="narou"
 	ncode=re.match(r'/(n[0-9a-zA-Z]+)',ret.path).group(1)
@@ -53,12 +58,6 @@ if args.axel:
 else:
 	lazy=1
 
-
-env=Environment(loader=FileSystemLoader(STATIC_DIR,encoding='utf8'))
-base_html=env.get_template(BASE_PATH)
-index_html=env.get_template(INDEX_PATH)
-single_html=env.get_template(SINGLE_PATH)
-base_url="https://"+ret.hostname+"/"
 
 if type=="narou":
 	info_res = get_data(base_url+ncode)
@@ -82,9 +81,9 @@ elif type=="kakuyomu":
 	title=top_data.select_one("#workTitle").text
 
 if args.episode:
-#	if re.match("^\d*$",args.episode):
-#		raise_error("Incorrect Episode number")
-	if int(args.episode)>num_parts or int(args.episode)<0:
+	if not re.match(r'^\d*$',args.episode):
+		raise_error("Incorrect Episode number")
+	elif int(args.episode)>num_parts or int(args.episode)<0:
 		args.episode=""
 
 novels=[]
@@ -104,10 +103,11 @@ else:
 		else:
 			files=os.listdir(ndir)
 			for file in files:
-				if os.path.splitext(file)[1]=='.html':
+				base,ext=os.path.splitext(file)
+				if ext=='.html':
 					novels.append(base)
 	else:
-		ndir=os.getcwd()+ncode
+		ndir=os.getcwd()+"/"+ncode+"/"
 		if not os.path.isdir(ndir):
 			os.mkdir(ndir)
 		else:
