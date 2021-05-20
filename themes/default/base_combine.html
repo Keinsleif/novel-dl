@@ -15,30 +15,39 @@
 <link rel="apple-touch-icon-precomposed" href="static/apple-touch-icon-precomposed.png" />
 
 <script>
-	window.onload=function(){
-		if (navigator.userAgent.match(/(iPhone|iPod|Android.*Mobile)/i)){
+	loadFiles=['reset','kotei','novel_smpview'];
+	function handleWindowResize(){
+		if (window.matchMedia('(max-width: 767px)').matches){
 			document.getElementById("pc").style.display ="none";
 			document.getElementById("sp").style.display ="block";
-			loadFiles=['static/novel_smpview.css'];
+			enableCSS=["novel_smpview"];
 		} else{
 			document.getElementById("pc").style.display ="block";
 			document.getElementById("sp").style.display ="none";
-			loadFiles=['static/reset.css','static/kotei.css'];
+			enableCSS=["reset","kotei"];
 		}
+		for (var i=0;i<loadFiles.length;i++) {
+			if (enableCSS.includes(loadFiles[i])) {
+				document.getElementById(loadFiles[i]).disabled=false;
+			} else{
+				document.getElementById(loadFiles[i]).disabled=true;
+			}
+		}
+	}
+	window.onload=function(){
 		for (var i=0;i<loadFiles.length; i++) {
 			var css=document.createElement('link');
 			css.rel='stylesheet';
-			css.href=loadFiles[i];
+			css.id=loadFiles[i];
+			css.href="static/"+loadFiles[i]+".css";
 			css.media="screen,print";
-			document.getElementsByTagName(“head”)[0].appendChild(css);
+			css.disabled=true;
+			document.getElementsByTagName("head")[0].appendChild(css);
 		}
+		handleWindowResize()
 	}
+	window.addEventListener('resize', handleWindowResize)
 </script>
-<!--
-<link rel="stylesheet" type="text/css" href="static/novel_smpview.css" media="screen,print" />
-<link rel="stylesheet" type="text/css" href="static/reset.css" media="screen,print" />
-<link rel="stylesheet" type="text/css" href="static/kotei.css" media="screen,print" />
--->
 </head>
 
 

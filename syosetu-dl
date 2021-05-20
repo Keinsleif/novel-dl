@@ -72,7 +72,7 @@ if type=="narou":
 	info_res = get_data(base_url+ncode)
 	top_data = bs4(info_res,"html.parser")
 	index_raw=top_data.select_one(".index_box")
-	if index_raw and not args.episode:
+	if index_raw:
 		raws=index_raw.select(".novel_sublist2")
 		num_parts=len(raws)
 	else:
