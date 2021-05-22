@@ -102,52 +102,52 @@
   </header>
 
   <div id="contentMain" role="main">
-  {% if part==1 %}
+  {%- if part==1 %}
     <div id="contentMain-inner" class="js-page-scroller-container">
       <header id="contentMain-header">
         <div id="contentMain-header-cover">
             <p id="contentMain-header-workTitle" class="js-vertical-composition-item">{{title}}</p>
         </div>
-  {% if index[0]['type']==1 %}
+  {%- if index[0]['type']==1 %}
         <p class="chapterTitle level1 js-vertical-composition-item"><span>{{index[0]['text']}}</span></p>
-  {% endif %}
-  {% else %}
+  {%- endif %}
+  {%- else %}
       <div id="contentMain-previousEpisode">
-        <a href="{{ppart}}#end" data-link-click-action-name="WorksEpisodesEpisodeHeaderPreviousEpisode">
+        <a href="{{part-1}}#end" data-link-click-action-name="WorksEpisodesEpisodeHeaderPreviousEpisode">
           <span id="contentMain-previousEpisode-inner">
-            <span class="contentMain-pagerRelation">前のエピソード</span><span class="contentMain-pagerDash">――</span><span class="contentMain-pagerEpisodeTitle js-vertical-composition-item">{{epis[ppart-1]['title']}}</span>
+            <span class="contentMain-pagerRelation">前のエピソード</span><span class="contentMain-pagerDash">――</span><span class="contentMain-pagerEpisodeTitle js-vertical-composition-item">{{epis[part-2]['title']}}</span>
           </span>
         </a>
       </div>
     <div id="contentMain-inner" class="js-page-scroller-container">
       <header id="contentMain-header">
-  {% if epis[part-1]['chap']!=epis[part-2]['chap'] %}
+  {%- if epis[part-1]['chap']!=epis[part-2]['chap'] %}
         <p class="chapterTitle level1 js-vertical-composition-item"><span>{{epis[part-1]['chap']}}</span></p>
-  {% endif %}
-  {% endif %}
+  {%- endif %}
+  {%- endif %}
         <p class="widget-episodeTitle js-vertical-composition-item">{{subtitle}}</p>
       </header>
       <div class="widget-episode js-episode-body-container">
         <div class="widget-episode-inner">
           <div class="widget-episodeBody js-episode-body">
-{% for i in range(0,lines) %}
-{% if contents[i]=="<br />" %}
+{%- for i in range(0,lines) %}
+{%- if contents[i]=="<br />" %}
 <p id="p{{ i+1 }}" class="blank"><br /></p>
-{% else %}
+{%- else %}
 <p id="p{{ i+1 }}">{{ contents[i] }}</p>
-{% endif %}
-{% endfor %}
+{%- endif %}
+{%- endfor %}
           </div>
         </div>
       </div>
 
     <div id="episodeFooter">
-	{% if part!=total %}
+	{%- if part!=total %}
         <div id="contentMain-nextEpisode">
-          <a href="{{npart}}.html" id="contentMain-readNextEpisode" data-link-click-action-name="WorksEpisodesEpisodeFooterNextEpisode" class="js-read-next-episode">
+          <a href="{{part+1}}.html" id="contentMain-readNextEpisode" data-link-click-action-name="WorksEpisodesEpisodeFooterNextEpisode" class="js-read-next-episode">
             <span class="contentMain-nextEpisode-inner">
               <span class="contentMain-pagerRelation">次のエピソード</span>
-              <span class="contentMain-pagerEpisodeTitle js-vertical-composition-item"><span>{{epis[npart-1]['title']}}</span></span>
+              <span class="contentMain-pagerEpisodeTitle js-vertical-composition-item"><span>{{epis[part]['title']}}</span></span>
               <span class="contentMain-pagerArrow"><svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000"><path d="M522.42,723.09v-514H477.58v514l-228.7-228.7-31.39,32L500,808.86,782.51,526.35l-32-32ZM500,955.16c-61.66,0-121.08-11.77-177.13-35.32a466.15,466.15,0,0,1-77.35-42A460.59,460.59,0,0,1,122.2,754.48a445.47,445.47,0,0,1-41.48-77.35C56.61,621.08,44.84,561.66,44.84,500c0-61.1,11.77-120.52,35.88-176.57a445.47,445.47,0,0,1,41.48-77.35,495.6,495.6,0,0,1,55.49-67.83,495.6,495.6,0,0,1,67.83-55.49,466.15,466.15,0,0,1,77.35-42A454.52,454.52,0,0,1,500,44.84c251.12,0,455.16,204.6,455.16,455.16C955.16,751.12,751.12,955.16,500,955.16ZM500,0C223.65,0,0,224.22,0,500s223.65,500,500,500c275.78,0,500-224.22,500-500S775.78,0,500,0Z"/></svg></span>
             </span>
           </a>
@@ -155,7 +155,7 @@
         </div>
 	
     </div>
-	{% endif %}
+	{%- endif %}
     <div id="end"></div>
 
   </div>
@@ -184,20 +184,20 @@
   </header>
   <div class="widget-toc-main">
     <ol class="widget-toc-items test-toc-items">
-	{% for i in index %}
-	{% if i['type']==1 %}
+	{%- for i in index %}
+	{%- if i['type']==1 %}
           <li class="widget-toc-chapter widget-toc-level1 js-vertical-composition-item" data-vertical-composition-done="true">
             <span>{{ i['text'] }}</span>
           </li>
-	{% elif i['type']==2 %}
+	{%- elif i['type']==2 %}
           <li class="widget-toc-episode">
             <a href="{{i['part']}}.html" class="widget-toc-episode-episodeTitle">
               <span class="widget-toc-episode-titleLabel js-vertical-composition-item" data-vertical-composition-done="true">{{ i['text'] }}</span>
               <time class="widget-toc-episode-datePublished" datetime="i['time'].strftime('%Y-%m-%dT%H:%M:%S+09:00')">{{i['time'].strftime('%Y年%m月%d日 %H:%M')}}</time>
             </a>
           </li>
-	{% endif %}
-	{% endfor %}
+	{%- endif %}
+	{%- endfor %}
     </ol>
 
   </div>

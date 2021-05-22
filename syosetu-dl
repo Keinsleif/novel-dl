@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
-import time,re,requests,sys,os,shutil,argparse
+import time,re,requests,sys,os,shutil,argparse,configparser
 from datetime import timezone,datetime as dtime
 from pytz import timezone
+from tqdm import tqdm
 import urllib.parse
 from bs4 import BeautifulSoup as bs4
 from jinja2 import Environment, FileSystemLoader
@@ -10,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 #==DEFINE-variable==
 CONFIG_DIR=os.path.dirname(os.path.abspath(__file__))+"/"
 THEMES=os.listdir(CONFIG_DIR+"themes/")
-MEDIAS=["pc","mobile"]
+MEDIAS=["pc","mobile",""]
 
 #==DEFINE-function==
 def raise_error(e,exit=True):
@@ -49,18 +50,30 @@ if not args.theme in THEMES:
 if not args.media in MEDIAS:
 	parser.error('Invalid media type')
 
-STATIC_DIR=CONFIG_DIR+"themes/"+args.theme+"/"
 
-#==GET-template_files==
-env=Environment(loader=FileSystemLoader(STATIC_DIR,encoding='utf8'))
+#==SETUP-themes==
+THEME_DIR=CONFIG_DIR+"themes/"+args.theme+"/"
+config_ini = configparser.ConfigParser()
+env=Environment(loader=FileSystemLoader(THEME_DIR,encoding='utf8'))
+static_files=[THEME_DIR+"static/"+i for i in os.listdir(THEME_DIR+"static/")]
+
 if args.media:
-	base_html=env.get_template("base_"+args.media+".html")
-	index_html=env.get_template("index_"+args.media+".html")
-	single_html=env.get_template("single_"+args.media+".html")
+	htmls={"base":"base_"+args.media+".html","index":"index_"+args.media+".html","single":"single_"+args.media+".html"}
 else:
-	base_html=env.get_template("base.html")
-	index_html=env.get_template("index.html")
-	single_html=env.get_template("single.html")
+	htmls={"base":"base.html","index":"index.html","single":"single.html"}
+
+if config_ini.read(THEME_DIR+"config.ini", encoding='utf-8') and config_ini['Main'].get('parent'):
+	parent_dir=CONFIG_DIR+"themes/"+config_ini['Main'].get('parent')
+	penv=Environment(loader=FileSystemLoader(parent_dir,encoding='utf8'))
+	for file in htmls:
+		if os.path.isfile(THEME_DIR+htmls[file]):
+			htmls[file]=env.get_template(htmls[file])
+		else:
+			htmls[file]=penv.get_template(htmls[file])
+	static_files=static_files+[parent_dir+"/static/"+i for i in os.listdir(parent_dir+"/static")]
+else:
+	htmls={i:env.get_template(htmls[i]) for i in htmls}
+
 
 #==CHECK-url==
 ret=urllib.parse.urlparse(args.arg)
@@ -140,17 +153,16 @@ else:
 					novels.append(base)
 
 #==PROCESS-GEN-single_html==
-if num_parts==1 or args.episode:
+if num_parts==1 or args.short:
 	style={}
-	files=os.listdir(STATIC_DIR+"static/")
-	for file in files:
+	for file in static_files:
 		base,ext=os.path.splitext(file)
 		if ext==".css":
-			with open(STATIC_DIR+"static/"+file,"r",encoding="utf-8") as f:
-				style[base]=f.read()
+			with open(file,"r",encoding="utf-8") as f:
+				style[os.path.basename(base)]=f.read()
 
 	if type=="narou":
-		if args.episode:
+		if args.short:
 			data=get_data(base_url+ncode+"/"+args.episode)
 			soup=bs4(data,"html.parser")
 			body=soup.select_one("#novel_honbun")
@@ -162,7 +174,7 @@ if num_parts==1 or args.episode:
 		body=[str(i) for i in l]
 
 	elif type=="kakuyomu":
-		if args.episode:
+		if args.short:
 			try:
 				url=base_url+raws[int(args.episode)].a['href'].replace("/","",1)
 			except IndexError:
@@ -177,30 +189,16 @@ if num_parts==1 or args.episode:
 		[i.p.unwrap() for i in l]
 		body=[str(i) for i in l]
 
-	if args.episode and not args.short:
-		part=int(args.episode)
-		if part==1:
-			ppart="#"
-			npart=part+1
-		elif part==num_parts:
-			ppart=part-1
-			npart="#"
-		else:
-			ppart=part-1
-			npart=part+1
-		contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,contents=body,lines=len(body))
-		with open(ndir+args.episode+".html", "w", encoding="utf-8") as f:
-			f.write(contents)
 	else:
-		contents=single_html.render(title=title,contents=body,style=style,lines=len(body))
+		contents=htmls['single'].render(title=title,contents=body,style=style,lines=len(body))
 		if args.short:
 			title=subtitle
 		with open(ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ",""), "w", encoding="utf-8") as f:
 			f.write(contents)
-	print("part 1 downloaded (total: {:d} parts)".format(num_parts))
+	print("total 1 part successfully downloaded")
 	sys.exit()
 
-#==GEN-index_html==
+#==GEN-index_data==
 index=[]
 epis=[]
 eles=bs4(str(index_raw).replace("\n",""),"html.parser").contents[0].contents
@@ -234,60 +232,58 @@ elif type=="kakuyomu":
 		desc.span.unwrap()
 	desc="".join([str(i) for i in desc.contents])
 
-contents=index_html.render(title=title,desc=desc,index=index)
-with open(ndir+"index.html","w",encoding="utf-8") as f:
-		f.write(contents)
-
-#==COPY-statics==
-if not os.path.islink(ndir+"static"):
-	if os.path.isdir(ndir+"static"):
-		shutil.rmtree(ndir+"static")
-	elif os.path.isfile(ndir+"static"):
-		os.remove(ndir+"static")
-	#os.symlink(STATIC_DIR+"static",ndir+"static")
-	os.mkdir(ndir+"static")
-	files=os.listdir(STATIC_DIR+"static")
-	for file in files:
-		shutil.copyfile(STATIC_DIR+"static/"+file,ndir+"static/"+file)
-
-#==GEN-episodes==
-for part in range(1, num_parts+1):
-	if str(part) in novels and not args.renew:
-		print("part {:d} skipped (total: {:d} parts)".format(part, num_parts))
-		continue
-
-	if type=="narou":
-		res = get_data(base_url+ncode+"/{:d}/".format(part))
-		soup = bs4(res,"html.parser")
-		subtitle=soup.select_one(".novel_subtitle").text
-		body=soup.select_one("#novel_honbun")
-
-	elif type=="kakuyomu":
-		res = get_data(base_url+raws[part-1].find('a')['href'].replace("/","",1))
-		soup = bs4(res,"html.parser")
-		subtitle=soup.select_one(".widget-episodeTitle").text
-		body=soup.select_one(".widget-episodeBody")
-
-	l=[bs4(str(i),"html.parser") for i in body("p")]
-	[i.p.unwrap() for i in l]
-	body=[str(i) for i in l]
-
-	if part==1:
-		ppart="#"
-		npart=part+1
-	elif part==num_parts:
-		ppart=part-1
-		npart="#"
-	else:
-		ppart=part-1
-		npart=part+1
-
-	contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,contents=body,lines=len(body),index=index,epis=epis)
-
-	with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
+if not args.episode:
+	contents=htmls['index'].render(title=title,desc=desc,index=index)
+	with open(ndir+"index.html","w",encoding="utf-8") as f:
 			f.write(contents)
 
-	print("part {:d} downloaded (total: {:d} parts)".format(part, num_parts))
-	time.sleep(lazy)
+	#==COPY-statics==
+	if not os.path.islink(ndir+"static"):
+		if os.path.isdir(ndir+"static"):
+			shutil.rmtree(ndir+"static")
+		elif os.path.isfile(ndir+"static"):
+			os.remove(ndir+"static")
+		#os.symlink(THEME_DIR+"static",ndir+"static")
+		os.mkdir(ndir+"static")
+		for file in static_files:
+			shutil.copyfile(file,ndir+"static/"+os.path.basename(file))
 
 
+total=num_parts
+if args.episode:
+	num_parts=1
+#==GEN-episodes==
+with tqdm(total=num_parts) as pbar:
+	for part in range(1, num_parts+1):
+		if args.episode:
+			part=int(args.episode)
+
+		if str(part) in novels and not args.renew:
+			pbar.set_description("Skipped     ")
+			pbar.update()
+			continue
+
+		if type=="narou":
+			res = get_data(base_url+ncode+"/{:d}/".format(part))
+			soup = bs4(res,"html.parser")
+			subtitle=soup.select_one(".novel_subtitle").text
+			body=soup.select_one("#novel_honbun")
+
+		elif type=="kakuyomu":
+			res = get_data(base_url+raws[part-1].find('a')['href'].replace("/","",1))
+			soup = bs4(res,"html.parser")
+			subtitle=soup.select_one(".widget-episodeTitle").text
+			body=soup.select_one(".widget-episodeBody")
+
+		l=[bs4(str(i),"html.parser") for i in body("p")]
+		[i.p.unwrap() for i in l]
+		body=[str(i) for i in l]
+
+		contents=htmls['base'].render(title=title,subtitle=subtitle,part=part,total=total,contents=body,lines=len(body),index=index,epis=epis)
+
+		with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
+				f.write(contents)
+		time.sleep(lazy)
+		pbar.set_description("Downloaded  ")
+		pbar.update()
+print("total {:d} part successfully downloaded".format(num_parts))

@@ -8,18 +8,18 @@
 {{desc|safe}}
 </div>
 <div class="index_box">
-{% for dex in index %}
-{% if dex['type']==1 %}
+{%- for dex in index %}
+{%- if dex['type']==1 %}
  <div class="chapter_title">{{dex['text']}}</div>
-{% elif dex['type']==2 %}
+{%- elif dex['type']==2 %}
 <dl class="novel_sublist2">
 <dd class="subtitle">
 <a href="{{dex['part']}}.html">{{dex['text']}}</a>
 </dd>
 <dt class="long_update">{{dex['time'].strftime('%Y/%m/%d/ %H:%M')}}</dt>
 </dl>
-{% endif %}
-{% endfor %}
+{%- endif %}
+{%- endfor %}
 </div>
 </div></div>
 

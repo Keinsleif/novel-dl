@@ -7,11 +7,11 @@
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
 <meta name="format-detection" content="telephone=no" />
-{% for s in style %}
+{%- for s in style %}
 <style id="{{ s }}">
 {{ style[s] }}
 </style>
-{% endfor %}
+{%- endfor %}
 <script>
 	window.onload=function(){
 		for (var i=0;i<document.styleSheets.length;i++) {
@@ -35,9 +35,9 @@
 <p class="novel_subtitle">{{title}}</p>
 
 <div id="novel_honbun" class="novel_view">
-{% for i in range(0,lines) %}
+{%- for i in range(0,lines) %}
 <p id="L{{ i+1 }}">{{ contents[i] }}</p>
-{% endfor %}
+{%- endfor %}
 </div>
 
 </div></div>

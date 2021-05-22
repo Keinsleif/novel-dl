@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="format-detection" content="telephone=no" />
 <title>{{title}}</title>
-{% for s in style %}
+{%- for s in style %}
 <style id="{{s}}">
 {{ style[s] }}
 </style>
-{% endfor %}
+{%- endfor %}
 <script>
 	function handleWindowResize(){
 		if (window.matchMedia('(max-width: 767px)').matches){
@@ -49,9 +49,9 @@
 <p class="novel_subtitle">{{title}}</p>
 
 <div id="novel_honbun" class="novel_view">
-{% for i in range(0,lines) %}
+{%- for i in range(0,lines) %}
 <p id="L{{ i+1 }}">{{ contents[i] }}</p>
-{% endfor %}
+{%- endfor %}
 </div>
 
 </div></div>
@@ -85,9 +85,9 @@
 <div class="novel_title">{{title}}</div><!-- novel_title -->
 
 <div id="novel_honbun" class="novel_view">
-{% for i in range(0,lines) %}
+{%- for i in range(0,lines) %}
 <p id="L{{ i+1 }}">{{ contents[i] }}</p>
-{% endfor %}
+{%- endfor %}
 </div><!-- novel_view -->
 </div></div>
 <!-- フッタここから -->

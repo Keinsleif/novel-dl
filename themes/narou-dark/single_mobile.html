@@ -5,11 +5,11 @@
 <title>THE END</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="format-detection" content="telephone=no" />
-{% for s in style %}
+{%- for s in style %}
 <style id="{{ s }}">
 {{ style[s] }}
 </style>
-{% endfor %}
+{%- endfor %}
 <script>
 	window.onload=function(){
 		for (var i=0;i<document.styleSheets.length;i++) {
@@ -30,9 +30,9 @@
 <div class="novel_title">{{title}}</div><!-- novel_title -->
 
 <div id="novel_honbun" class="novel_view">
-{% for i in range(0,lines) %}
+{%- for i in range(0,lines) %}
 <p id="L{{ i+1 }}">{{ contents[i] }}</p>
-{% endfor %}
+{%- endfor %}
 </div><!-- novel_view -->
 </div></div>
 <!-- フッタここから -->

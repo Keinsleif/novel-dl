@@ -10,17 +10,17 @@
 
 <div class="novel_sublist">
 <ul>
-{% for dex in index %}
-{% if dex['type']==1 %}
+{%- for dex in index %}
+{%- if dex['type']==1 %}
 <li class="chapter">{{dex['text']}}</li>
-{% elif dex['type']==2 %}
+{%- elif dex['type']==2 %}
 <li>
 <a href="{{dex['part']}}.html">{{dex['text']}}</a>
 <br />
 <span class="kaikou">{{dex['time'].strftime('%Y/%m/%d/ %H:%M')}}</span>
 </li>
-{% endif %}
-{% endfor %}
+{%- endif %}
+{%- endfor %}
 </ul>
 </div><!--novel_sublist-->
 

@@ -73,20 +73,20 @@
 
   <div class="widget-toc-main">
     <ol class="widget-toc-items test-toc-items">
-{% for dex in index %}
-{% if dex['type']==1 %}
+{%- for dex in index %}
+{%- if dex['type']==1 %}
           <li class="widget-toc-chapter widget-toc-level1 js-vertical-composition-item">
             <span>{{ dex['text'] }}</span>
           </li>
-{% elif dex['type']==2 %}
+{%- elif dex['type']==2 %}
           <li class="widget-toc-episode">
             <a href="{{ dex['part']}}.html" class="widget-toc-episode-episodeTitle">
               <span class="widget-toc-episode-titleLabel js-vertical-composition-item">{{ dex['text'] }}</span>
 			  <time class="widget-toc-episode-datePublished" datetime="{{dex['time'].strftime('%Y-%m-%dT%H:%M:%S+09:00')}}">{{dex['time'].strftime('%Y年%m月%d日 %H:%M')}}</time>
             </a>
           </li>
-{% endif %}
-{% endfor %}
+{%- endif %}
+{%- endfor %}
     </ol>
   </div>
 </section>

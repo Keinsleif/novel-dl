@@ -7,15 +7,21 @@
 <div id="novel_contents">
 <div id="novel_color">
 <div class="novel_bn">
-<a href="{{ppart}}.html">&lt;&lt;&nbsp;前へ</a><a href="{{npart}}.html">次へ&nbsp;&gt;&gt;</a></div><!--novel_bn-->
+{%- if part!=1 %}
+<a href="{{part-1}}.html">&lt;&lt;&nbsp;前へ</a>
+{%- endif %}
+{%- if part!=total %}
+<a href="{{part+1}}.html">次へ&nbsp;&gt;&gt;</a>
+{%- endif %}
+</div><!--novel_bn-->
 
 <div id="novel_no">{{part}}/{{total}}</div>
 <p class="novel_subtitle">{{subtitle}}</p>
 
 <div id="novel_honbun" class="novel_view">
-{% for i in range(0,lines) %}
+{%- for i in range(0,lines) %}
 <p id="L{{ i+1 }}">{{ contents[i] }}</p>
-{% endfor %}
+{%- endfor %}
 </div>
 
 <div class="novel_bn">
