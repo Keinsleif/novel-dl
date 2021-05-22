@@ -154,47 +154,50 @@ else:
 
 #==PROCESS-GEN-single_html==
 if num_parts==1 or args.short:
-	style={}
-	for file in static_files:
-		base,ext=os.path.splitext(file)
-		if ext==".css":
-			with open(file,"r",encoding="utf-8") as f:
-				style[os.path.basename(base)]=f.read()
+	with tqdm(total=1) as pbar:
+		pbar.set_description("Downloading ")
+		style={}
+		for file in static_files:
+			base,ext=os.path.splitext(file)
+			if ext==".css":
+				with open(file,"r",encoding="utf-8") as f:
+					style[os.path.basename(base)]=f.read()
 
-	if type=="narou":
-		if args.short:
-			data=get_data(base_url+ncode+"/"+args.episode)
-			soup=bs4(data,"html.parser")
-			body=soup.select_one("#novel_honbun")
-			subtitle=soup.select_one(".novel_subtitle").text
+		if type=="narou":
+			if args.short:
+				data=get_data(base_url+ncode+"/"+args.episode)
+				soup=bs4(data,"html.parser")
+				body=soup.select_one("#novel_honbun")
+				subtitle=soup.select_one(".novel_subtitle").text
+			else:
+				body=top_data.select_one("#novel_honbun")
+			l=[bs4(str(i),"html.parser") for i in body("p")]
+			[i.p.unwrap() for i in l]
+			body=[str(i) for i in l]
+
+		elif type=="kakuyomu":
+			if args.short:
+				try:
+					url=base_url+raws[int(args.episode)].a['href'].replace("/","",1)
+				except IndexError:
+					raise_error("Incorrect episode number")
+			else:
+				url=base_url+raws[0].find('a')['href'].replace("/","",1)
+			res = get_data(url=url)
+			soup = bs4(res,"html.parser")
+			subtitle=soup.select_one(".widget-episodeTitle").text
+			body=soup.select_one(".widget-episodeBody")
+			l=[bs4(str(i),"html.parser") for i in body("p")]
+			[i.p.unwrap() for i in l]
+			body=[str(i) for i in l]
+
 		else:
-			body=top_data.select_one("#novel_honbun")
-		l=[bs4(str(i),"html.parser") for i in body("p")]
-		[i.p.unwrap() for i in l]
-		body=[str(i) for i in l]
-
-	elif type=="kakuyomu":
-		if args.short:
-			try:
-				url=base_url+raws[int(args.episode)].a['href'].replace("/","",1)
-			except IndexError:
-				raise_error("Incorrect episode number")
-		else:
-			url=base_url+raws[0].find('a')['href'].replace("/","",1)
-		res = get_data(url=url)
-		soup = bs4(res,"html.parser")
-		subtitle=soup.select_one(".widget-episodeTitle").text
-		body=soup.select_one(".widget-episodeBody")
-		l=[bs4(str(i),"html.parser") for i in body("p")]
-		[i.p.unwrap() for i in l]
-		body=[str(i) for i in l]
-
-	else:
-		contents=htmls['single'].render(title=title,contents=body,style=style,lines=len(body))
-		if args.short:
-			title=subtitle
-		with open(ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ",""), "w", encoding="utf-8") as f:
-			f.write(contents)
+			contents=htmls['single'].render(title=title,contents=body,style=style,lines=len(body))
+			if args.short:
+				title=subtitle
+			with open(ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ",""), "w", encoding="utf-8") as f:
+				f.write(contents)
+		pbar.update()
 	print("total 1 part successfully downloaded")
 	sys.exit()
 
@@ -254,6 +257,7 @@ if args.episode:
 	num_parts=1
 #==GEN-episodes==
 with tqdm(total=num_parts) as pbar:
+	pbar.set_description("Downloading ")
 	for part in range(1, num_parts+1):
 		if args.episode:
 			part=int(args.episode)
@@ -284,6 +288,5 @@ with tqdm(total=num_parts) as pbar:
 		with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
 				f.write(contents)
 		time.sleep(lazy)
-		pbar.set_description("Downloaded  ")
 		pbar.update()
 print("total {:d} part successfully downloaded".format(num_parts))
