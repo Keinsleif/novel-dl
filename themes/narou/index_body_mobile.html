@@ -1,31 +1,12 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8" />
-<title>{{ title }}</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-<meta name="format-detection" content="telephone=no" />
-
-<link rel="shortcut icon" href="static/narou.ico" />
-<link rel="icon" href="static/narou.ico" />
-<link rel="apple-touch-icon-precomposed" href="static/apple-touch-icon-precomposed.png" />
-
-<link rel="stylesheet" type="text/css" href="static/novel_smpview.css" media="screen,print" />
-
-</head>
-<body>
-
 <div id="main_window">
 <div id="novel_contents">
 <div id="novel_color">
 
 <div class="novel_title">{{ title }}</div>
 
-
 <div id="novel_ex">
 {{desc|safe}}
 </div>
-
 
 <div class="novel_sublist">
 <ul>
@@ -36,16 +17,14 @@
 <li>
 <a href="{{dex['part']}}.html">{{dex['text']}}</a>
 <br />
-<span class="kaikou">{{dex['time']}}</span>
+<span class="kaikou">{{dex['time'].strftime('%Y/%m/%d/ %H:%M')}}</span>
 </li>
 {% endif %}
 {% endfor %}
 </ul>
 </div><!--novel_sublist-->
 
-
 </div><!-- /#novel_color -->
-</div>
 </div><!--novel_contents-->
 
 <!-- フッタここから -->
@@ -65,14 +44,7 @@
 <input name="word" size="14" type="text" />
 <input value="検索" type="submit" />
 </form>
-
 </div><!--footernavi-->
 </div><!--footer-->
 <!-- フッタここまで -->
-
-
 </div>
-
-
-</body>
-</html>

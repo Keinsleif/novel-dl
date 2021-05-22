@@ -352,35 +352,6 @@ dl.novel_sublist2 dt{
 	white-space: nowrap;
 }
 
-
-
-
-
-/******* 広告 *******/
-.koukoku_728 {
-	margin:20px auto;
-	width:728px;
-	clear:both;
-}
-
-.koukoku_auto {
-	margin:40px auto 20px;
-	text-align:center;
-}
-
-.koukoku_text {
-	margin:10px auto;
-	width:728px;
-	clear:both;
-}
-
-.contents1 .koukoku_468 {
-	margin:10px 0 0 0;
-	width:468px;
-	height:60px;
-	background:#cccccc;
-}
-
 #longstop{
 	margin:10px 0 10px 0;
 }
@@ -433,91 +404,6 @@ dl.novel_sublist2 dt{
 		text-shadow: none;
 		background:#99bbcc;
 }
-
-/* 公式企画応援ボタン */
-.wrap_eventpoint {
-	margin: 0 auto;
-	width: 470px;
-	height: 270px;
-	padding-top: 200px;
-	box-sizing: border-box;
-	background-image: url(/novelview/img/event/bg_support_pc.png);
-	background-repeat: no-repeat;
-	background-size: cover;
-	border-radius: 10px;
-	text-align: center;
-}
-
-.wrap_eventpoint button {
-	display: inline-block;
-	font-size: 16px;
-	cursor: pointer;
-	outline: 0;
-	text-decoration: none;
-	text-align: center;
-	border-radius: 2em;
-	padding: 0.5em 1em;
-	color: #fff;
-	border: 2px solid #edc844;
-	background-color: rgba(237, 200, 68, 0.5);
-	transition: all 0.2s;
-}
-
-.wrap_eventpoint button:hover {
-	border-color: #f1d673;
-	background-color: rgba(237, 200, 68, 0.75);
-}
-
-
-/* 前回の評価 */
-
-#my_novelpoint {
-	margin: 0;
-}
-
-hr.style{
-	margin: 20px 0;
-	border:0;
-	border-top:1px dotted #999999;
-}
-
-#my_novelpoint b{
-	margin: 0 15px 0 0;
-}
-
-#my_novelpoint .button_box {
-	margin: 15px 0 5px 0;
-}
-
-#my_novelpoint a.button {
-	padding: 5px 0;
-	text-align: center;
-			color: #333333 !important;
-	background:#eeeeee;
-	border-width: 0;
-	border: 2px solid #cccccc;
-	border-bottom: 2px solid #888888;
-	letter-spacing: 2px;
-	display:block;
-	width: 150px;
-}
-
-#my_novelpoint .button:hover {
-	cursor: pointer;
-			color: #333333;
-	background: #ddeefa;
-	border: 2px solid #aaccdc;
-}
-
-p.point_info {
-	text-align:left;
-	font-size:90%;
-	line-height: 150%;
-	color:#666666;
-}
-
-
-
 
 /******** IEだけ縦書きメニュー ********/
 a.tateyoko {
@@ -596,16 +482,6 @@ a.button {
 }
 
 .clr {clear:both;}
-
-
-
-/* ランキングタグ */
-.center {
-	margin: 20px 0;
-	text-align: center;
-}
-
-
 
 
 

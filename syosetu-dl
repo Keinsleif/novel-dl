@@ -1,19 +1,18 @@
 #!/usr/bin/python3
 
 import time,re,requests,sys,os,shutil,argparse
+from datetime import timezone,datetime as dtime
+from pytz import timezone
 import urllib.parse
 from bs4 import BeautifulSoup as bs4
 from jinja2 import Environment, FileSystemLoader
 
+#==DEFINE-variable==
 CONFIG_DIR=os.path.dirname(os.path.abspath(__file__))+"/"
+THEMES=os.listdir(CONFIG_DIR+"themes/")
+MEDIAS=["pc","mobile"]
 
-BASE_NAME="base"
-INDEX_NAME="index"
-SINGLE_NAME="single"
-FILE_EXT=".html"
-THEMES=["default","default-dark"]
-MEDIAS=["combine","pc","mobile"]
-
+#==DEFINE-function==
 def raise_error(e,exit=True):
 	print(e,file=sys.stderr)
 	if exit:
@@ -29,18 +28,20 @@ def get_data(url):
 		raise_error("The novel not found")
 	return data.content
 
+#==DEFINE-parser.argument==
 parser=argparse.ArgumentParser()
 parser.add_argument('arg',help="default:url")
-parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
 parser.add_argument('-d',"--dir",default="",help="set download directory")
 parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
+parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
 parser.add_argument('-e',"--episode",default="",help="set download episode")
-parser.add_argument('-s',"--short",action='store_true',help="generate episode page like short story (with -e option)")
-parser.add_argument('-m',"--media",default="combine",help="set html media type ([combine]/pc/mobile)")
-parser.add_argument('-t',"--theme",default="default",help="set syosetu theme (default,default-dark)")
+parser.add_argument('-s',"--short",action='store_true',help="generate html like short story (with -e option)")
+parser.add_argument('-m',"--media",default="",help="generate html only one media type ("+"/".join(MEDIAS)+")")
+parser.add_argument('-t',"--theme",default="default",help="set syosetu theme ("+"/".join(THEMES)+")")
 #parser.add_argument('-o',"--output",default="",help="set download filename (with single novel or -se option)")
 args=parser.parse_args()
 
+#==CHECK-args==
 if args.short and not args.episode:
 	parser.error('The -s,--short argument requires -e,--episode')
 if not args.theme in THEMES:
@@ -48,12 +49,20 @@ if not args.theme in THEMES:
 if not args.media in MEDIAS:
 	parser.error('Invalid media type')
 
-THEME=args.theme
-STATIC_DIR=CONFIG_DIR+"themes/"+THEME+"/"
+STATIC_DIR=CONFIG_DIR+"themes/"+args.theme+"/"
+
+#==GET-template_files==
 env=Environment(loader=FileSystemLoader(STATIC_DIR,encoding='utf8'))
-base_html=env.get_template(BASE_NAME+"_"+args.media+FILE_EXT)
-index_html=env.get_template(INDEX_NAME+"_"+args.media+FILE_EXT)
-single_html=env.get_template(SINGLE_NAME+"_"+args.media+FILE_EXT)
+if args.media:
+	base_html=env.get_template("base_"+args.media+".html")
+	index_html=env.get_template("index_"+args.media+".html")
+	single_html=env.get_template("single_"+args.media+".html")
+else:
+	base_html=env.get_template("base.html")
+	index_html=env.get_template("index.html")
+	single_html=env.get_template("single.html")
+
+#==CHECK-url==
 ret=urllib.parse.urlparse(args.arg)
 base_url="https://"+ret.hostname+"/"
 if re.match(r'.*syosetu.com',ret.hostname):
@@ -70,7 +79,7 @@ if args.axel:
 else:
 	lazy=1
 
-
+#==GET-index_data==
 if type=="narou":
 	info_res = get_data(base_url+ncode)
 	top_data = bs4(info_res,"html.parser")
@@ -98,6 +107,8 @@ if args.episode:
 	elif int(args.episode)>num_parts or int(args.episode)<0:
 		args.episode=""
 
+#==GET-dest_data==
+#==PREPARE-dest==
 novels=[]
 if num_parts==1 or args.episode:
 	if args.dir:
@@ -106,7 +117,6 @@ if num_parts==1 or args.episode:
 			os.mkdir(ndir)
 	else:
 		ndir=""
-
 else:
 	if args.dir:
 		ndir=os.path.abspath(args.dir)+"/"
@@ -129,14 +139,14 @@ else:
 				if ext=='.html':
 					novels.append(base)
 
-
+#==PROCESS-GEN-single_html==
 if num_parts==1 or args.episode:
 	style={}
 	files=os.listdir(STATIC_DIR+"static/")
 	for file in files:
 		base,ext=os.path.splitext(file)
 		if ext==".css":
-			with open(STATIC_DIR+"static/"+file,"r") as f:
+			with open(STATIC_DIR+"static/"+file,"r",encoding="utf-8") as f:
 				style[base]=f.read()
 
 	if type=="narou":
@@ -183,44 +193,52 @@ if num_parts==1 or args.episode:
 			f.write(contents)
 	else:
 		contents=single_html.render(title=title,contents=body,style=style,lines=len(body))
-		with open(ndir+title+".html", "w", encoding="utf-8") as f:
+		if args.short:
+			title=subtitle
+		with open(ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ",""), "w", encoding="utf-8") as f:
 			f.write(contents)
 	print("part 1 downloaded (total: {:d} parts)".format(num_parts))
 	sys.exit()
 
-
+#==GEN-index_html==
+index=[]
+epis=[]
+eles=bs4(str(index_raw).replace("\n",""),"html.parser").contents[0].contents
+part=1
+c=""
 if type=="narou":
-	eles=bs4(str(index_raw).replace("\n",""),"html.parser").contents[0].contents
-	index=[]
-	part=1
 	for ele in eles:
 		if re.match(r'.+chapter_title',str(ele)):
 			index.append({'type': 1,'text': ele.text})
+			c=ele.text
 		elif re.match(r'.+novel_sublist2',str(ele)):
-			index.append({'type': 2,'text': ele.a.text,'part': part,'time': ele.dt.text.replace("（改）","")})
+			timestamp=dtime.strptime(ele.dt.text.replace("（改）",""),"%Y/%m/%d %H:%M")
+			index.append({'type': 2,'text': ele.a.text,'part': part,'time': timestamp})
+			epis.append({'title':ele.a.text,'chap':c})
 			part=part+1
 	desc="".join([str(i) for i in top_data.select_one("#novel_ex").contents])
 
 elif type=="kakuyomu":
-	eles=bs4(str(index_raw).replace("\n",""),"html.parser").contents[0].contents
-	index=[]
-	part=1
 	for ele in eles:
 		if re.match(r'.+widget-toc-chapter',str(ele)):
 			index.append({'type': 1,'text': ele.text})
+			c=ele.text
 		elif re.match(r'.+widget-toc-episode',str(ele)):
-			timestamp=re.sub(r':\d\dZ$','',ele.time['datetime'].replace("-","/",2).replace("T"," ",1))
+			timestamp=dtime.strptime(ele.a.time.get('datetime'),"%Y-%m-%dT%H:%M:%SZ").astimezone(timezone('Asia/Tokyo'))
 			index.append({'type': 2,'text': ele.span.text, 'part': part, 'time': timestamp})
+			epis.append({'title':ele.span.text,'chap':c})
 			part=part+1
 	desc=top_data.select_one("#introduction")
 	if desc.select_one(".ui-truncateTextButton-expandButton"):
 		desc.select_one(".ui-truncateTextButton-expandButton").decompose()
 		desc.span.unwrap()
 	desc="".join([str(i) for i in desc.contents])
+
 contents=index_html.render(title=title,desc=desc,index=index)
-with open(ndir+"/index.html","w") as f:
+with open(ndir+"index.html","w",encoding="utf-8") as f:
 		f.write(contents)
 
+#==COPY-statics==
 if not os.path.islink(ndir+"static"):
 	if os.path.isdir(ndir+"static"):
 		shutil.rmtree(ndir+"static")
@@ -232,9 +250,8 @@ if not os.path.islink(ndir+"static"):
 	for file in files:
 		shutil.copyfile(STATIC_DIR+"static/"+file,ndir+"static/"+file)
 
-
+#==GEN-episodes==
 for part in range(1, num_parts+1):
-
 	if str(part) in novels and not args.renew:
 		print("part {:d} skipped (total: {:d} parts)".format(part, num_parts))
 		continue
@@ -244,18 +261,16 @@ for part in range(1, num_parts+1):
 		soup = bs4(res,"html.parser")
 		subtitle=soup.select_one(".novel_subtitle").text
 		body=soup.select_one("#novel_honbun")
-		l=[bs4(str(i),"html.parser") for i in body("p")]
-		[i.p.unwrap() for i in l]
-		body=[str(i) for i in l]
 
 	elif type=="kakuyomu":
 		res = get_data(base_url+raws[part-1].find('a')['href'].replace("/","",1))
 		soup = bs4(res,"html.parser")
 		subtitle=soup.select_one(".widget-episodeTitle").text
 		body=soup.select_one(".widget-episodeBody")
-		l=[bs4(str(i),"html.parser") for i in body("p")]
-		[i.p.unwrap() for i in l]
-		body=[str(i) for i in l]
+
+	l=[bs4(str(i),"html.parser") for i in body("p")]
+	[i.p.unwrap() for i in l]
+	body=[str(i) for i in l]
 
 	if part==1:
 		ppart="#"
@@ -267,7 +282,7 @@ for part in range(1, num_parts+1):
 		ppart=part-1
 		npart=part+1
 
-	contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,contents=body,lines=len(body))
+	contents = base_html.render(title=title,subtitle=subtitle,part=part,total=num_parts,ppart=ppart,npart=npart,contents=body,lines=len(body),index=index,epis=epis)
 
 	with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
 			f.write(contents)
