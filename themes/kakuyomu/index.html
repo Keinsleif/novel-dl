@@ -10,11 +10,18 @@
 <link rel="icon" sizes="256x256" href="static/app-256.png" class="js-favicon" />
 <link rel="apple-touch-icon" href="static/ios-60.png" />
 <link rel="shortcut icon" href="static/favicon.ico" class="js-favicon" />
+<script src="static/combine.js"></script>
 </head>
 
 <body id="page-works-work" class="wrapper isPC">
 
+<div id="pc">
 {% include "index_body_pc.html" %}
+</div>
+
+<div id="sp">
+{% include "index_body_mobile.html" %}
+</div>
 
 <script src="static/custom.js"></script>
 

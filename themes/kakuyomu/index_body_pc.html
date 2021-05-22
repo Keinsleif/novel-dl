@@ -1,0 +1,88 @@
+  <header id="globalHeaderPC">
+    <div id="globalHeaderPC-inner">
+      <div id="globalHeaderPC-primary">
+        <h1 id="globalHeaderPC-logo"><a href="https://kakuyomu.jp">
+          <img src="static/kakuyomu-logo.png" alt="カクヨム" />
+        </a></h1>
+        <nav>
+          <ul id="globalHeaderPC-globalNav"><li id="globalHeaderPC-antenna"><a href="https://kakuyomu.jp/my/antenna"><span>マイページ</span></a></li><li><a href="https://kakuyomu.jp/explore"><span>小説を探す</span></a></li><li><a href="https://kakuyomu.jp/official"><span>公式連載</span></a></li><li id="globalHeaderPC-publication"><a href="https://kakuyomu.jp/publication/"><span>書籍化作品</span></a></li>
+          </ul>
+        </nav>
+      </div>
+      <nav>
+        <div id="globalHeaderPC-search" class="js-global-header-search-container">
+          <form method="GET" action="https://kakuyomu.jp/search">
+            <input type="text" id="globalHeaderPC-search-input" name="q" placeholder="小説・ユーザーを検索…" autocomplete="off" />
+            <button type="submit" id="globalHeaderPC-searchSubmit" aria-label="検索する"><i class="icon-search"></i></button>
+          </form>
+          <div id="globalHeaderPC-searchingConditions-panel" class="isPanelHidden js-global-header-searching-condition-history-panel"
+            data-endpoint-url="https://kakuyomu.jp/my/searching_conditions/recent_fragment">
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+<div id="container">
+  <div id="container-inner">
+    
+<div id="work">
+  <header id="workHeader">
+
+    <div id="workHeader-inner">
+      <h1 id="workTitle">{{ title }}</h1>
+    </div>
+
+  </header>
+
+  <main id="workMain">
+
+    <div class="widget-internalLinks"></div>
+
+      <section id="description" class="internalLinks-target hasBothCatchphraseAndIntroduction">
+          <p id="introduction" class="ui-truncateTextButton js-work-introduction">{{ desc |safe}}</p>
+      </section>
+
+    <div id="table-of-contents">
+
+<section class="widget-toc">
+  <header>
+    <h3 class="heading-level2">目次</h3>
+
+    <div class="widget-toc-workInfo js-chrome-visibility-fix">
+	  <p class="widget-toc-workStatus">
+        <span>連載</span>
+        <span class="js-vertical-composition-item">全{{total}}話</span>
+      </p>
+      <p class="widget-toc-date"><time datetime="{{index[-1]['time'].strftime('%Y-%m-%dT%H:%M:%S+09:00')}}"><span>{{index[-1]['time'].strftime('%Y年%m月%d日 %H:%M')}}</span></time> 更新</p>
+    </div>
+  </header>
+
+  <div class="widget-toc-main">
+    <ol class="widget-toc-items test-toc-items">
+{%- for dex in index %}
+{%- if dex['type']==1 %}
+          <li class="widget-toc-chapter widget-toc-level1 js-vertical-composition-item">
+            <span>{{ dex['text'] }}</span>
+          </li>
+{%- elif dex['type']==2 %}
+          <li class="widget-toc-episode">
+            <a href="{{ dex['part']}}.html" class="widget-toc-episode-episodeTitle">
+              <span class="widget-toc-episode-titleLabel js-vertical-composition-item">{{ dex['text'] }}</span>
+			  <time class="widget-toc-episode-datePublished" datetime="{{dex['time'].strftime('%Y-%m-%dT%H:%M:%S+09:00')}}">{{dex['time'].strftime('%Y年%m月%d日 %H:%M')}}</time>
+            </a>
+          </li>
+{%- endif %}
+{%- endfor %}
+          <li class="widget-toc-episode">
+              <span class="widget-toc-episode-titleLabel js-vertical-composition-item">&nbsp;</span>
+          </li>
+    </ol>
+  </div>
+</section>
+
+</div>
+</main>
+</div>
+</div>
+</div>

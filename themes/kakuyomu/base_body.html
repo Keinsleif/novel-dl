@@ -1,0 +1,265 @@
+<script>
+ (function () {
+     try {
+         var keys = ['font_size', 'color_theme', 'font_family', 'writing_direction'];
+         var bodyClass = document.body.className;
+         for (var i = 0; i < keys.length; i++) {
+             var key = keys[i];
+             var rawValue = window.localStorage.getItem('dcv.episode_viewer.display_setting.' + key);
+             if (!rawValue) continue;
+
+             var value = JSON.parse(rawValue);
+             if (key === 'writing_direction') {
+                 bodyClass = bodyClass.replace(/\bwritingDirection-horizontal\b/, '');
+                     if (value === 'vertical') {
+                         document.documentElement.className += ' writingDirection-vertical';
+                     }
+             }
+
+             var prefix = key.replace(/_(.)/g, function (m, c) { return c.toUpperCase(); }) + '-';
+             bodyClass += ' ' + prefix + value;
+         }
+         document.body.className = bodyClass;
+     } catch (ignore) {}
+ })();
+</script>
+
+
+
+<div id="content" class="contentAside-isHidden js-viewer-sidebar-container js-viewer-read-counter">
+
+
+  <header id="worksEpisodesEpisodeHeader" class="js-viewer-globalheader isShown">
+    <div id="worksEpisodesEpisodeHeader-inner">
+      <div id="worksEpisodesEpisodeHeader-workInfo">
+        <p id="worksEpisodesEpisodeHeader-closeButton" aria-label="閉じる" class="ui-tooltip ui-tooltip-bottom" data-ui-tooltip-label="閉じる"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000"><title>閉じる</title><polygon points="640 379.8 620.2 360 500 480.2 379.8 360 360 379.8 480.2 500 360 620.2 379.8 640 500 520 620.2 640 640 620.2 519.8 500 640 379.8"/></svg>
+
+
+        </a></p><ul id="worksEpisodesEpisodeHeader-breadcrumbs" itemscope itemtype="https://schema.org/BreadcrumbList">
+          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><h1 class="js-vertical-composition-item"><a href="index.html" title="{{title}}" itemprop="item"><span itemprop="name">{{title}}</span></a></h1><meta itemprop="position" content="1" /></li>
+          <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"><h2 class="js-vertical-composition-item" title="{{subtitle}}"><span itemprop="name">{{subtitle}}</span></h2><link itemprop="url" href="{{part}}.html" /><meta itemprop="position" content="2" /></li>
+        </ul>
+      </div>
+      <p id="worksEpisodesEpisodeHeader-logo"><a href="index.html">
+        <img id="worksEpisodesEpisodeHeader-logo-horizontal-default" src="static/kakuyomu-logo.png" alt="カクヨム" />
+        <img id="worksEpisodesEpisodeHeader-logo-horizontal-white" src="static/kakuyomu-logo-white.png" alt="カクヨム" />
+        <img id="worksEpisodesEpisodeHeader-logo-vertical-default" src="static/kakuyomu-logo-vertical.png" alt="カクヨム" />
+        <img id="worksEpisodesEpisodeHeader-logo-vertical-white" src="static/kakuyomu-logo-vertical-white.png" alt="カクヨム" />
+      </a></p>
+      <div id="worksEpisodesEpisodeHeader-tools">
+        <p class="ui-tooltip ui-tooltip-bottom" data-ui-tooltip-label="ビューワー設定"><button type="button"
+                id="displaySetting-button"
+                class="ui-button-silent-wrapper js-viewer-setting-modal-open-button"
+                aria-label="ビューワー設定"
+                aria-controls="displaySetting-modalContainer">
+          <span class="ui-button-silent"><svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000"><title>表示設定</title><path d="M556.54,608.48c5-7.77,5.29-8.71,9.33-12.75,31.7-36.36,52.22-70.55,74.6-121.53-15.86-.93-18-.93-23.63-.93a213.08,213.08,0,0,0-67.45,11.19c.32,62.79.94,70.87,5.29,111.27a26.74,26.74,0,0,1,.62,6.84v5.6Zm-88.89-72.11c-19,22.38-29.84,48.17-29.84,72.73,0,26.73,14.3,44.14,35.12,44.14,18,0,34.19-7.15,55.95-24.87-6.84-37.3-9.64-73-9.64-131.79C495.31,509.64,481.32,520.83,467.65,536.37Zm-46.94-180c20.52,5.9,46.32,7.77,91.08,7.77,1.55,0,3.41,0,12.12-.31.62-11.81.62-11.81,2.48-36.68.63-5.28,1.56-24.24,1.56-27.66a42.54,42.54,0,0,0-.62-7.46l37.92,2.48c-4.35,13.68-6.53,30.15-10,68.08,79.26-3.73,148.26-14,185.25-27.05l1.87,33.88c-6.22.94-7.77.94-16.79,2.49-53.15,9.64-127.12,18-172.51,19.58-2.79,41.34-2.79,41.34-3.41,65.28,24.86-6.84,46.31-9.95,72.11-9.95,10.25,0,16.16.62,28.28,1.55a175.33,175.33,0,0,0,11.5-43.82l33.88,10.25c-1.55,2.8-6.84,16.17-15.23,38.86C747.39,469.23,785,510.57,785,567.76c0,47.56-26.42,86.1-76.46,112.21-27.67,14.61-55.64,22.38-99.47,28-4.35-14.3-6.83-19.58-15.54-32.63,28.91-.94,49.73-5,73.05-13.37,53.15-18.34,83.61-53.77,83.61-97.29,0-41.65-27.67-70.87-80.2-84.54-28.28,65.58-54.39,107.54-92.31,146.08-37.61,38.86-74.6,58.75-108.79,58.75-36.37,0-62.79-30.77-62.79-74,0-60,42.59-114.38,113.14-145.15.32-35.43.32-37.92,2.8-73.36H502.46c-4.66,0-26.73-.93-65.58-2.48-4.36-.31-7.77-.31-8.71-.31-1.86,0-4.35,0-7.77.31ZM251.62,635.83a45.62,45.62,0,0,1,4-5.91c14.92-16.78,24.24-32.63,34.5-56.25-7.15-.32-8.08-.32-10.57-.32a98.87,98.87,0,0,0-31.39,5c.31,29.22.31,32.95,2.48,51.59v5.6Zm-41.33-33.26c-8.71,10.26-13.68,22.38-13.68,33.57,0,12.43,6.53,20.52,16.16,20.52,8.39,0,15.85-3.42,25.8-11.5-3.11-17.41-4.35-33.88-4.35-61.24C223,590.14,216.5,595.42,210.29,602.57Zm-21.76-83.3c9.63,2.49,21.44,3.42,42.27,3.42h5.59c.32-5.59.32-5.59,1.25-17.1,0-2.48.62-11.18.62-12.74a16.83,16.83,0,0,0-.31-3.42l17.72,1.25c-2.18,6.21-3.11,14-5,31.39,37-1.87,69-6.53,86.1-12.75l.93,15.86c-3.11.62-3.73.62-8.08,1.24-24.55,4.35-58.74,8.39-79.57,9-1.55,19-1.55,19-1.55,30.15a118,118,0,0,1,33.25-4.66,103.23,103.23,0,0,1,13.06.93,82.77,82.77,0,0,0,5.28-20.51l15.54,5c-.62,1.25-3.1,7.46-6.83,18,31.08,7.15,48.49,26.11,48.49,52.53,0,22.07-12.13,40.1-35.44,52.22-12.74,6.53-25.8,10.26-46,12.74-2.18-6.52-3.11-9-7.15-15.23a104.38,104.38,0,0,0,33.88-5.9c24.56-8.71,38.54-25.18,38.54-45.07,0-19.27-12.74-33-37-39.17-13,30.46-25.48,49.73-42.89,67.45-17.41,18-34.5,27.35-50.35,27.35C194.12,671.26,182,657,182,637.07c0-27.66,19.58-53.15,52.22-67.13.31-16.48.31-17.72,1.24-34.2h-9c-2.18,0-12.44-.31-30.46-.93a24.27,24.27,0,0,0-4-.31,15.25,15.25,0,0,0-3.42.31Z"/></svg></span>
+        </button></p>
+		<p class="ui-tooltip ui-tooltip-bottom" data-ui-tooltip-label="目次"><button type="button"
+                id="sidebar-button"
+                class="ui-button-silent-wrapper js-viewer-sidebar-toggle-button"
+                aria-label="目次">
+          <span class="ui-button-silent"><svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640"><title>目次</title><rect x="100.08" y="292.85" width="52" height="52"/><rect x="100.08" y="166.86" width="52" height="52"/><rect x="100.08" y="421.14" width="52" height="52"/><rect x="210.57" y="302.69" width="321.28" height="32"/><rect x="210.57" y="430.98" width="321.28" height="32"/><rect x="210.57" y="176.29" width="329.43" height="32.81"/></svg></span>
+        </button></p>
+      </div>
+    </div>
+  </header>
+
+  <div id="contentMain" role="main">
+{%- if part==1 %}
+    <div id="contentMain-inner" class="js-page-scroller-container">
+      <header id="contentMain-header">
+        <div id="contentMain-header-cover">
+            <p id="contentMain-header-workTitle" class="js-vertical-composition-item">{{title}}</p>
+        </div>
+{%- if index[0]['type']==1 %}
+        <p class="chapterTitle level1 js-vertical-composition-item"><span>{{index[0]['text']}}</span></p>
+{%- endif %}
+{%- else %}
+      <div id="contentMain-previousEpisode">
+        <a href="{{part-1}}.html#end" data-link-click-action-name="WorksEpisodesEpisodeHeaderPreviousEpisode">
+          <span id="contentMain-previousEpisode-inner">
+            <span class="contentMain-pagerRelation">前のエピソード</span><span class="contentMain-pagerDash">――</span><span class="contentMain-pagerEpisodeTitle js-vertical-composition-item">{{epis[part-2]['title']}}</span>
+          </span>
+        </a>
+      </div>
+    <div id="contentMain-inner" class="js-page-scroller-container">
+      <header id="contentMain-header">
+{%- if epis[part-1]['chap']!=epis[part-2]['chap'] %}
+        <p class="chapterTitle level1 js-vertical-composition-item"><span>{{epis[part-1]['chap']}}</span></p>
+{%- endif %}
+{%- endif %}
+        <p class="widget-episodeTitle js-vertical-composition-item">{{subtitle}}</p>
+      </header>
+      <div class="widget-episode js-episode-body-container">
+        <div class="widget-episode-inner">
+          <div class="widget-episodeBody js-episode-body">
+{%- for i in range(0,lines) %}
+{%- if contents[i]=="<br />" %}
+<p id="p{{ i+1 }}" class="blank"><br /></p>
+{%- else %}
+<p id="p{{ i+1 }}">{{ contents[i] }}</p>
+{%- endif %}
+{%- endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="episodeFooter">
+{%- if part!=total %}
+        <div id="contentMain-nextEpisode">
+          <a href="{{part+1}}.html" id="contentMain-readNextEpisode" data-link-click-action-name="WorksEpisodesEpisodeFooterNextEpisode" class="js-read-next-episode">
+            <span class="contentMain-nextEpisode-inner">
+              <span class="contentMain-pagerRelation">次のエピソード</span>
+              <span class="contentMain-pagerEpisodeTitle js-vertical-composition-item"><span>{{epis[part]['title']}}</span></span>
+              <span class="contentMain-pagerArrow"><svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000"><path d="M522.42,723.09v-514H477.58v514l-228.7-228.7-31.39,32L500,808.86,782.51,526.35l-32-32ZM500,955.16c-61.66,0-121.08-11.77-177.13-35.32a466.15,466.15,0,0,1-77.35-42A460.59,460.59,0,0,1,122.2,754.48a445.47,445.47,0,0,1-41.48-77.35C56.61,621.08,44.84,561.66,44.84,500c0-61.1,11.77-120.52,35.88-176.57a445.47,445.47,0,0,1,41.48-77.35,495.6,495.6,0,0,1,55.49-67.83,495.6,495.6,0,0,1,67.83-55.49,466.15,466.15,0,0,1,77.35-42A454.52,454.52,0,0,1,500,44.84c251.12,0,455.16,204.6,455.16,455.16C955.16,751.12,751.12,955.16,500,955.16ZM500,0C223.65,0,0,224.22,0,500s223.65,500,500,500c275.78,0,500-224.22,500-500S775.78,0,500,0Z"/></svg></span>
+            </span>
+          </a>
+
+        </div>
+{%- endif %}
+    <div id="end"></div>
+
+  </div>
+
+  <aside id="contentAside" class="js-viewer-sidebar-panel">
+<section id="contentAside-episodeInfo">
+  <header class="contentAside-sectionHeader js-chrome-visibility-fix">
+    <h3 class="heading-level4 js-vertical-composition-item"><a href="index.html">{{title}}</a></h3>
+  </header>
+
+
+  <div class="contentAside-sectionBody">
+
+
+<section class="widget-toc">
+  <header>
+    <h3>目次</h3>
+
+    <div class="widget-toc-workInfo js-chrome-visibility-fix">
+      <p class="widget-toc-workStatus">
+        <span>連載</span>
+        <span class="js-vertical-composition-item">全{{total}}話</span>
+      </p>
+      <p class="widget-toc-date"><time datetime="{{index[-1]['time'].strftime('%Y-%m-%dT%H:%M:%S+09:00')}}"><span>{{index[-1]['time'].strftime('%Y年%m月%d日 %H:%M')}}</span></time> 更新</p>
+    </div>
+  </header>
+  <div class="widget-toc-main">
+    <ol class="widget-toc-items test-toc-items">
+{%- for i in index %}
+{%- if i['type']==1 %}
+          <li class="widget-toc-chapter widget-toc-level1 js-vertical-composition-item" data-vertical-composition-done="true">
+            <span>{{ i['text'] }}</span>
+          </li>
+{%- elif i['type']==2 %}
+          <li class="widget-toc-episode">
+            <a href="{{i['part']}}.html" class="widget-toc-episode-episodeTitle">
+              <span class="widget-toc-episode-titleLabel js-vertical-composition-item" data-vertical-composition-done="true">{{ i['text'] }}</span>
+              <time class="widget-toc-episode-datePublished" datetime="{{i['time'].strftime('%Y-%m-%dT%H:%M:%S+09:00')}}">{{i['time'].strftime('%Y年%m月%d日 %H:%M')}}</time>
+            </a>
+          </li>
+{%- endif %}
+{%- endfor %}
+    </ol>
+
+  </div>
+</section>
+  </div>
+</section>
+  </aside>
+
+  <div id="displaySetting-modalContainer" class="js-viewer-setting-modal-container widget-displaySetting-modal ui-modal-container isHidden">
+    <div class="ui-modal-window js-modal-window">
+      <header class="ui-modal-header">
+        <h3>ビューワー設定</h3>
+      </header>
+      <div class="ui-tab js-episode-setting-tab-container">
+        <ul>
+          <li class="isActive"><button type="button" class="isActive js-episode-setting-tab-button" aria-controls="displaySetting"><span>表示設定</span></button></li>
+          <li><button type="button" class="js-episode-setting-tab-button" aria-controls="readSetting"><span>操作設定</span></button></li>
+        </ul>
+      </div>
+      <div class="ui-modal-body">
+        <div id="displaySetting" class="js-episode-display-setting-container isShown" data-storage-segment="dcv.episode_viewer.display_setting" data-should-update-root-writing-direction="1">
+
+<div class="widget-displaySetting">
+    <section class="widget-displaySetting-fontSize">
+      <h4>文字サイズ</h4>
+      <ul>
+        <li class="widget-displaySetting-fontSize-small">
+          <input id="input-displaySetting-fontSize-small" type="radio" name="font_size" value="small" /><label for="input-displaySetting-fontSize-small">小</label>
+        </li>
+        <li class="widget-displaySetting-fontSize-medium">
+          <input id="input-displaySetting-fontSize-medium" type="radio" name="font_size" value="medium" checked /><label for="input-displaySetting-fontSize-medium">中</label>
+        </li>
+        <li class="widget-displaySetting-fontSize-large">
+          <input id="input-displaySetting-fontSize-large" type="radio" name="font_size" value="large" /><label for="input-displaySetting-fontSize-large">大</label>
+        </li>
+        <li class="widget-displaySetting-fontSize-xLarge">
+          <input id="input-displaySetting-fontSize-xLarge" type="radio" name="font_size" value="xLarge" /><label for="input-displaySetting-fontSize-xLarge">特大</label>
+        </li>
+      </ul>
+    </section>
+    <section>
+      <h4>背景色</h4>
+      <ul>
+        <li class="widget-displaySetting-bgColor-white">
+          <input id="input-displaySetting-bgColor-white" type="radio" name="color_theme" value="white" checked /><label for="input-displaySetting-bgColor-white">白</label>
+        </li>
+        <li class="widget-displaySetting-bgColor-black">
+          <input id="input-displaySetting-bgColor-black" type="radio" name="color_theme" value="black" /><label for="input-displaySetting-bgColor-black">黒</label>
+        </li>
+        <li class="widget-displaySetting-bgColor-kinari">
+          <input id="input-displaySetting-bgColor-kinari" type="radio" name="color_theme" value="kinari" /><label for="input-displaySetting-bgColor-kinari">生成り</label>
+        </li>
+        <li class="widget-displaySetting-bgColor-blue">
+          <input id="input-displaySetting-bgColor-blue" type="radio" name="color_theme" value="blue" /><label for="input-displaySetting-bgColor-blue">水色</label>
+        </li>
+      </ul>
+    </section>
+    <section>
+      <h4>フォント</h4>
+      <ul>
+        <li class="widget-displaySetting-fontFamily-serif">
+          <input id="input-displaySetting-fontFamily-serif" type="radio" name="font_family" value="serif" checked /><label for="input-displaySetting-fontFamily-serif">明朝</label>
+        </li>
+        <li class="widget-displaySetting-fontFamily-sans">
+          <input id="input-displaySetting-fontFamily-sans" type="radio" name="font_family" value="sans" /><label for="input-displaySetting-fontFamily-sans">ゴシック</label>
+        </li>
+      </ul>
+    </section>
+    <section>
+      <h4>組み方向</h4>
+      <ul>
+        <li class="widget-displaySetting-modal-writingDirection-horizontal">
+          <input id="input-displaySetting-writingDirection-horizontal" type="radio" name="writing_direction" value="horizontal" checked /><label for="input-displaySetting-writingDirection-horizontal">横組み</label>
+        </li>
+        <li class="widget-displaySetting-modal-writingDirection-vertical">
+          <input id="input-displaySetting-writingDirection-vertical" type="radio" name="writing_direction" value="vertical" /><label for="input-displaySetting-writingDirection-vertical">縦組み</label>
+        </li>
+      </ul>
+    </section>
+</div>
+        </div>
+        <div id="readSetting" class="js-episode-read-setting-container isHidden">
+          <section>
+            <header>
+              <h4><label for="input-tapScroll">タップでスクロール</label></h4>
+              <p>機能をオンにすると、画面の下部をタップする度に自動的にスクロールして読み進められます。</p>
+            </header>
+            <p>
+              <span class="ui-toggleSwitch">
+                <input type="checkbox" id="input-tapScroll" name="click_scroll_enabled" class="" />
+                <span class="ui-toggleSwitch-alternate"></span>
+              </span>
+            </p>
+          </section>
+        </div>
+      </div>
+      <footer class="ui-modal-footer">
+        <div><p class="widget-displaySetting-fontFamily-warning js-episode-display-setting-font-family-warning isHidden">一部のAndroid端末では<br />フォント設定が反映されません。</p></div>
+        <button class="ui-button-blue js-modal-window-close-button"><span>完了</span></button>
+      </footer>
+    </div>
+  </div>
+</div>

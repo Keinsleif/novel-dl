@@ -157,11 +157,15 @@ if num_parts==1 or args.short:
 	with tqdm(total=1) as pbar:
 		pbar.set_description("Downloading ")
 		style={}
+		script={}
 		for file in static_files:
 			base,ext=os.path.splitext(file)
 			if ext==".css":
 				with open(file,"r",encoding="utf-8") as f:
 					style[os.path.basename(base)]=f.read()
+			if ext==".js":
+				with open(file,"r",encoding="utf-8") as f:
+					script[os.path.basename(base)]=f.read()
 
 		if type=="narou":
 			if args.short:
@@ -191,12 +195,12 @@ if num_parts==1 or args.short:
 			[i.p.unwrap() for i in l]
 			body=[str(i) for i in l]
 
-		else:
-			contents=htmls['single'].render(title=title,contents=body,style=style,lines=len(body))
-			if args.short:
-				title=subtitle
-			with open(ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ",""), "w", encoding="utf-8") as f:
-				f.write(contents)
+
+		if args.short:
+			title=subtitle
+		contents=htmls['single'].render(title=title,contents=body,style=style,script=script,lines=len(body))
+		with open(ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ",""), "w", encoding="utf-8") as f:
+			f.write(contents)
 		pbar.update()
 	print("total 1 part successfully downloaded")
 	sys.exit()
@@ -236,7 +240,7 @@ elif type=="kakuyomu":
 	desc="".join([str(i) for i in desc.contents])
 
 if not args.episode:
-	contents=htmls['index'].render(title=title,desc=desc,index=index)
+	contents=htmls['index'].render(title=title,desc=desc,index=index,total=num_parts)
 	with open(ndir+"index.html","w",encoding="utf-8") as f:
 			f.write(contents)
 
