@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
-import time,re,requests,sys,os,shutil,argparse,configparser
-from datetime import timezone,datetime as dtime
+import time,re,sys,os,shutil,argparse,configparser,urllib.parse
+from datetime import datetime as dtime
 from pytz import timezone
+import requests
 from tqdm import tqdm
-import urllib.parse
 from bs4 import BeautifulSoup as bs4
 from jinja2 import Environment, FileSystemLoader
 
