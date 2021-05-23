@@ -9,9 +9,8 @@ from bs4 import BeautifulSoup as bs4
 from jinja2 import Environment, FileSystemLoader
 
 #==DEFINE-variable==
-CONFIG_DIR=os.path.dirname(os.path.abspath(__file__))+"/"
+CONFIG_DIR=os.path.abspath(os.path.dirname(__file__))+"/"
 THEMES=os.listdir(CONFIG_DIR+"themes/")
-MEDIAS=["pc","mobile",""]
 
 #==DEFINE-function==
 def raise_error(e,exit=True):
@@ -32,23 +31,21 @@ def get_data(url):
 #==DEFINE-parser.argument==
 parser=argparse.ArgumentParser()
 parser.add_argument('arg',help="default:url")
-parser.add_argument('-d',"--dir",default="",help="set download directory")
+parser.add_argument('-d',"--dir",default="",help="set output directory")
 parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
 parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
 parser.add_argument('-e',"--episode",default="",help="set download episode")
-parser.add_argument('-s',"--short",action='store_true',help="generate html like short story (with -e option)")
-parser.add_argument('-m',"--media",default="",help="generate html only one media type ("+"/".join(MEDIAS)+")")
-parser.add_argument('-t',"--theme",default="default",help="set syosetu theme ("+"/".join(THEMES)+")")
+parser.add_argument('-s',"--short",action='store_true',help="generate novel like short story (with -e option)")
+parser.add_argument('-m',"--media",default="",help="generate html only one media type")
+parser.add_argument('-t',"--theme",default="default",help="set novel's theme")
 #parser.add_argument('-o',"--output",default="",help="set download filename (with single novel or -se option)")
 args=parser.parse_args()
 
 #==CHECK-args==
 if args.short and not args.episode:
-	parser.error('The -s,--short argument requires -e,--episode')
+	raise_error('The -s,--short argument requires -e,--episode')
 if not args.theme in THEMES:
-	parser.error('Invalid theme name')
-if not args.media in MEDIAS:
-	parser.error('Invalid media type')
+	raise_error('Invalid theme name')
 
 
 #==SETUP-themes==
@@ -56,13 +53,19 @@ THEME_DIR=CONFIG_DIR+"themes/"+args.theme+"/"
 config_ini = configparser.ConfigParser()
 env=Environment(loader=FileSystemLoader(THEME_DIR,encoding='utf8'))
 static_files=[THEME_DIR+"static/"+i for i in os.listdir(THEME_DIR+"static/")]
-
+if not config_ini.read(THEME_DIR+"config.ini", encoding='utf-8'):
+	config_ini={"Main": {}}
+if config_ini['Main'].get('medias'):
+	exec("MEDIAS="+config_ini['Main'].get('medias'))
+if not args.media in MEDIAS:
+	MEDIAS.remove('')
+	raise_error('Invalid media type\nAvailable medias in this theme: ('+' '.join(MEDIAS)+')')
 if args.media:
 	htmls={"base":"base_"+args.media+".html","index":"index_"+args.media+".html","single":"single_"+args.media+".html"}
 else:
 	htmls={"base":"base.html","index":"index.html","single":"single.html"}
 
-if config_ini.read(THEME_DIR+"config.ini", encoding='utf-8') and config_ini['Main'].get('parent'):
+if config_ini['Main'].get('parent'):
 	parent_dir=CONFIG_DIR+"themes/"+config_ini['Main'].get('parent')
 	penv=Environment(loader=FileSystemLoader(parent_dir,encoding='utf8'))
 	for file in htmls:
@@ -294,3 +297,4 @@ with tqdm(total=num_parts) as pbar:
 		time.sleep(lazy)
 		pbar.update()
 print("total {:d} part successfully downloaded".format(num_parts))
+
