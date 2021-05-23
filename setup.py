@@ -45,7 +45,7 @@ setup(
 #	},
 	entry_points="""
 		[console_scripts]
-		{app}={pkg}.main
+		{app}={pkg}.main:main
 	""".format(app=PACKAGE_NAME.replace("_","-"),pkg=PACKAGE_NAME),
 
 	classifiers=[
