@@ -1,2 +1,2 @@
 include requirements.txt
-recursive-include syosetu_dl/themes *
+recursive-include novel_dl/themes *
