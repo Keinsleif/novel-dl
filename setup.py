@@ -1,4 +1,3 @@
-
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
@@ -6,7 +5,7 @@ from setuptools import setup
 from setuptools import find_packages
 import os
 
-PACKAGE_NAME="syosetu_dl"
+PACKAGE_NAME="novel_dl"
 DESCRIPTION = 'Novel downloader'
 LONG_DESCRIPTION = "Command-line program to download novels from syosetu.com and kakuyomu.jp"
 
@@ -29,7 +28,7 @@ setup(
 
 	description=DESCRIPTION,
 	long_description=LONG_DESCRIPTION,
-	url="https://github.com/kazuto28/syosetu-dl",
+	url="https://github.com/kazuto28/{pkg}".format(pkg=PACKAGE_NAME),
 	author="Kondo Kazuto",
 	author_email="mountaindull@gmail.com",
 	license="MIT",
@@ -38,11 +37,6 @@ setup(
 	include_package_data=True,
 	zip_safe=False,
 	install_requires=REQUIRES,
-#	entry_points={
-#		'console_scripts':[
-#			'{app} = {pkg}.main'.format(app=PACKAGE_NAME.replace('_','-'),pkg=PACKAGE_NAME)
-#		]
-#	},
 	entry_points="""
 		[console_scripts]
 		{app}={pkg}.main:main
