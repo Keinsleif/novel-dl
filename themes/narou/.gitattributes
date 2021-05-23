@@ -1,0 +1,3 @@
+*.html linguist-documentation
+static/* linguist-documentation
+tool/* linguist-documentation
