@@ -31,7 +31,7 @@ def get_data(url):
 def main():
 	#==DEFINE-parser.argument==
 	parser=argparse.ArgumentParser()
-	parser.add_argument('arg',help="default:url")
+	parser.add_argument('url',help="URL")
 	parser.add_argument('-d',"--dir",default="",help="set output directory")
 	parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
 	parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
@@ -82,7 +82,7 @@ def main():
 
 
 	#==CHECK-url==
-	ret=urllib.parse.urlparse(args.arg)
+	ret=urllib.parse.urlparse(args.url)
 	base_url="https://"+ret.hostname+"/"
 	if re.match(r'.*syosetu.com',ret.hostname):
 		type="narou"
