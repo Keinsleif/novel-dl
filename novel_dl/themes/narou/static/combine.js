@@ -1,4 +1,4 @@
-loadFiles=['reset','kotei','novel_smpview'];
+loadFiles={'reset':false,'kotei':false,'novel_smpview':true};
 function handleWindowResize(){
 	if (window.matchMedia('(max-width: 767px)').matches){
 		document.getElementById("pc").style.display ="none";
@@ -9,23 +9,22 @@ function handleWindowResize(){
 		document.getElementById("sp").style.display ="none";
 		enableCSS=["reset","kotei"];
 	}
-	for (var i=0;i<loadFiles.length;i++) {
-		if (enableCSS.includes(loadFiles[i])) {
-			document.getElementById(loadFiles[i]).disabled=false;
+	for (var i in loadFiles) {
+		if (enableCSS.includes(i)) {
+			document.getElementById(i).disabled=false;
 		} else{
-			document.getElementById(loadFiles[i]).disabled=true;
+			document.getElementById(i).disabled=true;
 		}
 	}
 }
-
-for (var i=0;i<loadFiles.length; i++) {
-	var css=document.createElement('link');
-	css.rel='stylesheet';
-	css.id=loadFiles[i];
-	css.href="static/"+loadFiles[i]+".css";
-	css.media="screen,print";
-	css.disabled=true;
-	document.getElementsByTagName("head")[0].appendChild(css);
+for (var i in loadFiles) {
+       var css=document.createElement('link');
+       css.rel='stylesheet';
+       css.id=i;
+       css.href="static/"+i+".css";
+       css.media="screen,print";
+       css.disabled=loadFiles[i];
+       document.getElementsByTagName("head")[0].appendChild(css);
 }
 window.onload=handleWindowResize
 window.addEventListener('resize', handleWindowResize)

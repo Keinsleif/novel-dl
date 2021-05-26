@@ -52,10 +52,10 @@ def main():
 	ret=urllib.parse.urlparse(args.url)
 	base_url="https://"+ret.hostname+"/"
 	if re.match(r'.*syosetu.com',ret.hostname):
-		type="narou"
+		site="narou"
 		ncode=re.match(r'/(n[0-9a-zA-Z]+)',ret.path).group(1)
 	elif re.match(r'.*kakuyomu.jp',ret.hostname):
-		type="kakuyomu"
+		site="kakuyomu"
 		ncode=re.match(r'/works/([0-9]+)',ret.path).group(1)
 	else:
 		print("That url is not supported")
@@ -67,13 +67,12 @@ def main():
 
 	#==SETUP-themes==
 	if args.theme=="auto":
-		if type=="narou":
+		if site=="narou":
 			args.theme="narou"
-		elif type=="kakuyomu":
+		elif site=="kakuyomu":
 			args.theme="kakuyomu"
 	THEME_DIR=CONFIG_DIR+"themes/"+args.theme+"/"
 	config_ini = configparser.ConfigParser()
-	env=Environment(loader=FileSystemLoader(THEME_DIR,encoding='utf8'))
 	static_files=[THEME_DIR+"static/"+i for i in os.listdir(THEME_DIR+"static/")]
 	if not config_ini.read(THEME_DIR+"config.ini", encoding='utf-8') and not 'Main' in config_ini.sections():
 		config_ini={"Main": {}}
@@ -89,22 +88,26 @@ def main():
 	else:
 		htmls={"base":"base.html","index":"index.html","single":"single.html"}
 
+	env=Environment(loader=FileSystemLoader(THEME_DIR,encoding='utf8'))
 	if conf.get('parent'):
 		parent_dir=CONFIG_DIR+"themes/"+conf['parent']
 		penv=Environment(loader=FileSystemLoader(parent_dir,encoding='utf8'))
 		for file in htmls:
 			if os.path.isfile(THEME_DIR+htmls[file]):
 				htmls[file]=env.get_template(htmls[file])
-			else:
+			elif os.path.isfile(parent_dir+htmls[file]):
 				htmls[file]=penv.get_template(htmls[file])
+			else:
+				raise_error("Cannot load theme file: "+htmls[file])
 		static_files=static_files+[parent_dir+"/static/"+i for i in os.listdir(parent_dir+"/static")]
 	else:
 		htmls={i:env.get_template(htmls[i]) for i in htmls}
 
 
 	#==GET-index_data==
-	if type=="narou":
-		info_res = get_data(base_url+ncode)
+	if site=="narou":
+		index_url=base_url+ncode
+		info_res = get_data(index_url)
 		top_data = bs4(info_res,"html.parser")
 		index_raw=top_data.select_one(".index_box")
 		if index_raw:
@@ -116,8 +119,9 @@ def main():
 				ndir=""
 		title=top_data.select_one("title").text
 
-	elif type=="kakuyomu":
-		info_res = get_data(base_url+"works/"+ncode)
+	elif site=="kakuyomu":
+		index_url=base_url+"works/"+ncode
+		info_res = get_data(index_url)
 		top_data = bs4(info_res,"html.parser")
 		index_raw=top_data.select_one(".widget-toc-items")
 		raws=index_raw.select("li.widget-toc-episode")
@@ -177,19 +181,21 @@ def main():
 					with open(file,"r",encoding="utf-8") as f:
 						script[os.path.basename(base)]=f.read()
 
-			if type=="narou":
+			if site=="narou":
 				if args.short:
-					data=get_data(base_url+ncode+"/"+args.episode)
+					url=base_url+ncode+"/"+args.episode
+					data=get_data(url)
 					soup=bs4(data,"html.parser")
 					body=soup.select_one("#novel_honbun")
 					subtitle=soup.select_one(".novel_subtitle").text
 				else:
+					url=index_url
 					body=top_data.select_one("#novel_honbun")
 				l=[bs4(str(i),"html.parser") for i in body("p")]
 				[i.p.unwrap() for i in l]
 				body=[str(i) for i in l]
 
-			elif type=="kakuyomu":
+			elif site=="kakuyomu":
 				if args.short:
 					try:
 						url=base_url+raws[int(args.episode)].a['href'].replace("/","",1)
@@ -205,10 +211,9 @@ def main():
 				[i.p.unwrap() for i in l]
 				body=[str(i) for i in l]
 
-
 			if args.short:
 				title=subtitle
-			contents=htmls['single'].render(title=title,contents=body,style=style,script=script,lines=len(body))
+			contents=htmls['single'].render(title=title,contents=body,style=style,script=script,lines=len(body),site=site,url=url)
 			with open(ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ",""), "w", encoding="utf-8") as f:
 				f.write(contents)
 			pbar.update()
@@ -221,7 +226,7 @@ def main():
 	eles=bs4(str(index_raw).replace("\n",""),"html.parser").contents[0].contents
 	part=1
 	c=""
-	if type=="narou":
+	if site=="narou":
 		for ele in eles:
 			if re.match(r'.+chapter_title',str(ele)):
 				index.append({'type': 1,'text': ele.text})
@@ -233,7 +238,7 @@ def main():
 				part=part+1
 		desc="".join([str(i) for i in top_data.select_one("#novel_ex").contents])
 
-	elif type=="kakuyomu":
+	elif site=="kakuyomu":
 		for ele in eles:
 			if re.match(r'.+widget-toc-chapter',str(ele)):
 				index.append({'type': 1,'text': ele.text})
@@ -250,7 +255,7 @@ def main():
 		desc="".join([str(i) for i in desc.contents])
 
 	if not args.episode:
-		contents=htmls['index'].render(title=title,desc=desc,index=index,total=num_parts)
+		contents=htmls['index'].render(title=title,desc=desc,index=index,total=num_parts,site=site,url=index_url)
 		with open(ndir+"index.html","w",encoding="utf-8") as f:
 				f.write(contents)
 
@@ -281,14 +286,16 @@ def main():
 				pbar.update()
 				continue
 
-			if type=="narou":
-				res = get_data(base_url+ncode+"/{:d}/".format(part))
+			if site=="narou":
+				url=base_url+ncode+"/{:d}/".format(part)
+				res = get_data(url)
 				soup = bs4(res,"html.parser")
 				subtitle=soup.select_one(".novel_subtitle").text
 				body=soup.select_one("#novel_honbun")
 
-			elif type=="kakuyomu":
-				res = get_data(base_url+raws[part-1].find('a')['href'].replace("/","",1))
+			elif site=="kakuyomu":
+				url=base_url+raws[part-1].find('a')['href'].replace("/","",1)
+				res = get_data(url)
 				soup = bs4(res,"html.parser")
 				subtitle=soup.select_one(".widget-episodeTitle").text
 				body=soup.select_one(".widget-episodeBody")
@@ -297,7 +304,7 @@ def main():
 			[i.p.unwrap() for i in l]
 			body=[str(i) for i in l]
 
-			contents=htmls['base'].render(title=title,subtitle=subtitle,part=part,total=total,contents=body,lines=len(body),index=index,epis=epis)
+			contents=htmls['base'].render(title=title,subtitle=subtitle,part=part,total=total,contents=body,lines=len(body),index=index,epis=epis,site=site,url=url)
 
 			with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
 					f.write(contents)
