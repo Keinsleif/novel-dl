@@ -17,16 +17,15 @@ function handleWindowResize(){
 		}
 	}
 }
-window.onload=function(){
-	for (var i=0;i<loadFiles.length; i++) {
-		var css=document.createElement('link');
-		css.rel='stylesheet';
-		css.id=loadFiles[i];
-		css.href="static/"+loadFiles[i]+".css";
-		css.media="screen,print";
-		css.disabled=true;
-		document.getElementsByTagName("head")[0].appendChild(css);
-	}
-	handleWindowResize()
+
+for (var i=0;i<loadFiles.length; i++) {
+	var css=document.createElement('link');
+	css.rel='stylesheet';
+	css.id=loadFiles[i];
+	css.href="static/"+loadFiles[i]+".css";
+	css.media="screen,print";
+	css.disabled=true;
+	document.getElementsByTagName("head")[0].appendChild(css);
 }
+window.onload=handleWindowResize
 window.addEventListener('resize', handleWindowResize)

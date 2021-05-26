@@ -10,7 +10,7 @@ from jinja2 import Environment, FileSystemLoader
 
 #==DEFINE-variable==
 CONFIG_DIR=os.path.abspath(os.path.dirname(__file__))+"/"
-THEMES=os.listdir(CONFIG_DIR+"themes/")
+THEMES=os.listdir(CONFIG_DIR+"themes/")+["auto"]
 
 #==DEFINE-function==
 def raise_error(e,exit=True):
@@ -37,8 +37,8 @@ def main():
 	parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
 	parser.add_argument('-e',"--episode",default="",help="set download episode")
 	parser.add_argument('-s',"--short",action='store_true',help="generate novel like short story (with -e option)")
+	parser.add_argument('-t',"--theme",default="auto",help="set novel's theme")
 	parser.add_argument('-m',"--media",default="",help="generate html only one media type")
-	parser.add_argument('-t',"--theme",default="default",help="set novel's theme")
 	#parser.add_argument('-o',"--output",default="",help="set download filename (with single novel or -se option)")
 	args=parser.parse_args()
 
@@ -47,39 +47,6 @@ def main():
 		raise_error('The -s,--short argument requires -e,--episode')
 	if not args.theme in THEMES:
 		raise_error('Invalid theme name')
-
-
-	#==SETUP-themes==
-	THEME_DIR=CONFIG_DIR+"themes/"+args.theme+"/"
-	config_ini = configparser.ConfigParser()
-	env=Environment(loader=FileSystemLoader(THEME_DIR,encoding='utf8'))
-	static_files=[THEME_DIR+"static/"+i for i in os.listdir(THEME_DIR+"static/")]
-	if not config_ini.read(THEME_DIR+"config.ini", encoding='utf-8'):
-		config_ini={"Main": {}}
-
-	MEDIAS=[""]
-	if config_ini['Main'].get('medias'):
-		MEDIAS=eval(config_ini['Main'].get('medias'))
-	if not args.media in MEDIAS:
-		MEDIAS.remove('')
-		raise_error('Invalid media type\nAvailable medias in this theme: ('+' '.join(MEDIAS)+')')
-	if args.media:
-		htmls={"base":"base_"+args.media+".html","index":"index_"+args.media+".html","single":"single_"+args.media+".html"}
-	else:
-		htmls={"base":"base.html","index":"index.html","single":"single.html"}
-
-	if config_ini['Main'].get('parent'):
-		parent_dir=CONFIG_DIR+"themes/"+config_ini['Main'].get('parent')
-		penv=Environment(loader=FileSystemLoader(parent_dir,encoding='utf8'))
-		for file in htmls:
-			if os.path.isfile(THEME_DIR+htmls[file]):
-				htmls[file]=env.get_template(htmls[file])
-			else:
-				htmls[file]=penv.get_template(htmls[file])
-		static_files=static_files+[parent_dir+"/static/"+i for i in os.listdir(parent_dir+"/static")]
-	else:
-		htmls={i:env.get_template(htmls[i]) for i in htmls}
-
 
 	#==CHECK-url==
 	ret=urllib.parse.urlparse(args.url)
@@ -94,9 +61,46 @@ def main():
 		print("That url is not supported")
 		sys.exit()
 	if args.axel:
-		lazy=0
+		delay=0
 	else:
-		lazy=1
+		delay=1
+
+	#==SETUP-themes==
+	if args.theme=="auto":
+		if type=="narou":
+			args.theme="narou"
+		elif type=="kakuyomu":
+			args.theme="kakuyomu"
+	THEME_DIR=CONFIG_DIR+"themes/"+args.theme+"/"
+	config_ini = configparser.ConfigParser()
+	env=Environment(loader=FileSystemLoader(THEME_DIR,encoding='utf8'))
+	static_files=[THEME_DIR+"static/"+i for i in os.listdir(THEME_DIR+"static/")]
+	if not config_ini.read(THEME_DIR+"config.ini", encoding='utf-8') and not 'Main' in config_ini.sections():
+		config_ini={"Main": {}}
+	conf=dict(config_ini.items("Main"))
+	MEDIAS=[""]
+	if conf.get('medias'):
+		MEDIAS=eval(conf['medias'])
+	if not args.media in MEDIAS:
+		MEDIAS.remove('')
+		raise_error('Invalid media type\nAvailable medias in this theme: ('+' '.join(MEDIAS)+')')
+	if args.media:
+		htmls={"base":"base_"+args.media+".html","index":"index_"+args.media+".html","single":"single_"+args.media+".html"}
+	else:
+		htmls={"base":"base.html","index":"index.html","single":"single.html"}
+
+	if conf.get('parent'):
+		parent_dir=CONFIG_DIR+"themes/"+conf['parent']
+		penv=Environment(loader=FileSystemLoader(parent_dir,encoding='utf8'))
+		for file in htmls:
+			if os.path.isfile(THEME_DIR+htmls[file]):
+				htmls[file]=env.get_template(htmls[file])
+			else:
+				htmls[file]=penv.get_template(htmls[file])
+		static_files=static_files+[parent_dir+"/static/"+i for i in os.listdir(parent_dir+"/static")]
+	else:
+		htmls={i:env.get_template(htmls[i]) for i in htmls}
+
 
 	#==GET-index_data==
 	if type=="narou":
@@ -297,7 +301,7 @@ def main():
 
 			with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
 					f.write(contents)
-			time.sleep(lazy)
+			time.sleep(delay)
 			pbar.update()
 	print("total {:d} part successfully downloaded".format(num_parts))
 
