@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import time,re,sys,os,shutil,argparse,configparser,urllib.parse
 from datetime import datetime as dtime
@@ -12,44 +12,44 @@ from jinja2 import Environment, FileSystemLoader
 CONFIG_DIR=os.path.abspath(os.path.dirname(__file__))+"/"
 THEMES=os.listdir(CONFIG_DIR+"themes/")+["auto"]
 
-#==DEFINE-function==
+
+class NovelDLException(Exception):
+	def console_message(self):
+		print("novel-dl: ",end="",file=sys.stderr)
+		print(*self.args,file=sys.stderr)
+
 def raise_error(e,exit=True):
-	print(e,file=sys.stderr)
-	if exit:
-		sys.exit(1)
+	raise NovelDLException(e)
+	#print("novel-dl: "+e,file=sys.stderr)
+	#if exit:
+	#	if __name__=="__main__":
+	#		sys.exit(1)
+	#	else:
+	#		return -1
+
 
 def get_data(url):
 	headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
 	cookie={'over18': 'yes'}
 	data=requests.get(url=url,headers=headers,cookies=cookie)
 	if int(data.status_code/100)==5:
-		raise_error("Network Error (5xx)")
+		raise_error("network error (5xx)")
 	elif int(data.status_code/100)==4:
-		raise_error("The novel not found")
+		raise_error("novel not found")
 	return data.content
 
-def main():
-	#==DEFINE-parser.argument==
-	parser=argparse.ArgumentParser()
-	parser.add_argument('url',help="URL")
-	parser.add_argument('-d',"--dir",default="",help="set output directory")
-	parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
-	parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
-	parser.add_argument('-e',"--episode",default="",help="set download episode")
-	parser.add_argument('-s',"--short",action='store_true',help="generate novel like short story (with -e option)")
-	parser.add_argument('-t',"--theme",default="auto",help="set novel's theme")
-	parser.add_argument('-m',"--media",default="",help="generate html only one media type")
-	#parser.add_argument('-o',"--output",default="",help="set download filename (with single novel or -se option)")
-	args=parser.parse_args()
 
+def main(args):
 	#==CHECK-args==
-	if args.short and not args.episode:
-		raise_error('The -s,--short argument requires -e,--episode')
-	if not args.theme in THEMES:
-		raise_error('Invalid theme name')
+	if args["short"] and not args["episode"]:
+		raise_error("invalid option -- 's'\nThe -s,--short argument requires -e,--episode")
+	if not args["theme"] in THEMES:
+		raise_error('invalid theme name `'+args["theme"]+'`')
 
 	#==CHECK-url==
-	ret=urllib.parse.urlparse(args.url)
+	ret=urllib.parse.urlparse(args["url"])
+	if not ret.hostname:
+		raise_error("invalid argument 'url'")
 	base_url="https://"+ret.hostname+"/"
 	if re.match(r'.*syosetu.com',ret.hostname):
 		site="narou"
@@ -58,20 +58,19 @@ def main():
 		site="kakuyomu"
 		ncode=re.match(r'/works/([0-9]+)',ret.path).group(1)
 	else:
-		print("That url is not supported")
-		sys.exit()
-	if args.axel:
+		raise_error("url is not supported")
+	if args["axel"]:
 		delay=0
 	else:
 		delay=1
 
 	#==SETUP-themes==
-	if args.theme=="auto":
+	if args["theme"]=="auto":
 		if site=="narou":
-			args.theme="narou"
+			args["theme"]="narou"
 		elif site=="kakuyomu":
-			args.theme="kakuyomu"
-	THEME_DIR=CONFIG_DIR+"themes/"+args.theme+"/"
+			args["theme"]="kakuyomu"
+	THEME_DIR=CONFIG_DIR+"themes/"+args["theme"]+"/"
 	config_ini = configparser.ConfigParser()
 	static_files=[THEME_DIR+"static/"+i for i in os.listdir(THEME_DIR+"static/")]
 	if not config_ini.read(THEME_DIR+"config.ini", encoding='utf-8') and not 'Main' in config_ini.sections():
@@ -80,11 +79,11 @@ def main():
 	MEDIAS=[""]
 	if conf.get('medias'):
 		MEDIAS=eval(conf['medias'])
-	if not args.media in MEDIAS:
+	if not args["media"] in MEDIAS:
 		MEDIAS.remove('')
-		raise_error('Invalid media type\nAvailable medias in this theme: ('+' '.join(MEDIAS)+')')
-	if args.media:
-		htmls={"base":"base_"+args.media+".html","index":"index_"+args.media+".html","single":"single_"+args.media+".html"}
+		raise_error('invalid media type\nAvailable medias in this theme: ('+' '.join(MEDIAS)+')')
+	if args["media"]:
+		htmls={"base":"base_"+args["media"]+".html","index":"index_"+args["media"]+".html","single":"single_"+args["media"]+".html"}
 	else:
 		htmls={"base":"base.html","index":"index.html","single":"single.html"}
 
@@ -98,11 +97,10 @@ def main():
 			elif os.path.isfile(parent_dir+htmls[file]):
 				htmls[file]=penv.get_template(htmls[file])
 			else:
-				raise_error("Cannot load theme file: "+htmls[file])
+				raise_error("cannot load theme file: "+htmls[file])
 		static_files=static_files+[parent_dir+"/static/"+i for i in os.listdir(parent_dir+"/static")]
 	else:
 		htmls={i:env.get_template(htmls[i]) for i in htmls}
-
 
 	#==GET-index_data==
 	if site=="narou":
@@ -115,7 +113,7 @@ def main():
 			num_parts=len(raws)
 		else:
 			num_parts=1
-			if not args.dir:
+			if not args["dir"]:
 				ndir=""
 		title=top_data.select_one("title").text
 
@@ -128,25 +126,25 @@ def main():
 		num_parts = len(raws)
 		title=top_data.select_one("#workTitle").text
 
-	if args.episode:
-		if not re.match(r'^\d*$',args.episode):
-			raise_error("Incorrect Episode number")
-		elif int(args.episode)>num_parts or int(args.episode)<0:
-			args.episode=""
+	if args["episode"]:
+		if not re.match(r'^\d*$',args["episode"]):
+			raise_error("incorrect episode number `"+args["episode"]+"`")
+		elif int(args["episode"])>num_parts or int(args["episode"])<0:
+			args["episode"]=""
 
 	#==GET-dest_data==
 	#==PREPARE-dest==
 	novels=[]
-	if num_parts==1 or args.episode:
-		if args.dir:
-			ndir=os.path.abspath(args.dir)+"/"
+	if num_parts==1 or args["episode"]:
+		if args["dir"]:
+			ndir=os.path.abspath(args["dir"])+"/"
 			if not os.path.isdir(ndir):
 				os.mkdir(ndir)
 		else:
 			ndir=""
 	else:
-		if args.dir:
-			ndir=os.path.abspath(args.dir)+"/"
+		if args["dir"]:
+			ndir=os.path.abspath(args["dir"])+"/"
 			if not os.path.isdir(ndir):
 				os.mkdir(ndir)
 			else:
@@ -167,7 +165,7 @@ def main():
 						novels.append(base)
 
 	#==PROCESS-GEN-single_html==
-	if num_parts==1 or args.short:
+	if num_parts==1 or args["short"]:
 		with tqdm(total=1) as pbar:
 			pbar.set_description("Downloading ")
 			style={}
@@ -182,8 +180,8 @@ def main():
 						script[os.path.basename(base)]=f.read()
 
 			if site=="narou":
-				if args.short:
-					url=base_url+ncode+"/"+args.episode
+				if args["short"]:
+					url=base_url+ncode+"/"+args["episode"]
 					data=get_data(url)
 					soup=bs4(data,"html.parser")
 					body=soup.select_one("#novel_honbun")
@@ -196,11 +194,11 @@ def main():
 				body=[str(i) for i in l]
 
 			elif site=="kakuyomu":
-				if args.short:
+				if args["short"]:
 					try:
-						url=base_url+raws[int(args.episode)].a['href'].replace("/","",1)
+						url=base_url+raws[int(args["episode"])].a['href'].replace("/","",1)
 					except IndexError:
-						raise_error("Incorrect episode number")
+						raise_error("incorrect episode number `"+args["episode"]+"`")
 				else:
 					url=base_url+raws[0].find('a')['href'].replace("/","",1)
 				res = get_data(url=url)
@@ -211,15 +209,14 @@ def main():
 				[i.p.unwrap() for i in l]
 				body=[str(i) for i in l]
 
-			if args.short:
+			if args["short"]:
 				title=subtitle
 			contents=htmls['single'].render(title=title,contents=body,style=style,script=script,lines=len(body),site=site,url=url)
 			with open(ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ",""), "w", encoding="utf-8") as f:
 				f.write(contents)
 			pbar.update()
 		print("total 1 part successfully downloaded")
-		sys.exit()
-
+		return
 	#==GEN-index_data==
 	index=[]
 	epis=[]
@@ -254,7 +251,7 @@ def main():
 			desc.span.unwrap()
 		desc="".join([str(i) for i in desc.contents])
 
-	if not args.episode:
+	if not args["episode"]:
 		contents=htmls['index'].render(title=title,desc=desc,index=index,total=num_parts,site=site,url=index_url)
 		with open(ndir+"index.html","w",encoding="utf-8") as f:
 				f.write(contents)
@@ -272,16 +269,16 @@ def main():
 
 
 	total=num_parts
-	if args.episode:
+	if args["episode"]:
 		num_parts=1
 	#==GEN-episodes==
 	with tqdm(total=num_parts) as pbar:
 		pbar.set_description("Downloading ")
 		for part in range(1, num_parts+1):
-			if args.episode:
-				part=int(args.episode)
+			if args["episode"]:
+				part=int(args["episode"])
 
-			if str(part) in novels and not args.renew:
+			if str(part) in novels and not args["renew"]:
 				pbar.set_description("Skipped     ")
 				pbar.update()
 				continue
@@ -312,5 +309,25 @@ def main():
 			pbar.update()
 	print("total {:d} part successfully downloaded".format(num_parts))
 
+
+def command_line():
+	parser=argparse.ArgumentParser()
+	parser.add_argument('url',help="URL")
+	parser.add_argument('-d',"--dir",default="",help="set output directory")
+	parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
+	parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
+	parser.add_argument('-e',"--episode",default="",help="set download episode")
+	parser.add_argument('-s',"--short",action='store_true',help="generate novel like short story (with -e option)")
+	parser.add_argument('-t',"--theme",default="auto",help="set novel's theme")
+	parser.add_argument('-m',"--media",default="",help="generate html only one media type")
+	args=parser.parse_args()
+	try:
+		main(args.__dict__)
+	except NovelDLException as e:
+		e.console_message()
+
+def init_vars():
+	return {"url": "","dir": "","renew": False,"axel": False,"episode": "","short": False,"theme": "auto","media": ""}
+
 if __name__=="__main__":
-	main()
+	command_line()

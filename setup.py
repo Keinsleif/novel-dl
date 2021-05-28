@@ -39,7 +39,7 @@ setup(
 	install_requires=REQUIRES,
 	entry_points="""
 		[console_scripts]
-		{app}={pkg}.main:main
+		{app}={pkg}.main:command_line
 	""".format(app=PACKAGE_NAME.replace("_","-"),pkg=PACKAGE_NAME),
 
 	classifiers=[
