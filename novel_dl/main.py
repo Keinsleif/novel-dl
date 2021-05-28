@@ -20,13 +20,6 @@ class NovelDLException(Exception):
 
 def raise_error(e,exit=True):
 	raise NovelDLException(e)
-	#print("novel-dl: "+e,file=sys.stderr)
-	#if exit:
-	#	if __name__=="__main__":
-	#		sys.exit(1)
-	#	else:
-	#		return -1
-
 
 def get_data(url):
 	headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
@@ -39,7 +32,12 @@ def get_data(url):
 	return data.content
 
 
-def main(args):
+def main(args,bar=False):
+	if bar:
+		bar_output=None
+	else:
+		bar_output=open(os.devnull,"w")
+
 	#==CHECK-args==
 	if args["short"] and not args["episode"]:
 		raise_error("invalid option -- 's'\nThe -s,--short argument requires -e,--episode")
@@ -166,7 +164,7 @@ def main(args):
 
 	#==PROCESS-GEN-single_html==
 	if num_parts==1 or args["short"]:
-		with tqdm(total=1) as pbar:
+		with tqdm(total=1,file=bar_output) as pbar:
 			pbar.set_description("Downloading ")
 			style={}
 			script={}
@@ -215,7 +213,8 @@ def main(args):
 			with open(ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ",""), "w", encoding="utf-8") as f:
 				f.write(contents)
 			pbar.update()
-		print("total 1 part successfully downloaded")
+		if bar:
+			print("total 1 part successfully downloaded")
 		return
 	#==GEN-index_data==
 	index=[]
@@ -272,7 +271,7 @@ def main(args):
 	if args["episode"]:
 		num_parts=1
 	#==GEN-episodes==
-	with tqdm(total=num_parts) as pbar:
+	with tqdm(total=num_parts,file=bar_output) as pbar:
 		pbar.set_description("Downloading ")
 		for part in range(1, num_parts+1):
 			if args["episode"]:
@@ -307,7 +306,8 @@ def main(args):
 					f.write(contents)
 			time.sleep(delay)
 			pbar.update()
-	print("total {:d} part successfully downloaded".format(num_parts))
+	if bar:
+		print("total {:d} part successfully downloaded".format(num_parts))
 
 
 def command_line():
@@ -320,14 +320,17 @@ def command_line():
 	parser.add_argument('-s',"--short",action='store_true',help="generate novel like short story (with -e option)")
 	parser.add_argument('-t',"--theme",default="auto",help="set novel's theme")
 	parser.add_argument('-m',"--media",default="",help="generate html only one media type")
+	parser.add_argument('-q',"--quiet",action='store_false',help="suppress non-messages")
 	args=parser.parse_args()
+	args=args.__dict__
+	bar=args.pop("quiet")
 	try:
-		main(args.__dict__)
+		main(args,bar=bar)
 	except NovelDLException as e:
 		e.console_message()
 
-def init_vars():
-	return {"url": "","dir": "","renew": False,"axel": False,"episode": "","short": False,"theme": "auto","media": ""}
+def args(url="",save_dir="",renew=False,axel=False,episode="",short=False,theme="auto",media=""):
+	return {"url": url,"dir": save_dir,"renew": renew,"axel": axel,"episode": episode,"short": short,"theme": theme,"media": media}
 
 if __name__=="__main__":
 	command_line()
