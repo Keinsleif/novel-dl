@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import time,re,sys,os,shutil,argparse,configparser,urllib.parse
 from datetime import datetime as dtime
