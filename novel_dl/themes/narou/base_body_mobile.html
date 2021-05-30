@@ -10,15 +10,17 @@
 <div class="novel_bn">
 <div class="link_prev">
 {%- if part!=1 %}
-<a rel="prev" href="{{part-1}}.html">&lt;&lt;&nbsp;前へ&nbsp;</a></div>
+<a rel="prev" href="{{part-1}}.html">&lt;&lt;&nbsp;前へ&nbsp;</a>
 {%- endif %}
+</div>
 <div class="link_back">
 <a href="index.html">目次</a>
 </div>
 <div class="link_next">
 {%- if part!=total %}
-<a rel="next" href="{{part+1}}.html">&nbsp;次へ&nbsp;&gt;&gt;</a></div>
+<a rel="next" href="{{part+1}}.html">&nbsp;次へ&nbsp;&gt;&gt;</a>
 {%- endif %}
+</div>
 </div><!-- novel_bn -->
 
 <div id="novel_no">{{part}}/{{total}}</div>
@@ -31,18 +33,19 @@
 {%- endfor %}
 </div>
 
-</div><!--novel_color-->
-
 <div class="novel_bn footer">
 <div class="link_prev">
-<a rel="prev" href="{{part-1}}.html">&lt;&lt;&nbsp;前へ&nbsp;</a></div>
-
+{%- if part!=1 %}
+<a rel="prev" href="{{part-1}}.html">&lt;&lt;&nbsp;前へ&nbsp;</a>
+{%- endif %}
+</div>
 <div class="link_back">
 <a href="index.html">目次</a>
 </div>
-
 <div class="link_next">
+{%- if part!=total %}
 <a rel="next" href="{{part+1}}.html">&nbsp;次へ&nbsp;&gt;&gt;</a>
+{%- endif %}
 </div>
 </div><!-- novel_bn -->
 
@@ -65,3 +68,4 @@
 </div><!--footernavi-->
 </div><!--footer-->
 <!-- フッタここまで -->
+</div>

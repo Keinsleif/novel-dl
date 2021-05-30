@@ -11,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 
 #==DEFINE-variable==
 CONFIG_DIR=os.path.abspath(os.path.dirname(__file__))+"/"
-THEMES=os.listdir(CONFIG_DIR+"themes/")+["auto"]
+THEMES=["auto"]+os.listdir(CONFIG_DIR+"themes/")
 
 
 class NovelDLException(Exception):
@@ -91,9 +91,9 @@ def main(args,bar=False):
 		parent_dir=CONFIG_DIR+"themes/"+conf['parent']
 		penv=Environment(loader=FileSystemLoader(parent_dir,encoding='utf8'))
 		for file in htmls:
-			if os.path.isfile(THEME_DIR+htmls[file]):
+			if os.path.isfile(os.path.join(THEME_DIR,htmls[file])):
 				htmls[file]=env.get_template(htmls[file])
-			elif os.path.isfile(parent_dir+htmls[file]):
+			elif os.path.isfile(os.path.join(parent_dir,htmls[file])):
 				htmls[file]=penv.get_template(htmls[file])
 			else:
 				raise_error("cannot load theme file: "+htmls[file])
@@ -134,18 +134,20 @@ def main(args,bar=False):
 	#==GET-dest_data==
 	#==PREPARE-dest==
 	novels=[]
+	if args["dir"]:
+		args["dir"]=args["dir"].format(ncode=ncode)
 	if num_parts==1 or args["episode"]:
 		if args["dir"]:
 			ndir=os.path.abspath(args["dir"])+"/"
 			if not os.path.isdir(ndir):
-				os.mkdir(ndir)
+				os.makedirs(ndir)
 		else:
 			ndir=""
 	else:
 		if args["dir"]:
 			ndir=os.path.abspath(args["dir"])+"/"
 			if not os.path.isdir(ndir):
-				os.mkdir(ndir)
+				os.makedirs(ndir)
 			else:
 				files=os.listdir(ndir)
 				for file in files:
@@ -155,7 +157,7 @@ def main(args,bar=False):
 		else:
 			ndir=os.getcwd()+"/"+ncode+"/"
 			if not os.path.isdir(ndir):
-				os.mkdir(ndir)
+				os.makedirs(ndir)
 			else:
 				files=os.listdir(ndir)
 				for file in files:
@@ -211,12 +213,14 @@ def main(args,bar=False):
 			if args["short"]:
 				title=subtitle
 			contents=htmls['single'].render(title=title,contents=body,style=style,script=script,lines=len(body),site=site,url=url)
-			with open(ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ",""), "w", encoding="utf-8") as f:
+			file_name=ndir+re.sub(r'[\\/:*?"<>|]+','',title+".html").replace(" ","")
+			with open(file_name, "w", encoding="utf-8") as f:
 				f.write(contents)
 			pbar.update()
 		if bar:
 			print("total 1 part successfully downloaded")
-		return
+		return (1,file_name,ncode)
+
 	#==GEN-index_data==
 	index=[]
 	epis=[]
@@ -309,6 +313,10 @@ def main(args,bar=False):
 			pbar.update()
 	if bar:
 		print("total {:d} part successfully downloaded".format(num_parts))
+	if args["episode"]:
+		return (1,ndir+str(part)+".html",ncode)
+	else:
+		return (0,ndir,ncode)
 
 
 def command_line():
