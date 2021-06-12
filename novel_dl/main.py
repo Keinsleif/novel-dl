@@ -30,11 +30,11 @@ def get_data(url):
 	try:
 		data=requests.get(url=url,headers=headers,cookies=cookie)
 	except:
-		raise_error("network error")
+		raise_error("Network Error")
 	if int(data.status_code/100)==5:
-		raise_error("network error (5xx)")
+		raise_error("Network Error (5xx)")
 	elif int(data.status_code/100)==4:
-		raise_error("novel not found (4xx)")
+		raise_error("Novel not found (4xx)")
 	return data.content
 
 
@@ -48,12 +48,12 @@ def main(args,bar=False):
 	if args["short"] and not args["episode"]:
 		raise_error("invalid option -- 's'\nThe -s,--short argument requires -e,--episode")
 	if not args["theme"] in THEMES:
-		raise_error('invalid theme name `'+args["theme"]+'`')
+		raise_error('Invalid theme name `'+args["theme"]+'`')
 
 	#==CHECK-url==
 	ret=urllib.parse.urlparse(args["url"])
 	if not ret.hostname:
-		raise_error("invalid argument 'url'")
+		raise_error("Invalid argument 'url'")
 	base_url="https://"+ret.hostname+"/"
 	if re.match(r'.*syosetu.com',ret.hostname):
 		site="narou"
@@ -62,7 +62,7 @@ def main(args,bar=False):
 		site="kakuyomu"
 		ncode=re.match(r'/works/([0-9]+)',ret.path).group(1)
 	else:
-		raise_error("url is not supported")
+		raise_error("URL is not supported")
 	if args["axel"]:
 		delay=0
 	else:
@@ -85,7 +85,7 @@ def main(args,bar=False):
 		MEDIAS=eval(conf['medias'])
 	if not args["media"] in MEDIAS:
 		MEDIAS.remove('')
-		raise_error('invalid media type\nAvailable medias in this theme: ('+' '.join(MEDIAS)+')')
+		raise_error('Invalid media type\nAvailable medias in this theme: ('+' '.join(MEDIAS)+')')
 	if args["media"]:
 		htmls={"base":"base_"+args["media"]+".html","index":"index_"+args["media"]+".html","single":"single_"+args["media"]+".html"}
 	else:
@@ -101,7 +101,7 @@ def main(args,bar=False):
 			elif os.path.isfile(os.path.join(parent_dir,htmls[file])):
 				htmls[file]=penv.get_template(htmls[file])
 			else:
-				raise_error("cannot load theme file: "+htmls[file])
+				raise_error("Cannot load theme file: "+htmls[file])
 		static_files=static_files+[parent_dir+"/static/"+i for i in os.listdir(parent_dir+"/static")]
 	else:
 		htmls={i:env.get_template(htmls[i]) for i in htmls}
@@ -132,7 +132,7 @@ def main(args,bar=False):
 
 	if args["episode"]:
 		if not re.match(r'^\d*$',args["episode"]):
-			raise_error("incorrect episode number `"+args["episode"]+"`")
+			raise_error("Incorrect episode number `"+args["episode"]+"`")
 		elif int(args["episode"])>num_parts or int(args["episode"])<0:
 			args["episode"]=""
 
@@ -204,7 +204,7 @@ def main(args,bar=False):
 					try:
 						url=base_url+raws[int(args["episode"])].a['href'].replace("/","",1)
 					except IndexError:
-						raise_error("incorrect episode number `"+args["episode"]+"`")
+						raise_error("Incorrect episode number `"+args["episode"]+"`")
 				else:
 					url=base_url+raws[0].find('a')['href'].replace("/","",1)
 				res = get_data(url=url)
