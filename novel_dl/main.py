@@ -18,6 +18,8 @@ class NovelDLException(Exception):
 	def console_message(self):
 		print("novel-dl: ",end="",file=sys.stderr)
 		print(*self.args,file=sys.stderr)
+	def return_message(self):
+		return "novel-dl: "+self.args[0]
 
 def raise_error(e,exit=True):
 	raise NovelDLException(e)
@@ -25,11 +27,14 @@ def raise_error(e,exit=True):
 def get_data(url):
 	headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
 	cookie={'over18': 'yes'}
-	data=requests.get(url=url,headers=headers,cookies=cookie)
+	try:
+		data=requests.get(url=url,headers=headers,cookies=cookie)
+	except:
+		raise_error("network error")
 	if int(data.status_code/100)==5:
 		raise_error("network error (5xx)")
 	elif int(data.status_code/100)==4:
-		raise_error("novel not found")
+		raise_error("novel not found (4xx)")
 	return data.content
 
 
