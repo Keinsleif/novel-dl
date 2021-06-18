@@ -40,7 +40,7 @@ def get_data(url):
 
 def main(args,bar=False):
 	if bar:
-		bar_output=None
+		bar_output=sys.stdout
 	else:
 		bar_output=open(os.devnull,"w")
 
