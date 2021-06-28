@@ -2,6 +2,9 @@
 <div id="main"></div>
 <div class="contents1">
 <a href="index.html" class="margin_r20">{{title}}</a>
+{%- if epis[0]['chap'] %}
+<p class="chapter_title">{{epis[part-1]['chap']}}</p>
+{%- endif %}
 </div><!--contents1-->
 
 <div id="novel_contents">

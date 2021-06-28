@@ -25,7 +25,12 @@
 
 <div id="novel_no">{{part}}/{{total}}</div>
 
-<div class="novel_subtitle">{{subtitle}}</div>
+<div class="novel_subtitle">
+{%- if epis[0]['chap'] %}
+<div class="chapter_title">{{epis[part-1]['chap']}}</div>
+{%- endif %}
+{{subtitle}}
+</div>
 
 <div id="novel_honbun" class="novel_view">
 {%- for i in range(0,lines) %}

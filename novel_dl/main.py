@@ -17,12 +17,13 @@ THEMES=["auto"]+os.listdir(CONFIG_DIR+"themes/")
 class NovelDLException(Exception):
 	def console_message(self):
 		print("novel-dl: ",end="",file=sys.stderr)
-		print(*self.args,file=sys.stderr)
+		print(self.args[0],file=sys.stderr)
 	def return_message(self):
 		return "novel-dl: "+self.args[0]
 
-def raise_error(e,exit=True):
-	raise NovelDLException(e)
+
+def raise_error(msg):
+	raise NovelDLException(msg)
 
 def get_data(url):
 	headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
@@ -46,7 +47,7 @@ def main(args,bar=False):
 
 	#==CHECK-args==
 	if args["short"] and not args["episode"]:
-		raise_error("invalid option -- 's'\nThe -s,--short argument requires -e,--episode")
+		raise_error("Invalid option -- 's'\nThe -s,--short argument requires -e,--episode")
 	if not args["theme"] in THEMES:
 		raise_error('Invalid theme name `'+args["theme"]+'`')
 
