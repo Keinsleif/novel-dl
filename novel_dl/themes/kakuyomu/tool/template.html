@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<body id="page-works-episodes-episode" class="wrapper-naked isPC writingDirection-horizontal fontSize-small fontSize-medium fontSize-large fontSize-xLarge colorTheme-white colorTheme-black colorTheme-kinari colorTheme-blue fontFamily-sans fontFamily-serif writingDirection-vertical">
+<body id="page-works-episodes-episode" class="wrapper-naked isPC isTouch writingDirection-horizontal fontSize-small fontSize-medium fontSize-large fontSize-xLarge colorTheme-white colorTheme-black colorTheme-kinari colorTheme-blue fontFamily-sans fontFamily-serif writingDirection-vertical">
 <div id="content" class="contentAside-isHidden contentAside-isShown js-viewer-sidebar-container js-viewer-read-counter">
 <header id="worksEpisodesEpisodeHeader" class="js-viewer-globalheader isShown">
 <div id="worksEpisodesEpisodeHeader-inner">
@@ -63,20 +63,14 @@ aria-label="目次">
 <div class="widget-episode js-episode-body-container">
 <div class="widget-episode-inner">
 <div class="widget-episodeBody js-episode-body">
-{%- for i in range(0,lines) %}
-{%- if contents[i]=="<br />" %}
-<p id="p{{ i+1 }}" class="blank"><br /></p>
-{%- else %}
-<p id="p{{ i+1 }}">{{ contents[i] }}</p>
-{%- endif %}
-{%- endfor %}
+<p id="p1" class="blank"><br /></p>
+<p id="p2">{{ contents[i] }}</p>
 </div>
 </div>
 </div>
 <div id="episodeFooter">
-	{%- if part!=total %}
 <div id="contentMain-nextEpisode">
-<a href="{{part+1}}.html" id="contentMain-readNextEpisode" data-link-click-action-name="WorksEpisodesEpisodeFooterNextEpisode" class="js-read-next-episode">
+<a href="2.html" id="contentMain-readNextEpisode" data-link-click-action-name="WorksEpisodesEpisodeFooterNextEpisode" class="js-read-next-episode">
 <span class="contentMain-nextEpisode-inner">
 <span class="contentMain-pagerRelation">次のエピソード</span>
 <span class="contentMain-pagerEpisodeTitle js-vertical-composition-item"><span>{{epis[part]['title']}}</span></span>
@@ -84,9 +78,7 @@ aria-label="目次">
 </span>
 </a>
 </div>
-	
 </div>
-	{%- endif %}
 <div id="end"></div>
 </div>
 <aside id="contentAside" class="js-viewer-sidebar-panel">
@@ -108,20 +100,15 @@ aria-label="目次">
 </header>
 <div class="widget-toc-main">
 <ol class="widget-toc-items test-toc-items">
-	{%- for i in index %}
-	{%- if i['type']==1 %}
 <li class="widget-toc-chapter widget-toc-level1 js-vertical-composition-item" data-vertical-composition-done="true">
 <span>{{ i['text'] }}</span>
 </li>
-	{%- elif i['type']==2 %}
 <li class="widget-toc-episode">
 <a href="{{i['part']}}.html" class="widget-toc-episode-episodeTitle">
 <span class="widget-toc-episode-titleLabel js-vertical-composition-item" data-vertical-composition-done="true">{{ i['text'] }}</span>
 <time class="widget-toc-episode-datePublished" datetime="i['time'].strftime('%Y-%m-%dT%H:%M:%S+09:00')">{{i['time'].strftime('%Y年%m月%d日 %H:%M')}}</time>
 </a>
 </li>
-	{%- endif %}
-	{%- endfor %}
 </ol>
 </div>
 </section>

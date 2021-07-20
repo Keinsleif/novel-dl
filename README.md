@@ -1,5 +1,5 @@
 # novel-dl
-This tool enables you to download novels from "syosetu.com" or "kakuyomu.jp" and read them even if you are offline.
+This tool enables you to download novels from "syosetu.com" or "kakuyomu.jp" and read them even if you are offline.  
 このツールは「小説家になろう」や「カクヨム」から小説をダウンロードし、オフラインでも読むことを可能にするものです。
 
 # Description (概要)

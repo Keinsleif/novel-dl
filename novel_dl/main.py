@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import time,re,sys,os,shutil,argparse,configparser,urllib.parse
+import time, re, sys, os, shutil, argparse, json, urllib.parse
 from datetime import datetime as dtime
 from pytz import timezone
 import requests
@@ -55,7 +55,7 @@ def main(args,bar=False):
 	ret=urllib.parse.urlparse(args["url"])
 	if not ret.hostname:
 		raise_error("Invalid argument 'url'")
-	base_url="https://"+ret.hostname+"/"
+	base_url="https://{}/".format(ret.hostname)
 	if re.match(r'.*syosetu.com',ret.hostname):
 		site="narou"
 		ncode=re.match(r'/(n[0-9a-zA-Z]+)',ret.path).group(1)
@@ -71,30 +71,28 @@ def main(args,bar=False):
 
 	#==SETUP-themes==
 	if args["theme"]=="auto":
-		if site=="narou":
-			args["theme"]="narou"
-		elif site=="kakuyomu":
-			args["theme"]="kakuyomu"
+		args["theme"]=site
 	THEME_DIR=CONFIG_DIR+"themes/"+args["theme"]+"/"
-	config_ini = configparser.ConfigParser()
+	conf_file=os.path.join(THEME_DIR,"config.json")
+	conf = {}
+	if os.path.isfile(conf_file):
+		with open(conf_file,"r") as f:
+			conf = json.load(f)
 	static_files=[THEME_DIR+"static/"+i for i in os.listdir(THEME_DIR+"static/")]
-	if not config_ini.read(THEME_DIR+"config.ini", encoding='utf-8') and not 'Main' in config_ini.sections():
-		config_ini={"Main": {}}
-	conf=dict(config_ini.items("Main"))
 	MEDIAS=[""]
-	if conf.get('medias'):
-		MEDIAS=eval(conf['medias'])
+	if conf.get("medias"):
+		MEDIAS=conf["medias"]
 	if not args["media"] in MEDIAS:
-		MEDIAS.remove('')
-		raise_error('Invalid media type\nAvailable medias in this theme: ('+' '.join(MEDIAS)+')')
+		MEDIAS.remove("")
+		raise_error("Invalid media type\nAvailable medias in this theme: ({})".format(" ".join(MEDIAS)))
 	if args["media"]:
-		htmls={"base":"base_"+args["media"]+".html","index":"index_"+args["media"]+".html","single":"single_"+args["media"]+".html"}
+		htmls={"base":"base_{}.html".format(args["media"]),"index":"index_{}.html".format(args["media"]),"single":"single_{}.html".format(args["media"])}
 	else:
 		htmls={"base":"base.html","index":"index.html","single":"single.html"}
 
 	env=Environment(loader=FileSystemLoader(THEME_DIR,encoding='utf8'))
 	if conf.get('parent'):
-		parent_dir=CONFIG_DIR+"themes/"+conf['parent']
+		parent_dir=os.path.join(CONFIG_DIR,"themes",conf['parent'])
 		penv=Environment(loader=FileSystemLoader(parent_dir,encoding='utf8'))
 		for file in htmls:
 			if os.path.isfile(os.path.join(THEME_DIR,htmls[file])):
@@ -103,7 +101,7 @@ def main(args,bar=False):
 				htmls[file]=penv.get_template(htmls[file])
 			else:
 				raise_error("Cannot load theme file: "+htmls[file])
-		static_files=static_files+[parent_dir+"/static/"+i for i in os.listdir(parent_dir+"/static")]
+		static_files=static_files+[os.path.join(parent_dir,"static",i) for i in os.listdir(os.path.join(parent_dir,"static"))]
 	else:
 		htmls={i:env.get_template(htmls[i]) for i in htmls}
 
@@ -135,13 +133,12 @@ def main(args,bar=False):
 		if not re.match(r'^\d*$',args["episode"]):
 			raise_error("Incorrect episode number `"+args["episode"]+"`")
 		elif int(args["episode"])>num_parts or int(args["episode"])<0:
-			args["episode"]=""
+			args["episode"] = ""
 
-	#==GET-dest_data==
 	#==PREPARE-dest==
 	novels=[]
 	if args["dir"]:
-		args["dir"]=args["dir"].format(ncode=ncode)
+		args["dir"]=args["dir"].format(ncode=ncode,title=re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', title))
 	if num_parts==1 or args["episode"]:
 		if args["dir"]:
 			ndir=os.path.abspath(args["dir"])+"/"
@@ -294,7 +291,7 @@ def main(args,bar=False):
 				continue
 
 			if site=="narou":
-				url=base_url+ncode+"/{:d}/".format(part)
+				url=base_url+"{0}/{1:d}/".format(ncode,part)
 				res = get_data(url)
 				soup = bs4(res,"html.parser")
 				subtitle=soup.select_one(".novel_subtitle").text
@@ -334,7 +331,7 @@ def command_line():
 	parser.add_argument('-e',"--episode",default="",help="set download episode")
 	parser.add_argument('-s',"--short",action='store_true',help="generate novel like short story (with -e option)")
 	parser.add_argument('-t',"--theme",default="auto",help="set novel's theme")
-	parser.add_argument('-m',"--media",default="",help="generate html only one media type")
+	parser.add_argument('-m',"--media",default="",help="generate html supporting only one media type")
 	parser.add_argument('-q',"--quiet",action='store_false',help="suppress non-messages")
 	args=parser.parse_args()
 	args=args.__dict__
