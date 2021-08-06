@@ -7,7 +7,8 @@ import os
 
 PACKAGE_NAME="novel_dl"
 DESCRIPTION = 'Novel downloader'
-LONG_DESCRIPTION = "Command-line program to download novels from syosetu.com and kakuyomu.jp"
+with open("README.md","r") as f:
+	LONG_DESCRIPTION = f.read()
 
 root=os.path.abspath(os.path.dirname(__file__))
 
@@ -28,6 +29,7 @@ setup(
 
 	description=DESCRIPTION,
 	long_description=LONG_DESCRIPTION,
+	long_description_content_type="text/markdown",
 	url="https://github.com/kazuto28/{pkg}".format(pkg=PACKAGE_NAME),
 	author="Kondo Kazuto",
 	author_email="mountaindull@gmail.com",
