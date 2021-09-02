@@ -9,7 +9,6 @@ from tqdm import tqdm
 from bs4 import BeautifulSoup as bs4
 from jinja2 import Environment, FileSystemLoader
 
-#==DEFINE-variable==
 CONFIG_DIR=os.path.abspath(os.path.dirname(__file__))+"/"
 THEMES=["auto"]+os.listdir(CONFIG_DIR+"themes/")
 
@@ -45,13 +44,12 @@ def main(args,bar=False):
 	else:
 		bar_output=open(os.devnull,"w")
 
-	#==CHECK-args==
+	# Check args
 	if args["short"] and not args["episode"]:
 		raise_error("Invalid option -- 's'\nThe -s,--short argument requires -e,--episode")
 	if not args["theme"] in THEMES:
 		raise_error('Invalid theme name `'+args["theme"]+'`')
 
-	#==CHECK-url==
 	ret=urllib.parse.urlparse(args["url"])
 	if not ret.hostname:
 		raise_error("Invalid argument 'url'")
@@ -69,7 +67,7 @@ def main(args,bar=False):
 	else:
 		delay=1
 
-	#==SETUP-themes==
+	# Load themes
 	if args["theme"]=="auto":
 		args["theme"]=site
 	THEME_DIR=CONFIG_DIR+"themes/"+args["theme"]+"/"
@@ -105,7 +103,7 @@ def main(args,bar=False):
 	else:
 		htmls={i:env.get_template(htmls[i]) for i in htmls}
 
-	#==GET-index_data==
+	# Get index data
 	if site=="narou":
 		index_url=base_url+ncode
 		info_res = get_data(index_url)
@@ -135,7 +133,7 @@ def main(args,bar=False):
 		elif int(args["episode"])>num_parts or int(args["episode"])<0:
 			args["episode"] = ""
 
-	#==PREPARE-dest==
+	# Prepare dest
 	novels=[]
 	if args["dir"]:
 		args["dir"]=args["dir"].format(ncode=ncode,title=re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', title))
@@ -168,7 +166,7 @@ def main(args,bar=False):
 					if ext=='.html':
 						novels.append(base)
 
-	#==PROCESS-GEN-single_html==
+	# Process for single
 	if num_parts==1 or args["short"]:
 		with tqdm(total=1,file=bar_output) as pbar:
 			pbar.set_description("Downloading ")
@@ -224,7 +222,7 @@ def main(args,bar=False):
 			print("total 1 part successfully downloaded")
 		return (1,file_name,ncode)
 
-	#==GEN-index_data==
+	# Generate index.html
 	index=[]
 	epis=[]
 	eles=bs4(str(index_raw).replace("\n",""),"html.parser").contents[0].contents
@@ -263,7 +261,7 @@ def main(args,bar=False):
 		with open(ndir+"index.html","w",encoding="utf-8") as f:
 				f.write(contents)
 
-		#==COPY-statics==
+		# Copy statics
 		if not os.path.islink(ndir+"static"):
 			if os.path.isdir(ndir+"static"):
 				shutil.rmtree(ndir+"static")
@@ -275,10 +273,10 @@ def main(args,bar=False):
 				shutil.copyfile(file,ndir+"static/"+os.path.basename(file))
 
 
+	# Generate episodes
 	total=num_parts
 	if args["episode"]:
 		num_parts=1
-	#==GEN-episodes==
 	with tqdm(total=num_parts,file=bar_output) as pbar:
 		pbar.set_description("Downloading ")
 		for part in range(1, num_parts+1):
