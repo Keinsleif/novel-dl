@@ -4,6 +4,9 @@
 
 <div class="contents1">
 <a href="index.html">{{title}}</a>
+<div class="novel_writername">
+作者：{%- if author[1] %}<a href="{{ author[1] }}">{{ author[0] }}</a>{% else %}{{ author[0] }}{%- endif %}
+</div><!--novel_writername-->
 </div><!--contents1-->
 </div><!--#novel_color-->
 

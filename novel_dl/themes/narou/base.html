@@ -14,16 +14,20 @@
 <link rel="icon" href="static/narou.ico" />
 <link rel="apple-touch-icon-precomposed" href="static/apple-touch-icon-precomposed.png" />
 
-<script src="static/combine.js"></script>
+<link rel="stylesheet" type="text/css" href="static/custom.css" media="screen,print" />
+<link rel="stylesheet" type="text/css" href="static/switch.css" media="all" />
+<link rel="stylesheet" type="text/css" href="static/reset.css" media="screen and (min-width:768px)" />
+<link rel="stylesheet" type="text/css" href="static/kotei.css" media="screen and (min-width:768px)" />
+<link rel="stylesheet" type="text/css" href="static/novel_smpview.css" media="screen and (max-width:767px)" />
 </head>
 
 <body>
 <div id="page_type" style="display: none">base</div>
-<div id="pc">
+<div class="pc">
 {% include "base_body_pc.html" %}
 </div>
 
-<div id="sp" style="display: none">
+<div class="sp">
 {% include "base_body_mobile.html" %}
 </div>
 

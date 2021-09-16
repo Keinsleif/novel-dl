@@ -8,39 +8,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="format-detection" content="telephone=no" />
 <title>{{title}}</title>
-{%- for s in style %}
-<style id="{{s}}">
-{{ style[s] }}
+<style>
+	{{style['custom']}}
+	{{style['switch']}}
 </style>
-{%- endfor %}
-<script>
-	function handleWindowResize(){
-		if (window.matchMedia('(max-width: 767px)').matches){
-			document.getElementById("pc").style.display ="none";
-			document.getElementById("sp").style.display ="block";
-			loadFiles=["novel_smpview"];
-		} else{
-			document.getElementById("pc").style.display ="block";
-			document.getElementById("sp").style.display ="none";
-			loadFiles=["reset","kotei"];
-		}
-		for (var i=0;i<document.styleSheets.length;i++) {
-			var ownerNode = document.styleSheets[i].ownerNode;
-			if (!loadFiles.includes(ownerNode.id) && ownerNode.type=="") {
-				document.styleSheets[i].disabled = true;
-			} else{
-				document.styleSheets[i].disabled = false;
-			}
-		}
-	}
-	window.onload=handleWindowResize
-	window.addEventListener('resize', handleWindowResize)
-</script>
+<style media="screen and (min-width:768px)">
+	{{style['reset']}}
+	{{style['kotei']}}
+</style>
+<style media="screen and (max-width:767px)">
+	{{style['novel_smpview']}}
+</style>
 </head>
 
 <body>
 <div id="page_type" style="display: none">single</div>
-<div id="pc">
+<div class="pc">
 <a id="pageBottom" href="#footer">↓</a>
 <div id="main"></div>
 <div class="contents1">
@@ -48,7 +31,9 @@
 <div id="novel_contents">
 <div id="novel_color">
 <p class="novel_subtitle">{{title}}</p>
-
+<div class="novel_writername">
+作者：{%- if author[1] %}<a href="{{ author[1] }}">{{ author[0] }}</a>{% else %}{{ author[0] }}{%- endif %}
+</div><!--novel_writername-->
 <div id="novel_honbun" class="novel_view">
 {%- for i in range(0,lines) %}
 <p id="L{{ i+1 }}">{{ contents[i] }}</p>
@@ -77,13 +62,15 @@
 </div>
 
 
-<div id="sp">
+<div class="sp">
 <div id="main_window">
 <div id="novel_contents">
 <div id="novel_color">
 
 <div class="novel_title">{{title}}</div><!-- novel_title -->
-
+<div class="novel_writername">
+作者：{%- if author[1] %}<a href="{{ author[1] }}">{{ author[0] }}</a>{% else %}{{ author[0] }}{%- endif %}
+</div><!--novel_writername-->
 <div id="novel_honbun" class="novel_view">
 {%- for i in range(0,lines) %}
 <p id="L{{ i+1 }}">{{ contents[i] }}</p>
@@ -110,5 +97,10 @@
 <!-- フッタここまで -->
 </div>
 </div>
+{%- for s in script %}
+<script id="{{s}}">
+{{ script[s] }}
+</script>
+{%- endfor %}
 </body>
 </html>

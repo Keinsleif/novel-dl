@@ -7,22 +7,11 @@
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
 <meta name="format-detection" content="telephone=no" />
-{%- for s in style %}
-<style id="{{ s }}">
-{{ style[s] }}
+<style>
+	{{style['dark']}}
+	{{style['reset']}}
+	{{style['kotei']}}
 </style>
-{%- endfor %}
-<script>
-	window.onload=function(){
-		for (var i=0;i<document.styleSheets.length;i++) {
-			var ownerNode = document.styleSheets[i].ownerNode;
-			if (!["reset","kotei","dark"].includes(ownerNode.id) && ownerNode.type=="") {
-				document.styleSheets[i].disabled = true;
-			}
-		}
-	}
-
-</script>
 </head>
 
 <body>
@@ -34,7 +23,9 @@
 <div id="novel_contents">
 <div id="novel_color">
 <p class="novel_subtitle">{{title}}</p>
-
+<div class="novel_writername">
+作者：{%- if author[1] %}<a href="{{ author[1] }}">{{ author[0] }}</a>{% else %}{{ author[0] }}{%- endif %}
+</div><!--novel_writername-->
 <div id="novel_honbun" class="novel_view">
 {%- for i in range(0,lines) %}
 <p id="L{{ i+1 }}">{{ contents[i] }}</p>
@@ -60,5 +51,10 @@
 </ul>
 </div><!--footer-->
 <!-- フッタここまで -->
+{%- for s in script %}
+<script id="{{s}}">
+{{ script[s] }}
+</script>
+{%- endfor %}
 </body>
 </html>

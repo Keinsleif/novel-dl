@@ -88,7 +88,7 @@
         <div id="contentMain-header-cover">
             <p id="contentMain-header-workTitle" class="js-vertical-composition-item">{{title}}</p>
         </div>
-{%- if index[0]['type']==1 %}
+{%- if index[0]['type']=="chapter" %}
         <p class="chapterTitle level1 js-vertical-composition-item"><span>{{index[0]['text']}}</span></p>
 {%- endif %}
 {%- else %}
@@ -164,11 +164,11 @@
   <div class="widget-toc-main">
     <ol class="widget-toc-items test-toc-items">
 {%- for i in index %}
-{%- if i['type']==1 %}
+{%- if i['type']=="chapter" %}
           <li class="widget-toc-chapter widget-toc-level1 js-vertical-composition-item" data-vertical-composition-done="true">
             <span>{{ i['text'] }}</span>
           </li>
-{%- elif i['type']==2 %}
+{%- elif i['type']=="episode" %}
           <li class="widget-toc-episode">
             <a href="{{i['part']}}.html" class="widget-toc-episode-episodeTitle">
               <span class="widget-toc-episode-titleLabel js-vertical-composition-item" data-vertical-composition-done="true">{{ i['text'] }}</span>

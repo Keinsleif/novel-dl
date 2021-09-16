@@ -2,6 +2,9 @@
 <div id="main"></div>
 <div class="contents1">
 <a href="index.html" class="margin_r20">{{title}}</a>
+<div class="novel_writername">
+作者：{%- if author[1] %}<a href="{{ author[1] }}">{{ author[0] }}</a>{% else %}{{ author[0] }}{%- endif %}
+</div><!--novel_writername-->
 {%- if epis[0]['chap'] %}
 <p class="chapter_title">{{epis[part-1]['chap']}}</p>
 {%- endif %}

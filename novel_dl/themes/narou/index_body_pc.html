@@ -4,14 +4,17 @@
 <div id="novel_color">
 <br>
 <p class="novel_title">{{title}}</p>
+<div class="novel_writername">
+作者：{%- if author[1] %}<a href="{{ author[1] }}">{{ author[0] }}</a>{% else %}{{ author[0] }}{%- endif %}
+</div><!--novel_writername-->
 <div id="novel_ex">
 {{desc|safe}}
 </div>
 <div class="index_box">
 {%- for dex in index %}
-{%- if dex['type']==1 %}
+{%- if dex['type']=="chapter" %}
  <div class="chapter_title">{{dex['text']}}</div>
-{%- elif dex['type']==2 %}
+{%- elif dex['type']=="episode" %}
 <dl class="novel_sublist2">
 <dd class="subtitle">
 <a href="{{dex['part']}}.html">{{dex['text']}}</a>
