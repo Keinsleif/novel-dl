@@ -229,6 +229,8 @@ class KakuyomuND(NovelDownloader):
         raws=index_raw.select("li.widget-toc-episode")
         self.info["num_parts"] = len(raws)
         self.info["type"] = "serial"
+        author_data = top_data.select_one("#workAuthor-activityName")
+        self.info["author"] = [author_data.a.text,self.baseurl+author_data.a.attrs["href"]]
         self.info["title"] = top_data.select_one("#workTitle").text
         eles = bs4(str(index_raw).replace("\n",""),"html.parser").contents[0].contents
         c = ""

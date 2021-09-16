@@ -87,6 +87,7 @@
       <header id="contentMain-header">
         <div id="contentMain-header-cover">
             <p id="contentMain-header-workTitle" class="js-vertical-composition-item">{{title}}</p>
+            <p id="contentMain-header-author">{{author[0]}}</p>
         </div>
 {%- if index[0]['type']=="chapter" %}
         <p class="chapterTitle level1 js-vertical-composition-item"><span>{{index[0]['text']}}</span></p>
@@ -143,6 +144,7 @@
 <section id="contentAside-episodeInfo">
   <header class="contentAside-sectionHeader js-chrome-visibility-fix">
     <h3 class="heading-level4 js-vertical-composition-item"><a href="index.html">{{title}}</a></h3>
+    <h4 class="heading-level5"><a href="{{author[1]}}">{{author[0]}}</a></h4>
   </header>
 
 
