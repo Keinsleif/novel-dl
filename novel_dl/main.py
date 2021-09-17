@@ -58,14 +58,25 @@ def main(args,bar=None):
             ndir=os.getcwd()+"/"+nd.ncode+"/"
             if not os.path.isdir(ndir):
                 os.makedirs(ndir)
-    if os.path.isfile(ndir+"static/db.pickle"):
-        with open(ndir+"static/db.pickle","rb") as f:
-            db_data = pickle.load(f)
-        nd.mark_all("skip")
-        for data in db_data["epis"]:
-            nd.mark_part("unskip",data)
+        if os.path.isfile(ndir+"static/db.pickle"):
+            with open(ndir+"static/db.pickle","rb") as f:
+                db_data = pickle.load(f)
+            nd.mark_all("skip")
+            if nd.info["num_parts"] > max(db_data["epis"]):
+                nd.mark_part("unskip",max(db_data["epis"]))
+            for i in nd.info["epis"].keys():
+                if not i in db_data["epis"]:
+                    nd.mark_part("unskip",i)
+                elif nd.info["epis"][i]["time"]>db_data["epis"][i]:
+                    nd.mark_part("unskip",i)
 
-    nd.extract_novels()
+    try:
+        nd.extract_novels()
+    except NovelDLException as e:
+        if e.return_id() == 1:
+            pass
+        else:
+            raise e
 
 	# Load themes
     if args["theme"]=="auto":
@@ -140,7 +151,7 @@ def main(args,bar=None):
             pickle.dump(nd.gen_db(),f)
 
         for part in nd.novels:
-            contents=htmls['base'].render(title=nd.info["title"],author=nd.info["author"],subtitle=nd.novels[part][0],part=part,total=nd.info["num_parts"],contents=nd.novels[part][1],lines=len(nd.novels[part][1]),index=nd.info["index"],epis=nd.info["epis"],url=nd.info["epis"][part-1]["url"])
+            contents=htmls['base'].render(title=nd.info["title"],author=nd.info["author"],subtitle=nd.novels[part][0],part=part,total=nd.info["num_parts"],contents=nd.novels[part][1],lines=len(nd.novels[part][1]),index=nd.info["index"],epis=nd.info["epis"],url=nd.info["epis"][part]["url"])
             with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
                 f.write(contents)
 
@@ -162,6 +173,7 @@ def command_line():
         main(args,bar=bar)
     except NovelDLException as e:
         e.console_message()
+        sys.exit(-1)
 
 def args(url="",save_dir="",renew=False,axel=False,episode="",theme="auto",media=""):
     return {"url": url,"dir": save_dir,"renew": renew,"axel": axel,"episode": episode,"theme": theme,"media": media}

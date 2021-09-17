@@ -6,8 +6,9 @@ class NovelDLException(Exception):
         print(self.args[0],file=sys.stderr)
     def return_message(self):
         return "novel-dl: "+self.args[0]
+    def return_id(self):
+        return self.args[1]
 
 
-def raise_error(msg):
-    raise NovelDLException(msg)
-
+def raise_error(msg,id=0):
+    raise NovelDLException(msg,id)

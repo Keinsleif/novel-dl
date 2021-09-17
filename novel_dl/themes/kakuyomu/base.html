@@ -96,14 +96,14 @@
       <div id="contentMain-previousEpisode">
         <a href="{{part-1}}.html#end" data-link-click-action-name="WorksEpisodesEpisodeHeaderPreviousEpisode">
           <span id="contentMain-previousEpisode-inner">
-            <span class="contentMain-pagerRelation">前のエピソード</span><span class="contentMain-pagerDash">――</span><span class="contentMain-pagerEpisodeTitle js-vertical-composition-item">{{epis[part-2]['title']}}</span>
+            <span class="contentMain-pagerRelation">前のエピソード</span><span class="contentMain-pagerDash">――</span><span class="contentMain-pagerEpisodeTitle js-vertical-composition-item">{{epis[part-1]['title']}}</span>
           </span>
         </a>
       </div>
     <div id="contentMain-inner" class="js-page-scroller-container">
       <header id="contentMain-header">
-{%- if epis[part-1]['chap']!=epis[part-2]['chap'] %}
-        <p class="chapterTitle level1 js-vertical-composition-item"><span>{{epis[part-1]['chap']}}</span></p>
+{%- if epis[part]['chap']!=epis[part-1]['chap'] %}
+        <p class="chapterTitle level1 js-vertical-composition-item"><span>{{epis[part]['chap']}}</span></p>
 {%- endif %}
 {%- endif %}
         <p class="widget-episodeTitle js-vertical-composition-item">{{subtitle}}</p>
@@ -129,7 +129,7 @@
           <a href="{{part+1}}.html" id="contentMain-readNextEpisode" data-link-click-action-name="WorksEpisodesEpisodeFooterNextEpisode" class="js-read-next-episode">
             <span class="contentMain-nextEpisode-inner">
               <span class="contentMain-pagerRelation">次のエピソード</span>
-              <span class="contentMain-pagerEpisodeTitle js-vertical-composition-item"><span>{{epis[part]['title']}}</span></span>
+              <span class="contentMain-pagerEpisodeTitle js-vertical-composition-item"><span>{{epis[part+1]['subtitle']}}</span></span>
               <span class="contentMain-pagerArrow"><svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000"><path d="M522.42,723.09v-514H477.58v514l-228.7-228.7-31.39,32L500,808.86,782.51,526.35l-32-32ZM500,955.16c-61.66,0-121.08-11.77-177.13-35.32a466.15,466.15,0,0,1-77.35-42A460.59,460.59,0,0,1,122.2,754.48a445.47,445.47,0,0,1-41.48-77.35C56.61,621.08,44.84,561.66,44.84,500c0-61.1,11.77-120.52,35.88-176.57a445.47,445.47,0,0,1,41.48-77.35,495.6,495.6,0,0,1,55.49-67.83,495.6,495.6,0,0,1,67.83-55.49,466.15,466.15,0,0,1,77.35-42A454.52,454.52,0,0,1,500,44.84c251.12,0,455.16,204.6,455.16,455.16C955.16,751.12,751.12,955.16,500,955.16ZM500,0C223.65,0,0,224.22,0,500s223.65,500,500,500c275.78,0,500-224.22,500-500S775.78,0,500,0Z"/></svg></span>
             </span>
           </a>

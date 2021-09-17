@@ -5,8 +5,8 @@
 <div class="novel_writername">
 作者：{%- if author[1] %}<a href="{{ author[1] }}">{{ author[0] }}</a>{% else %}{{ author[0] }}{%- endif %}
 </div><!--novel_writername-->
-{%- if epis[0]['chap'] %}
-<p class="chapter_title">{{epis[part-1]['chap']}}</p>
+{%- if epis[1]['chap'] %}
+<p class="chapter_title">{{epis[part]['chap']}}</p>
 {%- endif %}
 </div><!--contents1-->
 

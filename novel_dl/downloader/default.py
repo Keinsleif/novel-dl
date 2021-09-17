@@ -22,7 +22,7 @@ class NovelDownloader(object):
         self.session = requests.Session()
         self.set_headers(self.HEADER)
         self.set_cookies(self.COOKIE)
-        self.info = {"title": "", "desc": "", "author": [], "type": "", "num_parts": 0, "index": [], "epis": []}
+        self.info = {"title": "", "desc": "", "author": [], "type": "", "num_parts": 0, "index": [], "epis": {}}
         self._mark = []
         self.novels = {}
 
@@ -30,7 +30,7 @@ class NovelDownloader(object):
         self.close()
 
     def initialize(self):
-        self.info = {"title": "", "desc": "", "author": "", "type": "", "num_parts": 0, "index": [], "epis": []}
+        self.info = {"title": "", "desc": "", "author": "", "type": "", "num_parts": 0, "index": [], "epis": {}}
 
     def close(self):
         self.session.close()
@@ -50,14 +50,8 @@ class NovelDownloader(object):
     def get(self, url, params=None):
         if not params:
             params = self.params
-        try:
-            result = self.session.get(url, params=params)
-        except requests.exceptions.ConnectionError as e:
-            raise_error("Network Error")
-        except Exception as e:
-            print(e.message)
-        else:
-            return result
+        result = self.session.get(url, params=params)
+        return result
 
     def mark_part(self, com, part):
         if not "INFO" in self.status:
@@ -107,11 +101,9 @@ class NovelDownloader(object):
                 self._real_extract_novels()
             except KeyboardInterrupt:
                 print()
-                return -1
-            except NovelDLException as e:
-                e.console_message()
-            except Exception as e:
-                print(e.message)
+                raise_error("Operation canceled by user",id=1)
+            except requests.exceptions.ConnectionError as e:
+                raise_error("Network Error",id=1)
             else:
                 break
         self.status.append("NOVELS")
@@ -123,7 +115,7 @@ class NovelDownloader(object):
         pass
 
     def gen_db(self):
-        db_data={"url": self.indexurl, "title": self.info["title"], "author": self.info["author"], "epis": {i:self.info["epis"][i-1]["time"] for i in self._mark}}
+        db_data={"url": self.indexurl, "title": self.info["title"], "author": self.info["author"], "epis": {i:self.info["epis"][i]["time"] for i in self.novels}}
         return db_data
 
 
@@ -169,8 +161,7 @@ class NarouND(NovelDownloader):
             self.status.append("NOVELS")
             return
 
-        eles = bs4(str(index_raw).replace("\n", ""),
-                   "html.parser").contents[0].contents
+        eles = bs4(str(index_raw).replace("\n", ""),"html.parser").contents[0].contents
         c = ""
         cid = 1
         part = 1
@@ -182,7 +173,7 @@ class NarouND(NovelDownloader):
             elif re.match(r'.+novel_sublist2', str(ele)):
                 timestamp = dtime.strptime(ele.dt.text.replace("（改）", ""), "%Y/%m/%d %H:%M")
                 self.info["index"].append({"type": "episode", "part": part, "text": ele.a.text,"time": timestamp})
-                self.info["epis"].append({"subtitle": ele.a.text, "url": self.baseurl+ele.a.attrs['href'], "chap": c, "time": timestamp})
+                self.info["epis"][part]={"subtitle": ele.a.text, "url": self.baseurl+ele.a.attrs['href'], "chap": c, "time": timestamp}
                 part = part+1
         self.info["desc"] = "".join([str(i) for i in top_data.select_one("#novel_ex").contents])
 
@@ -192,7 +183,7 @@ class NarouND(NovelDownloader):
         with tqdm(total=len(self._mark),file=self.bar_output) as pbar:
             pbar.set_description("Downloading ")
             for part in self._mark:
-                res = self.get(self.info["epis"][part-1]["url"])
+                res = self.get(self.info["epis"][part]["url"])
                 soup = bs4(res.content, "html.parser")
                 subtitle = soup.select_one(".novel_subtitle").text
                 body = soup.select_one("#novel_honbun")
@@ -243,7 +234,7 @@ class KakuyomuND(NovelDownloader):
             elif re.match(r'.+widget-toc-episode',str(ele)):
                 timestamp=dtime.strptime(ele.a.time.get('datetime'),"%Y-%m-%dT%H:%M:%SZ").astimezone(timezone('Asia/Tokyo'))
                 self.info["index"].append({"type": "episode", "part": part, "text": ele.span.text, "time": timestamp})
-                self.info["epis"].append({"subtitle": ele.span.text, "url": self.baseurl+ele.a.attrs["href"], "chap": c, "time": timestamp})
+                self.info["epis"][part]={"subtitle": ele.span.text, "url": self.baseurl+ele.a.attrs["href"], "chap": c, "time": timestamp}
                 part=part+1
         desc=top_data.select_one("#introduction")
         if desc.select_one(".ui-truncateTextButton-expandButton"):
@@ -255,7 +246,7 @@ class KakuyomuND(NovelDownloader):
         with tqdm(total=len(self._mark),file=self.bar_output) as pbar:
             pbar.set_description("Downloading ")
             for part in self._mark:
-                res = self.get(self.info["epis"][part-1]["url"])
+                res = self.get(self.info["epis"][part]["url"])
                 soup = bs4(res.content, "html.parser")
                 subtitle=soup.select_one(".widget-episodeTitle").text
                 body=soup.select_one(".widget-episodeBody")
