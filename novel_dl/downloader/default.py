@@ -81,11 +81,10 @@ class NovelDownloader(object):
             except KeyboardInterrupt:
                 print()
                 return -1
-            except NovelDLException as e:
-                e.console_message()
-            except Exception as e:
-                print(e.message)
-                return
+            except KeyboardInterrupt:
+                raise_error("Operation canceled by user")
+            except requests.exceptions.ConnectionError as e:
+                raise_error("Network Error")
             else:
                 break
         self.status.append("INFO")
@@ -100,8 +99,7 @@ class NovelDownloader(object):
             try:
                 self._real_extract_novels()
             except KeyboardInterrupt:
-                print()
-                raise_error("Operation canceled by user",id=1)
+                raise_error("Operation was canceled by user",id=1)
             except requests.exceptions.ConnectionError as e:
                 raise_error("Network Error",id=1)
             else:
@@ -114,8 +112,8 @@ class NovelDownloader(object):
     def _real_extract_novels(self):
         pass
 
-    def gen_db(self):
-        db_data={"url": self.indexurl, "title": self.info["title"], "author": self.info["author"], "epis": {i:self.info["epis"][i]["time"] for i in self.novels}}
+    def gen_db(self,db_data={}):
+        db_data.update({"url": self.indexurl, "title": self.info["title"], "num_parts": self.info["num_parts"], "author": self.info["author"], "epis": {i:self.info["epis"][i]["time"] for i in self.novels}})
         return db_data
 
 

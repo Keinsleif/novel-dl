@@ -62,19 +62,21 @@ def main(args,bar=None):
             with open(ndir+"static/db.pickle","rb") as f:
                 db_data = pickle.load(f)
             nd.mark_all("skip")
-            if nd.info["num_parts"] > max(db_data["epis"]):
-                nd.mark_part("unskip",max(db_data["epis"]))
+            if nd.info["num_parts"] > db_data["num_parts"]:
+                nd.mark_part("unskip",db_data["num_parts"])
             for i in nd.info["epis"].keys():
                 if not i in db_data["epis"]:
                     nd.mark_part("unskip",i)
                 elif nd.info["epis"][i]["time"]>db_data["epis"][i]:
                     nd.mark_part("unskip",i)
+        else:
+            db_data = None
 
     try:
         nd.extract_novels()
     except NovelDLException as e:
         if e.return_id() == 1:
-            pass
+            e.console_message()
         else:
             raise e
 
@@ -148,7 +150,10 @@ def main(args,bar=None):
 
 
         with open(ndir+"static/db.pickle","wb") as f:
-            pickle.dump(nd.gen_db(),f)
+            if db_data:
+                pickle.dump(nd.gen_db(db_data),f)
+            else:
+                pickle.dump(nd.gen_db(),f)
 
         for part in nd.novels:
             contents=htmls['base'].render(title=nd.info["title"],author=nd.info["author"],subtitle=nd.novels[part][0],part=part,total=nd.info["num_parts"],contents=nd.novels[part][1],lines=len(nd.novels[part][1]),index=nd.info["index"],epis=nd.info["epis"],url=nd.info["epis"][part]["url"])
