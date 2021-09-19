@@ -133,6 +133,7 @@ def main(args,bar=None):
         with open(ndir+re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"])+".html", "w") as f:
             f.write(contents)
     else:
+        # Gen index.html
         contents=htmls['index'].render(title=nd.info["title"],author=nd.info["author"],desc=nd.info["desc"],index=nd.info["index"],total=nd.info["num_parts"],url=nd.indexurl)
         with open(ndir+"index.html","w",encoding="utf-8") as f:
             f.write(contents)
