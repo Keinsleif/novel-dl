@@ -51,7 +51,7 @@ def main(args,bar=None):
             ndir=os.path.abspath(args["dir"])+"/"
         else:
             ndir=os.getcwd()+"/"+nd.ncode+"/"
-        if os.path.isfile(ndir+"static/db.json"):
+        if os.path.isfile(ndir+"static/db.json") and not args["renew"]:
             with open(ndir+"static/db.json","r") as f:
                 db_data = json.load(f)
             nd.mark_all("skip")
