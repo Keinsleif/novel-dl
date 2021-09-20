@@ -34,10 +34,8 @@ def main(args,bar=None):
     nd.extract_info()
 
     if args["episode"]:
-        if not re.match(r'^\d*$',args["episode"]):
+        if not re.match(r'^\d*$',args["episode"]) or int(args["episode"])>nd.info["num_parts"] or int(args["episode"])<0:
             raise_error("Incorrect episode number `"+args["episode"]+"`")
-        elif int(args["episode"])>nd.info["num_parts"] or int(args["episode"])<0:
-            args["episode"] = ""
 
     if args["dir"]:
         now=datetime.now()
