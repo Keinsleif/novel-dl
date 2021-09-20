@@ -42,6 +42,7 @@ def main(args,bar=None):
     if args["dir"]:
         now=datetime.now()
         args["dir"] = now.strftime(args["dir"]).format(ncode=nd.ncode,title=re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]))
+    db_data = {}
     if nd.info["num_parts"] == 0 or args["episode"]:
         if args["dir"]:
             ndir=os.path.abspath(args["dir"])+"/"
@@ -58,19 +59,17 @@ def main(args,bar=None):
             ndir=os.getcwd()+"/"+nd.ncode+"/"
             if not os.path.isdir(ndir):
                 os.makedirs(ndir)
-        if os.path.isfile(ndir+"static/db.pickle"):
-            with open(ndir+"static/db.pickle","rb") as f:
-                db_data = pickle.load(f)
+        if os.path.isfile(ndir+"static/db.json"):
+            with open(ndir+"static/db.json","r") as f:
+                db_data = json.load(f)
             nd.mark_all("skip")
             if nd.info["num_parts"] > db_data["num_parts"]:
                 nd.mark_part("unskip",db_data["num_parts"])
             for i in nd.info["epis"].keys():
-                if not i in db_data["epis"]:
+                if not str(i) in db_data["epis"]:
                     nd.mark_part("unskip",i)
-                elif nd.info["epis"][i]["time"]>db_data["epis"][i]:
-                    nd.mark_part("unskip",i)
-        else:
-            db_data = None
+#                elif datetime.fromisoformat(nd.info["epis"][i]["time"]) > datetime.fromisoformat(db_data["epis"][str(i)]):
+#                    nd.mark_part("unskip",i)
 
     try:
         nd.extract_novels()
@@ -150,11 +149,8 @@ def main(args,bar=None):
                 shutil.copyfile(file,ndir+"static/"+os.path.basename(file))
 
 
-        with open(ndir+"static/db.pickle","wb") as f:
-            if db_data:
-                pickle.dump(nd.gen_db(db_data),f)
-            else:
-                pickle.dump(nd.gen_db(),f)
+        with open(ndir+"static/db.json","w") as f:
+            json.dump(nd.gen_db(db_data),f, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
 
         for part in nd.novels:
             contents=htmls['base'].render(title=nd.info["title"],author=nd.info["author"],subtitle=nd.novels[part][0],part=part,total=nd.info["num_parts"],contents=nd.novels[part][1],lines=len(nd.novels[part][1]),index=nd.info["index"],epis=nd.info["epis"],url=nd.info["epis"][part]["url"])
@@ -180,6 +176,8 @@ def command_line():
     except NovelDLException as e:
         e.console_message()
         sys.exit(-1)
+    else:
+        print("Successfully downloaded")
 
 def args(url="",save_dir="",renew=False,axel=False,episode="",theme="auto",media=""):
     return {"url": url,"dir": save_dir,"renew": renew,"axel": axel,"episode": episode,"theme": theme,"media": media}

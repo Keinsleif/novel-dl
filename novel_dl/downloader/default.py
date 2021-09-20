@@ -79,9 +79,6 @@ class NovelDownloader(object):
                 self.initialize()
                 self._real_extract_info()
             except KeyboardInterrupt:
-                print()
-                return -1
-            except KeyboardInterrupt:
                 raise_error("Operation canceled by user")
             except requests.exceptions.ConnectionError as e:
                 raise_error("Network Error")
@@ -113,8 +110,11 @@ class NovelDownloader(object):
         pass
 
     def gen_db(self,db_data={}):
-        db_data.update({"url": self.indexurl, "title": self.info["title"], "num_parts": self.info["num_parts"], "author": self.info["author"], "epis": {i:self.info["epis"][i]["time"] for i in self.novels}})
-        return db_data
+        db = {"url": self.indexurl, "title": self.info["title"], "num_parts": self.info["num_parts"], "author": self.info["author"], "epis": {}}
+        if db_data:
+            db["epis"]={int(i):j for i,j in db_data["epis"].items()}
+        db["epis"].update({i:self.info["epis"][i]["time"].isoformat() for i in self.novels})
+        return db
 
 
 class NarouND(NovelDownloader):
