@@ -159,20 +159,20 @@ def command_line():
     parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
     parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
     parser.add_argument('-e',"--episode",default="",help="set download single episode as short novel")
-    #parser.add_argument('-s',"--short",action='store_true',help="generate novel like short story (with -e option)")
     parser.add_argument('-t',"--theme",default="auto",help="set novel's theme")
     parser.add_argument('-m',"--media",default="",help="generate html supporting only one media type")
     parser.add_argument('-q',"--quiet",action='store_false',help="suppress non-messages")
     args=parser.parse_args()
     args=args.__dict__
-    bar=args.pop("quiet")
+    output=args.pop("quiet")
     try:
-        main(args,bar=bar)
+        main(args,bar=output)
     except NovelDLException as e:
         e.console_message()
         sys.exit(-1)
     else:
-        print("Successfully downloaded")
+        if output:
+            print("Successfully downloaded")
 
 def args(url="",save_dir="",renew=False,axel=False,episode="",theme="auto",media=""):
     return {"url": url,"dir": save_dir,"renew": renew,"axel": axel,"episode": episode,"theme": theme,"media": media}
