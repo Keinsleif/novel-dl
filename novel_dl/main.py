@@ -46,19 +46,13 @@ def main(args,bar=None):
     if nd.info["num_parts"] == 0 or args["episode"]:
         if args["dir"]:
             ndir=os.path.abspath(args["dir"])+"/"
-            if not os.path.isdir(ndir):
-                os.makedirs(ndir)
         else:
             ndir=""
     else:
         if args["dir"]:
             ndir=os.path.abspath(args["dir"])+"/"
-            if not os.path.isdir(ndir):
-                os.makedirs(ndir)
         else:
             ndir=os.getcwd()+"/"+nd.ncode+"/"
-            if not os.path.isdir(ndir):
-                os.makedirs(ndir)
         if os.path.isfile(ndir+"static/db.json"):
             with open(ndir+"static/db.json","r") as f:
                 db_data = json.load(f)
@@ -68,8 +62,8 @@ def main(args,bar=None):
             for i in nd.info["epis"].keys():
                 if not str(i) in db_data["epis"]:
                     nd.mark_part("unskip",i)
-#                elif datetime.fromisoformat(nd.info["epis"][i]["time"]) > datetime.fromisoformat(db_data["epis"][str(i)]):
-#                    nd.mark_part("unskip",i)
+                elif datetime.fromisoformat(nd.info["epis"][i]["time"]) > datetime.fromisoformat(db_data["epis"][str(i)]):
+                    nd.mark_part("unskip",i)
 
     try:
         nd.extract_novels()
@@ -115,6 +109,9 @@ def main(args,bar=None):
     else:
         htmls={i:env.get_template(htmls[i]) for i in htmls}
 
+    # Create directory
+    if not os.path.isdir(ndir):
+        os.makedirs(ndir)
 
     if nd.info["type"] == "short":
         style={}
