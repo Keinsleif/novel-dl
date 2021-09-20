@@ -62,7 +62,7 @@ def main(args,bar=None):
             for i in nd.info["epis"].keys():
                 if not str(i) in db_data["epis"]:
                     nd.mark_part("unskip",i)
-                elif datetime.fromisoformat(nd.info["epis"][i]["time"]) > datetime.fromisoformat(db_data["epis"][str(i)]):
+                elif nd.info["epis"][i]["time"] > datetime.fromisoformat(db_data["epis"][str(i)]):
                     nd.mark_part("unskip",i)
 
     try:
