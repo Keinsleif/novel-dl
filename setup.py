@@ -5,12 +5,12 @@ from setuptools import setup
 from setuptools import find_packages
 import os
 
+root=os.path.abspath(os.path.dirname(__file__))
+
 PACKAGE_NAME="novel_dl"
 DESCRIPTION = 'Novel downloader'
-with open("README.md","r") as f:
+with open(os.path.join(root,"README.md"),"r") as f:
 	LONG_DESCRIPTION = f.read()
-
-root=os.path.abspath(os.path.dirname(__file__))
 
 version_path=os.path.join(root,PACKAGE_NAME,"__version__.py")
 ns=dict()

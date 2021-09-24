@@ -8,7 +8,7 @@ from .utils import *
 root = os.path.abspath(os.path.dirname(__file__))+"/"
 THEMES=["auto"]+os.listdir(root+"themes/")
 
-def main(args,bar=None):
+def main(args,bar=False):
     if bar:
         bar_output=sys.stdout
     else:
