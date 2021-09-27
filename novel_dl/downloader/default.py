@@ -3,6 +3,8 @@ import urllib.parse
 from datetime import datetime as dtime
 from pytz import timezone
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup as bs4
 from tqdm import tqdm
 from ..utils import *
@@ -22,6 +24,9 @@ class NovelDownloader(object):
         self.session = requests.Session()
         self.set_headers(self.HEADER)
         self.set_cookies(self.COOKIE)
+        retries = Retry(total=3, backoff_factor=1)
+        self.session.mount("https://", HTTPAdapter(max_retries=retries))
+        self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.info = {"title": "", "desc": "", "author": [], "type": "", "num_parts": 0, "index": [], "epis": {}}
         self._mark = []
         self.novels = {}
@@ -74,16 +79,13 @@ class NovelDownloader(object):
         pass
 
     def extract_info(self):
-        for _ in range(2):
-            try:
-                self.initialize()
-                self._real_extract_info()
-            except KeyboardInterrupt:
-                raise_error("Operation canceled by user")
-            except requests.exceptions.ConnectionError as e:
-                raise_error("Network Error")
-            else:
-                break
+        try:
+            self.initialize()
+            self._real_extract_info()
+        except KeyboardInterrupt:
+            raise_error("Operation canceled by user")
+        except requests.exceptions.ConnectionError as e:
+            raise_error("Network Error")
         self.status.append("INFO")
         self._mark = list(range(1, self.info["num_parts"]+1))
 
@@ -92,15 +94,12 @@ class NovelDownloader(object):
             result = self.extract_info()
             if result == -1:
                 return -1
-        for _ in range(2):
-            try:
-                self._real_extract_novels()
-            except KeyboardInterrupt:
-                raise_error("Operation was canceled by user",id=1)
-            except requests.exceptions.ConnectionError as e:
-                raise_error("Network Error",id=1)
-            else:
-                break
+        try:
+            self._real_extract_novels()
+        except KeyboardInterrupt:
+            raise_error("Operation was canceled by user",id=1)
+        except requests.exceptions.ConnectionError as e:
+            raise_error("Network Error",id=1)
         self.status.append("NOVELS")
 
     def _real_extract_info(self):
