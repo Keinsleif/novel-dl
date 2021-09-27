@@ -177,7 +177,7 @@ class NarouND(NovelDownloader):
     def _real_extract_novels(self):
         if self.info["num_parts"] == 0:
             return
-        with tqdm(total=len(self._mark),file=self.bar_output) as pbar:
+        with tqdm(total=len(self._mark),file=self.bar_output,unit="parts") as pbar:
             pbar.set_description("Downloading ")
             for part in self._mark:
                 res = self.get(self.info["epis"][part]["url"])
@@ -240,7 +240,7 @@ class KakuyomuND(NovelDownloader):
         self.info["desc"]="".join([str(i) for i in desc.contents])
 
     def _real_extract_novels(self):
-        with tqdm(total=len(self._mark),file=self.bar_output) as pbar:
+        with tqdm(total=len(self._mark),file=self.bar_output,unit="parts") as pbar:
             pbar.set_description("Downloading ")
             for part in self._mark:
                 res = self.get(self.info["epis"][part]["url"])
