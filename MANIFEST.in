@@ -1,2 +1,4 @@
 include requirements.txt
 recursive-include novel_dl/themes *
+recursive-include novel_dl/downloader *
+
