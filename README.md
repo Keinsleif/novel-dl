@@ -15,7 +15,7 @@ novel-dlは、「小説家になろう」や「カクヨム」から小説をダ
 小説のデータをダウンロードし、オフラインでも使用するためにcss、javascript、画像などとhtmlを生成します。  
 Pythonのバージョン3.3以降が必要であり、UNIXベースのプラットフォームで実行する必要があります。  
 UbuntuやCentOSなどのMacOSおよびLinux、つまりUnix系OSで動作するはずです。 Windowsではテストされていません。  
-それはパブリックドメインにリリースされます。つまり、好きなように変更、再配布、または使用することができます。  
+これはパブリックドメインにリリースされます。つまり、好きなように変更、再配布、または使用することができます。  
 
 # DEMO
 ![demo](https://raw.github.com/wiki/kazuto28/novel-dl/images/novel-dl_DEMO.gif)
@@ -25,7 +25,12 @@ UbuntuやCentOSなどのMacOSおよびLinux、つまりUnix系OSで動作する�
 
 # Options
 - -d, --dir  
-    生成したファイル群を出力する先を指定します。  
+    生成したファイル群の出力先フォルダを指定します。  
+    フォルダ名にはstrftimeの書式及び、以下のテンプレートが使用できます。  
+    "{"および"}"をエスケープする場合には  
+    "{"を"{{"に、"}"を"}}"に置き換えます。
+  - `title` Novel title (default)  
+  - `ncode` Novel identifier
 
 - -r, --renew  
     すでに存在する話をスキップせず、上書きし、更新します。  

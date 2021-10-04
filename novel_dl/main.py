@@ -39,7 +39,11 @@ def main(args,bar=False):
 
     if args["dir"]:
         now=datetime.now()
-        args["dir"] = now.strftime(args["dir"]).format(ncode=nd.ncode,title=re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]))
+        try:
+            args["dir"] = args["dir"].format("",ncode=nd.ncode,title=re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]))
+        except KeyError:
+            raise_error("Incorrect format template")
+        args["dir"] = now.strftime(args["dir"])
     db_data = {}
     if nd.info["num_parts"] == 0 or args["episode"]:
         if args["dir"]:
@@ -50,7 +54,7 @@ def main(args,bar=False):
         if args["dir"]:
             ndir=os.path.abspath(args["dir"])+"/"
         else:
-            ndir=os.getcwd()+"/"+nd.ncode+"/"
+            ndir=os.getcwd()+"/"+re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"])+"/"
         if os.path.isfile(ndir+"static/db.json") and not args["renew"]:
             with open(ndir+"static/db.json","r") as f:
                 db_data = json.load(f)
