@@ -137,6 +137,8 @@ class NarouND(NovelDownloader):
     def _real_extract_info(self):
         data = self.get(self.indexurl)
         top_data = bs4(data.content, "html.parser")
+        if top_data.select_one(".maintenance-container"):
+            raise_error("Narou is under maintenance")
         self.info["title"] = top_data.select_one("title").text
         author_data = top_data.select_one(".novel_writername")
         if author_data.a:
