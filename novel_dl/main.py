@@ -37,13 +37,12 @@ def main(args,bar=False):
         if not re.match(r'^\d*$',args["episode"]) or int(args["episode"])>nd.info["num_parts"] or int(args["episode"])<0:
             raise_error("Incorrect episode number `"+args["episode"]+"`")
 
-    if args["dir"]:
-        now=datetime.now()
-        try:
-            args["dir"] = args["dir"].format("",ncode=nd.ncode,title=re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]))
-        except KeyError:
-            raise_error("Incorrect format template")
-        args["dir"] = now.strftime(args["dir"])
+    try:
+        args["name"] = args["name"].format("",ncode=nd.ncode,title=re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]))
+    except KeyError:
+        raise_error("Incorrect format template")
+    now=datetime.now()
+    args["name"] = now.strftime(args["dir"])
     db_data = {}
     if nd.info["num_parts"] == 0 or args["episode"]:
         if args["dir"]:
@@ -52,9 +51,9 @@ def main(args,bar=False):
             ndir=""
     else:
         if args["dir"]:
-            ndir=os.path.abspath(args["dir"])+"/"
+            ndir=os.path.abspath(args["dir"])+"/"+args["name"]+"/"
         else:
-            ndir=os.getcwd()+"/"+re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"])+"/"
+            ndir=os.getcwd()+"/"+args["name"]+"/"
         if os.path.isfile(ndir+"static/db.json") and not args["renew"]:
             with open(ndir+"static/db.json","r") as f:
                 db_data = json.load(f)
@@ -128,7 +127,7 @@ def main(args,bar=False):
                     script[os.path.basename(base)]=f.read()
 
         contents=htmls['single'].render(title=nd.info["title"],author=nd.info["author"],contents=nd.novels[0][1],style=style,script=script,lines=len(nd.novels[0][1]),url=args["url"])
-        with open(ndir+re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"])+".html", "w") as f:
+        with open(ndir+args["name"]+".html", "w") as f:
             f.write(contents)
     else:
         # Gen index.html
@@ -160,6 +159,7 @@ def command_line():
     parser=argparse.ArgumentParser()
     parser.add_argument('url',help="URL")
     parser.add_argument('-d',"--dir",default="",help="set output directory")
+    parser.add_argument('-n',"--name",default="{title}",help="set output directory/file name")
     parser.add_argument('-r',"--renew",action='store_true',help="force to update all files")
     parser.add_argument('-a',"--axel",action='store_true',help="turn on axceleration mode")
     parser.add_argument('-e',"--episode",default="",help="set download single episode as short novel")
