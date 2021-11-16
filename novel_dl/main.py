@@ -42,7 +42,7 @@ def main(args,bar=False):
     except KeyError:
         raise_error("Incorrect format template")
     now=datetime.now()
-    args["name"] = now.strftime(args["dir"])
+    args["name"] = now.strftime(args["name"])
     db_data = {}
     if nd.info["num_parts"] == 0 or args["episode"]:
         if args["dir"]:
