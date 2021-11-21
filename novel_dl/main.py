@@ -1,4 +1,5 @@
 from jinja2 import Environment, FileSystemLoader
+from jinja2.exceptions import TemplateNotFound
 import time, re, sys, os, shutil, argparse, json, urllib.parse
 import pickle
 from datetime import datetime
@@ -36,6 +37,9 @@ def main(args,bar=False):
     if args["episode"]:
         if not re.match(r'^\d*$',args["episode"]) or int(args["episode"])>nd.info["num_parts"] or int(args["episode"])<0:
             raise_error("Incorrect episode number `"+args["episode"]+"`")
+        nd.mark_all("skip")
+        nd.mark_part("unskip",int(args["episode"]))
+        args["episode"]=int(args["episode"])
 
     try:
         args["name"] = args["name"].format("",ncode=nd.ncode,title=re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]))
@@ -44,11 +48,12 @@ def main(args,bar=False):
     now=datetime.now()
     args["name"] = now.strftime(args["name"])
     db_data = {}
+
     if nd.info["num_parts"] == 0 or args["episode"]:
         if args["dir"]:
             ndir=os.path.abspath(args["dir"])+"/"
         else:
-            ndir=""
+            ndir=os.getcwd()+"/"
     else:
         if args["dir"]:
             ndir=os.path.abspath(args["dir"])+"/"+args["name"]+"/"
@@ -83,7 +88,6 @@ def main(args,bar=False):
     if os.path.isfile(conf_file):
         with open(conf_file,"r") as f:
             conf = json.load(f)
-    static_files=[THEME_DIR+"static/"+i for i in os.listdir(THEME_DIR+"static/")]
     MEDIAS=[""]
     if conf.get("medias"):
         MEDIAS=conf["medias"]
@@ -95,26 +99,24 @@ def main(args,bar=False):
     else:
         htmls={"base":"base.html","index":"index.html","single":"single.html"}
 
-    env=Environment(loader=FileSystemLoader(THEME_DIR,encoding='utf8'))
     if conf.get('parent'):
-        parent_dir=os.path.join(root,"themes",conf['parent'])
-        penv=Environment(loader=FileSystemLoader(parent_dir,encoding='utf8'))
-        for file in htmls:
-            if os.path.isfile(os.path.join(THEME_DIR,htmls[file])):
-                htmls[file]=env.get_template(htmls[file])
-            elif os.path.isfile(os.path.join(parent_dir,htmls[file])):
-                htmls[file]=penv.get_template(htmls[file])
-            else:
-                raise_error("Cannot load theme file: "+htmls[file])
-        static_files=static_files+[os.path.join(parent_dir,"static",i) for i in os.listdir(os.path.join(parent_dir,"static"))]
+        env_paths=[THEME_DIR,os.path.join(root,"themes",conf['parent'])]
+        lstatic = os.listdir(THEME_DIR+"static/")
+        static_files = [THEME_DIR+"static/"+i for i in lstatic]+[os.path.join(env_paths[1],"static",i) for i in os.listdir(os.path.join(env_paths[1],"static")) if not i in lstatic]
     else:
+        env_paths=THEME_DIR
+        static_files = [os.path.join(THEME_DIR,"static",i) for i in os.listdir(os.path.join(THEME_DIR,"static"))]
+    env=Environment(loader=FileSystemLoader(env_paths,encoding='utf8'))
+    try:
         htmls={i:env.get_template(htmls[i]) for i in htmls}
+    except TemplateNotFound as e:
+        raise_error("Cannot load theme file: "+e.name)
 
     # Create directory
     if not os.path.isdir(ndir):
         os.makedirs(ndir)
 
-    if nd.info["type"] == "short":
+    if nd.info["type"] == "short" or args["episode"]:
         style={}
         script={}
         for file in static_files:
@@ -126,7 +128,10 @@ def main(args,bar=False):
                 with open(file,"r",encoding="utf-8") as f:
                     script[os.path.basename(base)]=f.read()
 
-        contents=htmls['single'].render(title=nd.info["title"],author=nd.info["author"],contents=nd.novels[0][1],style=style,script=script,lines=len(nd.novels[0][1]),url=args["url"])
+        if args["episode"]:
+            contents=htmls['single'].render(title=nd.novels[args["episode"]][0],author=nd.info["author"],contents=nd.novels[args["episode"]][1],style=style,script=script,lines=len(nd.novels[args["episode"]][1]),url=args["url"])
+        else:
+            contents=htmls['single'].render(title=nd.info["title"],author=nd.info["author"],contents=nd.novels[0][1],style=style,script=script,lines=len(nd.novels[0][1]),url=args["url"])
         with open(ndir+args["name"]+".html", "w") as f:
             f.write(contents)
     else:
