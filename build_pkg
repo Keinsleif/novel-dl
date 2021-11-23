@@ -1,8 +1,0 @@
-function abort {
-    echo "Failed"
-    exit 1
-}
-nano novel_dl/__version__.py
-rm -rf dist build
-python3 setup.py sdist bdist_wheel || abort
-twine upload -r pypi dist/* || abort
