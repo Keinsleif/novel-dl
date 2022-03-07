@@ -18,9 +18,6 @@ def main(args,bar=False):
     if not args["theme"] in THEMES:
         raise_error('Invalid theme name `'+args["theme"]+'`')
 
-    ret=urllib.parse.urlparse(args["url"])
-    if not ret.hostname:
-        raise_error("Invalid argument 'url'")
     if args["axel"]:
         delay=0.1
     else:
