@@ -8,16 +8,14 @@ import os
 root=os.path.abspath(os.path.dirname(__file__))
 
 PACKAGE_NAME="novel_dl"
-DESCRIPTION = 'Novel downloader'
+info_path=os.path.join(root,PACKAGE_NAME,"info.py")
+ns=dict()
+with open(info_path,"r") as f:
+	eval(compile(f.read(), info_path, 'exec'),dict(),ns)
+__version__=ns['__version__']
+
 with open(os.path.join(root,"README.md"),"r") as f:
 	LONG_DESCRIPTION = f.read()
-
-version_path=os.path.join(root,PACKAGE_NAME,"__version__.py")
-ns=dict()
-with open(version_path,"r") as f:
-	eval(compile(f.read(), version_path, 'exec'),dict(),ns)
-__version__=ns['__version__']
-del ns
 
 require_path=os.path.join(root,"requirements.txt")
 with open(require_path,"r") as f:
@@ -27,13 +25,13 @@ setup(
 	name=PACKAGE_NAME,
 	version=__version__,
 
-	description=DESCRIPTION,
+	description=ns['__description__'],
 	long_description=LONG_DESCRIPTION,
 	long_description_content_type="text/markdown",
-	url="https://github.com/kazuto28/{pkg}".format(pkg=PACKAGE_NAME),
-	author="Kondo Kazuto",
-	author_email="mountaindull@gmail.com",
-	license="MIT",
+	url="https://github.com/kazuto28/{pkg}".format(pkg=ns['__appname__'.lower()]),
+	author=ns['__author__'],
+	author_email=ns['__contact__'],
+	license=ns['__license__'],
 
 	packages=[PACKAGE_NAME],
 	include_package_data=True,
@@ -42,7 +40,7 @@ setup(
 	entry_points="""
 		[console_scripts]
 		{app}={pkg}.main:command_line
-	""".format(app=PACKAGE_NAME.replace("_","-"),pkg=PACKAGE_NAME),
+	""".format(app=ns['__appname__'],pkg=PACKAGE_NAME),
 
 	classifiers=[
 		"Environment :: Console",
