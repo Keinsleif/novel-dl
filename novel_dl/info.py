@@ -5,7 +5,7 @@ __author__ = 'Kondo Kazuto'
 __contact__ = 'mountaindull@gmail.com'
 __projecturl__ = 'https://github.com/kazuto28/novel-dl/'
 
-__version_info__=(1,5,4)
+__version_info__=(1,5,5)
 __version__='.'.join(map(str,__version_info__))
 
 __appname__ = 'Novel-DL'
