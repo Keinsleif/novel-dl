@@ -28,7 +28,7 @@ setup(
 	description=ns['__description__'],
 	long_description=LONG_DESCRIPTION,
 	long_description_content_type="text/markdown",
-	url="https://github.com/kazuto28/{pkg}".format(pkg=ns['__appname__'.lower()]),
+	url="https://github.com/kazuto28/{pkg}".format(pkg=ns['__appname__'].lower()),
 	author=ns['__author__'],
 	author_email=ns['__contact__'],
 	license=ns['__license__'],
@@ -40,7 +40,7 @@ setup(
 	entry_points="""
 		[console_scripts]
 		{app}={pkg}.main:command_line
-	""".format(app=ns['__appname__'],pkg=PACKAGE_NAME),
+	""".format(app=ns['__appname__'].lower(),pkg=PACKAGE_NAME),
 
 	classifiers=[
 		"Environment :: Console",
