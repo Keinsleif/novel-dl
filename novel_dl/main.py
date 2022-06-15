@@ -35,13 +35,13 @@ def main(args,bar=False):
         if not re.match(r'^\d*$',args["episode"]) or int(args["episode"])>nd.info["num_parts"] or int(args["episode"])<0:
             raise_error("Incorrect episode number `"+args["episode"]+"`")
         nd.mark_all("skip")
-        nd.mark_part("unskip",int(args["episode"]))
+        nd.mark_part("dl",int(args["episode"]))
         args["episode"]=int(args["episode"])
 
     try:
         args["name"] = args["name"].format("",ncode=nd.ncode,title=re.sub(r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]))
     except KeyError:
-        raise_error("Incorrect format template")
+        raise_error("Incorrect directory name format")
     now=datetime.now()
     args["name"] = now.strftime(args["name"])
     db_data = {}
@@ -61,12 +61,12 @@ def main(args,bar=False):
                 db_data = json.load(f)
             nd.mark_all("skip")
             if nd.info["num_parts"] > db_data["num_parts"]:
-                nd.mark_part("unskip",db_data["num_parts"])
+                nd.mark_part("dl",db_data["num_parts"])
             for i in nd.info["epis"].keys():
                 if not str(i) in db_data["epis"]:
-                    nd.mark_part("unskip",i)
+                    nd.mark_part("dl",i)
                 elif nd.info["epis"][i]["time"] > datetime.fromisoformat(db_data["epis"][str(i)]):
-                    nd.mark_part("unskip",i)
+                    nd.mark_part("dl",i)
 
     try:
         nd.extract_novels()
@@ -85,6 +85,8 @@ def main(args,bar=False):
     if os.path.isfile(conf_file):
         with open(conf_file,"r") as f:
             conf = json.load(f)
+    else:
+        raise_error("Cannot load theme config. config.json not found")
     MEDIAS=[""]
     if conf.get("medias"):
         MEDIAS=conf["medias"]

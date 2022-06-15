@@ -61,18 +61,22 @@ class NovelDownloader(object):
     def mark_part(self, com, part):
         if not "INFO" in self.status:
             self.extract_info()
+        if not com in self._markers:
+            raise_error("Part mark error: Invalid mark name")
         if part>0 and part<=self.info["num_parts"]:
             if com == "skip" and part in self._mark:
                 self._mark.remove(part)
-            elif com == "unskip" and not part in self._mark:
+            elif com == "dl" and not part in self._mark:
                 self._mark.append(part)
 
     def mark_all(self,com):
         if not "INFO" in self.status:
             self.extract_info()
+        if not com in self._markers:
+            raise_error("Part mark error: Invalid mark name")
         if com == "skip":
             self._mark.clear()
-        elif com == "unskip":
+        elif com == "dl":
             self._mark = list(range(1,self.info["num_parts"]+1))
 
     def match_url(url):
