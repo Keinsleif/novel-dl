@@ -7,11 +7,13 @@
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
 <meta name="format-detection" content="telephone=no" />
-<style>
-	{{style['custom']}}
-	{{style['reset']}}
-	{{style['kotei']}}
+{%- for s in style %}
+{%- if s[1]=="all" or s[1]=="screen and (min-width:768px)" %}
+<style media="all">
+	{{s[0]}}
 </style>
+{%- endif %}
+{%- endfor %}
 </head>
 
 <body>

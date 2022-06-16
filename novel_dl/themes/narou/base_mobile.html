@@ -9,14 +9,18 @@
 <link rel="shortcut icon" href="static/narou.ico" />
 <link rel="icon" href="static/narou.ico" />
 <link rel="apple-touch-icon-precomposed" href="static/apple-touch-icon-precomposed.png" />
-
-<link rel="stylesheet" type="text/css" href="static/custom.css" media="screen,print" />
-<link rel="stylesheet" type="text/css" href="static/novel_smpview.css" media="screen,print" />
+{%- for i in loads['css'] %}
+{%- if i[1]=="all" or i[1]=="screen and (max-width:768px)" %}
+<link rel="stylesheet" type="text/css" href="{{i[0]}}" media="all" />
+{%- endif %}
+{%- endfor %}
 </head>
 
 <body>
 <div id="page_type" style="display: none">base</div>
 {% include "base_body_mobile.html" %}
-<script src="static/custom.js"></script>
+{%- for i in loads['js'] %}
+<script src="{{i}}"></script>
+{%- endfor %}
 </body>
 </html>

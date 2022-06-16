@@ -8,7 +8,6 @@ import shutil
 import argparse
 import json
 import urllib.parse
-import pickle
 from datetime import datetime
 from .downloader import *
 from .utils import *
@@ -140,24 +139,25 @@ def main(args, bar=False):
             loads["js"] = conf['loads']['js']
 
         if type(conf["loads"].get('css')) is dict:
-            for i in conf["loads"]['css']:
-                loads["css"] += [[j, i] for j in conf['loads']['css'][i]]
+            loads["css"] = [[j, k] for k,v in conf["loads"]['css'].items() for j in v]
 
     # Create directory
     if not os.path.isdir(ndir):
         os.makedirs(ndir)
 
     if nd.info["type"] == "short" or args["episode"]:
-        style = {}
-        script = {}
-        for file in static_files:
-            base, ext = os.path.splitext(file)
-            if ext == ".css":
-                with open(file, "r", encoding="utf-8") as f:
-                    style[os.path.basename(base)] = f.read()
-            if ext == ".js":
-                with open(file, "r", encoding="utf-8") as f:
-                    script[os.path.basename(base)] = f.read()
+        style = []
+        script = []
+        for file in loads['css']:
+            paths=[re.match(".*/"+file[0],i).string for i in static_files if re.match(".*/"+file[0],i)]
+            if paths:
+                with open(paths[0], "r", encoding="utf-8") as f:
+                    style.append([f.read(),file[1]])
+        for file in loads['js']:
+            paths=[re.match(".*/"+file,i).string for i in static_files if re.match(".*/"+file,i)]
+            if paths:
+                with open(paths[0], "r", encoding="utf-8") as f:
+                    script.append(f.read())
 
         if args["episode"]:
             contents = htmls['single'].render(title=nd.novels[args["episode"]][0], author=nd.info["author"], contents=nd.novels[args["episode"]]

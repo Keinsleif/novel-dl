@@ -2,13 +2,16 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8" />
-<title>THE END</title>
+<title>{{title}}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="format-detection" content="telephone=no" />
-<style>
-	{{style['custom']}}
-	{{style['novel_smpview']}}
+{%- for s in style %}
+{%- if s[1]=="all" or s[1]=="screen and (max-width:768px)" %}
+<style media="all">
+	{{s[0]}}
 </style>
+{%- endif %}
+{%- endfor %}
 </head>
 <body>
 <div id="page_type" style="display: none">single</div>
@@ -46,8 +49,8 @@
 <!-- フッタここまで -->
 </div>
 {%- for s in script %}
-<script id="{{s}}">
-{{ script[s] }}
+<script>
+{{s}}
 </script>
 {%- endfor %}
 </body>

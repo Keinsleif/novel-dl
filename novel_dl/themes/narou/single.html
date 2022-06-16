@@ -8,17 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 <meta name="format-detection" content="telephone=no" />
 <title>{{title}}</title>
-<style>
-{{style['custom']}}
-{{style['switch']}}
+{%- for s in style %}
+<style media="{{s[1]}}">
+    {{s[0]}}
 </style>
-<style media="screen and (min-width:768px)">
-{{style['reset']}}
-{{style['kotei']}}
-</style>
-<style media="screen and (max-width:767px)">
-{{style['novel_smpview']}}
-</style>
+{%- endfor %}
 </head>
 
 <body>
@@ -98,8 +92,8 @@
 </div>
 </div>
 {%- for s in script %}
-<script id="{{s}}">
-{{ script[s] }}
+<script>
+{{s}}
 </script>
 {%- endfor %}
 </body>

@@ -10,8 +10,8 @@
 <link rel="apple-touch-icon" href="static/ios-60.png" />
 <link rel="shortcut icon" href="static/favicon.ico" class="js-favicon" />
 {%- for s in style %}
-<style id="{{s}}">
-{{style[s]}}
+<style media="{{s[1]}}">
+{{s[0]}}
 </style>
 {%- endfor %}
 </head>
@@ -190,8 +190,8 @@
 </div>
 
 {%- for s in script %}
-<script id="{{s}}">
-{{script[s]}}
+<script>
+{{s}}
 </script>
 {%- endfor %}
 
