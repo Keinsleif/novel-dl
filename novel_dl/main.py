@@ -11,6 +11,7 @@ import urllib.parse
 from datetime import datetime
 from .downloader import *
 from .utils import *
+from .info import __version__
 
 root = os.path.abspath(os.path.dirname(__file__))+"/"
 THEMES = ["auto"]+os.listdir(root+"themes/")
@@ -197,23 +198,34 @@ def main(args, bar=False):
 
 
 def command_line():
-    parser = argparse.ArgumentParser()
+    kw = {
+        'usage': '%(prog)s [OPTIONS] URL',
+        'conflict_handler': 'resolve'
+    }
+    parser = argparse.ArgumentParser(**kw)
     parser.add_argument('url', help="URL")
-    parser.add_argument('-d', "--dir", default="", help="set output directory")
-    parser.add_argument(
-        '-n', "--name", default="{title}", help="set output directory/file name")
-    parser.add_argument('-r', "--renew", action='store_true',
-                        help="force to update all files")
-    parser.add_argument('-a', "--axel", action='store_true',
-                        help="turn on axceleration mode")
-    parser.add_argument('-e', "--episode", default="",
-                        help="set download single episode as short novel")
-    parser.add_argument('-t', "--theme", default="auto",
-                        help="set novel's theme")
-    parser.add_argument('-m', "--media", default="",
-                        help="generate html supporting only one media type")
-    parser.add_argument('-q', "--quiet", action='store_false',
+    general = parser.add_argument_group("General Options")
+    general.add_argument('-h','--help',action="help",help="show this help text and exit")
+    general.add_argument('-v','--version',action="version",version="%(prog)s {}".format(__version__))
+    general.add_argument('-q', "--quiet", action='store_false',
                         help="suppress non-messages")
+    downloader=parser.add_argument_group("Downloader Options")
+    downloader.add_argument('-a', "--axel", action='store_true',
+                        help="turn on axceleration mode")
+    formatter=parser.add_argument_group("Formatter Options")
+    formatter.add_argument('-e', "--episode", default="",
+                        help="set download single episode as short novel")
+    formatter.add_argument('-t', "--theme", default="auto",
+                        help="set novel's theme")
+    formatter.add_argument('-m', "--media", default="",
+                        help="generate html supporting only one media type")
+    formatter.add_argument('-r', "--renew", action='store_true',
+                        help="force to update all files")
+    output = parser.add_argument_group("Output Options")
+    output.add_argument(
+        '-n', "--name", default="{title}", help="set output directory/file name")
+    output.add_argument('-d', "--dir", default="", help="set output directory")
+
     args = parser.parse_args()
     args = args.__dict__
     output = args.pop("quiet")
