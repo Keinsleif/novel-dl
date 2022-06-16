@@ -1,3 +1,9 @@
 {
-	"medias": [""]
+	"medias": [""],
+	"loads": {
+		"js":["static/switch.js","static/kakuyomu.js","static/switch.js","static/custom.js"],
+		"css": {
+			"all":["static/switch.css","static/kakuyomu.css","static/switch.css","static/custom.css"]
+		}
+	}
 }

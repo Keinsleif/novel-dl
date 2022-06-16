@@ -1,0 +1,11 @@
+@charset "utf-8";
+
+@media screen and (min-width:768px){
+    #pc { display: block !important; }
+    #sp { display: none !important; }
+}
+
+@media screen and (max-width:767px){
+    #pc { display: none !important; }
+    #sp { display: block !important; }        
+}

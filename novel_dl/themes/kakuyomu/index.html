@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
 <title>{{ title }}</title>
-
-<link rel="stylesheet" href="static/kakuyomu.css" />
+{%- for i in loads['css'] %}
+<link rel="stylesheet" href="{{i[0]}}" media="{{i[1]}}"/>
+{%- endfor %}
 <link rel="icon" sizes="256x256" href="static/app-256.png" class="js-favicon" />
 <link rel="apple-touch-icon" href="static/ios-60.png" />
 <link rel="shortcut icon" href="static/favicon.ico" class="js-favicon" />
-<script src="static/combine.js"></script>
 </head>
 
 <body id="page-works-work" class="wrapper isPC">
@@ -208,8 +208,8 @@
 </div>
 </div>
 </div>
-
-<script src="static/custom.js"></script>
-
+{%- for i in loads['js'] %}
+<script src="{{i}}"></script>
+{%- endfor %}
 </body>
 </html>

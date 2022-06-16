@@ -1,4 +1,10 @@
 {
 	"parent": "narou",
-	"medias": ["", "pc", "mobile"]
+	"medias": ["", "pc", "mobile"],
+	"loads":{
+		"js": ["static/shortcut.js","static/dark.js"],
+		"css":{
+			"all":["static/dark.css"]
+		}
+	}
 }

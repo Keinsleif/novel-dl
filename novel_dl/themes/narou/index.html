@@ -13,12 +13,15 @@
 <link rel="shortcut icon" href="static/narou.ico" />
 <link rel="icon" href="static/narou.ico" />
 <link rel="apple-touch-icon-precomposed" href="static/apple-touch-icon-precomposed.png" />
-
+{%- for i in loads['css'] %}
+<link rel="stylesheet" type="text/css" href="{{i[0]}}" media="{{i[1]}}">
+{%- endfor %}
 <link rel="stylesheet" type="text/css" href="static/custom.css" media="screen,print" />
 <link rel="stylesheet" type="text/css" href="static/switch.css" media="all" />
 <link rel="stylesheet" type="text/css" href="static/reset.css" media="screen and (min-width:768px)" />
 <link rel="stylesheet" type="text/css" href="static/kotei.css" media="screen and (min-width:768px)" />
 <link rel="stylesheet" type="text/css" href="static/novel_smpview.css" media="screen and (max-width:767px)" />
+
 </head>
 
 
@@ -31,7 +34,8 @@
 <div class="sp">
 {% include "index_body_mobile.html" %}
 </div>
-
-<script src="static/custom.js"></script>
+{%- for i in loads['js'] %}
+<script src="{{i}}"></script>
+{%- endfor %}
 </body>
 </html>

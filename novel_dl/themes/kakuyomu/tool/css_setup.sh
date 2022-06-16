@@ -1,7 +1,7 @@
 ROOT=$(cd $(dirname $0); pwd)
 TARGET=${ROOT}/../static/kakuyomu.css
 curl -#L -o /tmp/kakuyomu-old.css https://cdn-static.kakuyomu.jp/css/kakuyomu.css
-purifycss /tmp/kakuyomu-old.css ${ROOT}/template.html ${ROOT}/../*.html ${ROOT}/../static/kakuyomu.js --out ${TARGET} --info
+purifycss /tmp/kakuyomu-old.css ${ROOT}/{template,index}.html ${ROOT}/../*.html ${ROOT}/../static/kakuyomu.js --out ${TARGET} --info
 sed -e "s@/font/dcsymbols-regular.woff?6tnyRgzhZFkJ@dcsymbols-regular.woff@" -i ${TARGET}
 sed -e "s@/font/dcsymbols-regular.otf?VjSwft_YX8ck@dcsymbols-regular.otf@" -i ${TARGET}
 sed -e "s@/font/dcicons-regular.eot?OicIuNS6IwQE@dcicons-regular.eot@g" -i ${TARGET}
