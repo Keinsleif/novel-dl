@@ -13,6 +13,7 @@ from .downloader import *
 from .utils import *
 from .info import __version__
 
+return_code=0
 root = os.path.abspath(os.path.dirname(__file__))+"/"
 THEMES = ["auto"]+os.listdir(root+"themes/")
 url_reg = re.compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
@@ -46,45 +47,6 @@ def main(args, bar=False):
         nd.mark_all("skip")
         nd.mark_part("dl", int(args["episode"]))
         args["episode"] = int(args["episode"])
-
-    try:
-        args["name"] = args["name"].format("", ncode=nd.ncode, title=re.sub(
-            r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]))
-    except KeyError:
-        raise_error("Incorrect directory name format")
-    now = datetime.now()
-    args["name"] = now.strftime(args["name"])
-    db_data = {}
-
-    if nd.info["num_parts"] == 0 or args["episode"]:
-        if args["dir"]:
-            ndir = os.path.abspath(args["dir"])+"/"
-        else:
-            ndir = os.getcwd()+"/"
-    else:
-        if args["dir"]:
-            ndir = os.path.abspath(args["dir"])+"/"+args["name"]+"/"
-        else:
-            ndir = os.getcwd()+"/"+args["name"]+"/"
-        if os.path.isfile(ndir+"static/db.json") and not args["renew"]:
-            with open(ndir+"static/db.json", "r") as f:
-                db_data = json.load(f)
-            nd.mark_all("skip")
-            if nd.info["num_parts"] > db_data["num_parts"]:
-                nd.mark_part("dl", db_data["num_parts"])
-            for i in nd.info["epis"].keys():
-                if not str(i) in db_data["epis"]:
-                    nd.mark_part("dl", i)
-                elif nd.info["epis"][i]["time"] > datetime.fromisoformat(db_data["epis"][str(i)]):
-                    nd.mark_part("dl", i)
-
-    try:
-        nd.extract_novels()
-    except NovelDLException as e:
-        if e.return_id() == 1:
-            e.console_message()
-        else:
-            raise e
 
         # Load themes
     if args["theme"] == "auto":
@@ -129,6 +91,50 @@ def main(args, bar=False):
         htmls = {"base": "base.html",
                  "index": "index.html", "single": "single.html"}
 
+    try:
+        if nd.info["num_parts"] == 0 or args["episode"]:
+            ntype="short"
+        else:
+            ntype="series"
+        args["name"] = args["name"].format("", ncode=nd.ncode, title=re.sub(
+            r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]),media=args["media"],theme=args["theme"],type=ntype)
+    except KeyError:
+        raise_error("Incorrect directory name format")
+    now = datetime.now()
+    args["name"] = now.strftime(args["name"])
+    db_data = {}
+
+    if nd.info["num_parts"] == 0 or args["episode"]:
+        if args["dir"]:
+            ndir = os.path.abspath(args["dir"])+"/"
+        else:
+            ndir = os.getcwd()+"/"
+    else:
+        if args["dir"]:
+            ndir = os.path.abspath(args["dir"])+"/"+args["name"]+"/"
+        else:
+            ndir = os.getcwd()+"/"+args["name"]+"/"
+        if os.path.isfile(ndir+"static/db.json") and not args["renew"]:
+            with open(ndir+"static/db.json", "r") as f:
+                db_data = json.load(f)
+            nd.mark_all("skip")
+            if nd.info["num_parts"] > db_data["num_parts"]:
+                nd.mark_part("dl", db_data["num_parts"])
+            for i in nd.info["epis"].keys():
+                if not str(i) in db_data["epis"]:
+                    nd.mark_part("dl", i)
+                elif nd.info["epis"][i]["time"] > datetime.fromisoformat(db_data["epis"][str(i)]):
+                    nd.mark_part("dl", i)
+
+    try:
+        nd.extract_novels()
+    except NovelDLException as e:
+        if e.return_id() == 1:
+            e.console_message()
+            return_code=1
+        else:
+            raise e
+
     env = Environment(loader=FileSystemLoader(env_paths, encoding='utf8'))
     try:
         htmls = {i: env.get_template(htmls[i]) for i in htmls}
@@ -168,6 +174,7 @@ def main(args, bar=False):
                                               [1], style=style, script=script, lines=len(nd.novels[0][1]), url=args["url"])
         with open(ndir+args["name"]+".html", "w") as f:
             f.write(contents)
+        return ndir+args["name"]+".html"
     else:
         # Gen index.html
         contents = htmls['index'].render(title=nd.info["title"], author=nd.info["author"], desc=nd.info["desc"],
@@ -195,6 +202,7 @@ def main(args, bar=False):
                                             contents=nd.novels[part][1], lines=len(nd.novels[part][1]), index=nd.info["index"], epis=nd.info["epis"], url=nd.info["epis"][part]["url"], loads=loads)
             with open(ndir+str(part)+".html", "w", encoding="utf-8") as f:
                 f.write(contents)
+        return ndir
 
 
 def command_line():
@@ -233,13 +241,16 @@ def command_line():
         main(args, bar=output)
     except NovelDLException as e:
         e.console_message()
-        sys.exit(-1)
+        return_code=1
     else:
-        if output:
-            print("Successfully downloaded")
+        if return_code==0:
+            if output:
+                print("Successfully downloaded")
+    finally:
+        sys.exit(return_code)
 
 
-def args(url="", save_dir="", renew=False, axel=False, episode="", theme="auto", media=""):
+def args(url="", save_dir="", renew=False, axel=False, episode="", theme="", media=""):
     return {"url": url, "dir": save_dir, "renew": renew, "axel": axel, "episode": episode, "theme": theme, "media": media}
 
 
