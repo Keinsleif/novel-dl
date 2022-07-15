@@ -3031,6 +3031,147 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   margin: 0 15px 0 18px;
 }
 
+.isPC #modelessMessage {
+  position: fixed;
+  top: -50px;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  -webkit-transition: top .5s cubic-bezier(.23,1,.32,1);
+  transition: top .5s cubic-bezier(.23,1,.32,1);
+  z-index: 50000;
+}
+
+.isPC #modelessMessage.isShown {
+  top: 0;
+}
+
+.isPC #modelessMessage.isHidden .ui-tooltip:after,.isPC #modelessMessage.isHidden .ui-tooltip:before {
+  display: none!important;
+}
+
+.isPC #modelessMessage .modelessMessage-message {
+  margin: 0;
+  background: #444;
+  background: rgba(0,0,0,.8);
+  color: #fff;
+  text-shadow: 0 1px 0 #222;
+  margin: 0 0 1px;
+  text-align: center;
+}
+
+.isPC #modelessMessage .modelessMessage-message:after,.isPC #modelessMessage .modelessMessage-message:before {
+  content: '';
+  display: table;
+}
+
+.isPC #modelessMessage .modelessMessage-message:after {
+  clear: both;
+}
+
+.isPC #modelessMessage .modelessMessage-message button {
+  width: 50px;
+  height: 50px;
+  float: right;
+}
+
+.isPC #modelessMessage .modelessMessage-message button[disabled] {
+  background: 0 0!important;
+  border-color: transparent;
+}
+
+.isPC #modelessMessage .modelessMessage-body {
+  display: block;
+  width: calc(100% - 120px);
+  margin: 0 0 0 50px;
+  line-height: 50px;
+  float: left;
+}
+
+.isPC #modelessMessage .modelessMessage-body span {
+  display: inline-block;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+
+.isPC #modelessMessage i {
+  color: #fff;
+}
+
+.isTouch #modelessMessage {
+  position: fixed;
+  top: -48px;
+  left: 0;
+  width: 100%;
+  height: 48px;
+  -webkit-transition: top .5s cubic-bezier(.23,1,.32,1);
+  transition: top .5s cubic-bezier(.23,1,.32,1);
+  z-index: 50000;
+}
+
+.isTouch #modelessMessage.isShown {
+  top: 0;
+  top: constant(safe-area-inset-top);
+  top: env(safe-area-inset-top);
+}
+
+.isTouch #modelessMessage.isHidden .ui-tooltip:after,.isTouch #modelessMessage.isHidden .ui-tooltip:before {
+  display: none!important;
+}
+
+.isTouch #modelessMessage .modelessMessage-message {
+  margin: 0;
+  background: #444;
+  background: rgba(0,0,0,.8);
+  color: #fff;
+  text-shadow: 0 1px 0 #222;
+  margin: 0 0 1px;
+  text-align: center;
+  font-size: 11px;
+  padding-left: constant(safe-area-inset-left);
+  padding-left: env(safe-area-inset-left);
+  padding-right: constant(safe-area-inset-right);
+  padding-right: env(safe-area-inset-right);
+}
+
+.isTouch #modelessMessage .modelessMessage-message:after,.isTouch #modelessMessage .modelessMessage-message:before {
+  content: '';
+  display: table;
+}
+
+.isTouch #modelessMessage .modelessMessage-message:after {
+  clear: both;
+}
+
+.isTouch #modelessMessage .modelessMessage-message button {
+  width: 48px;
+  height: 48px;
+  float: right;
+}
+
+.isTouch #modelessMessage .modelessMessage-message button[disabled] {
+  background: 0 0!important;
+  border-color: transparent;
+}
+
+.isTouch #modelessMessage .modelessMessage-body {
+  display: block;
+  width: calc(100% - 96px);
+  margin: 0 0 0 48px;
+  line-height: 48px;
+  float: left;
+}
+
+.isTouch #modelessMessage .modelessMessage-body span {
+  display: inline-block;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+
+.isTouch #modelessMessage i {
+  color: #fff;
+}
+
 .isPC #globalHeaderPC {
   position: fixed;
   top: 0;
@@ -3341,64 +3482,6 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
 
 .isPC #globalHeaderPC-notification button img.isHidden {
   display: none;
-}
-
-.isPC #globalHeaderPC-profile .ui-contextMenu-content {
-  width: 175px;
-}
-
-.isPC #globalHeaderPC-profile .ui-contextMenu-content li:first-child a,.isPC #globalHeaderPC-profile .ui-contextMenu-content li:first-child button {
-  padding-top: 12px!important;
-}
-
-.isPC #globalHeaderPC-profile .ui-contextMenu-content li:last-child a,.isPC #globalHeaderPC-profile .ui-contextMenu-content li:last-child button {
-  padding-bottom: 12px!important;
-}
-
-.isPC #globalHeaderPC-profile .ui-contextMenu-content li.contextMenu-border+li a {
-  padding-top: 10px!important;
-}
-
-.isPC #globalHeaderPC-profile .ui-contextMenu-content li.contextMenu-border+li.works a {
-  padding-top: 12px!important;
-}
-
-.isPC #globalHeaderPC-profile .ui-contextMenu-content li.contextMenu-border a {
-  padding-bottom: 10px!important;
-}
-
-.isPC #globalHeaderPC-profile .ui-contextMenu-content li.works a {
-  padding-top: 12px!important;
-}
-
-.isPC #globalHeaderPC-profile .ui-contextMenu-content li a,.isPC #globalHeaderPC-profile .ui-contextMenu-content li button {
-  padding: 8px 10px!important;
-}
-
-.isPC #globalHeaderPC-profile-userName>a {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  line-height: 1.3;
-}
-
-.isPC #globalHeaderPC-profile-userName>a:focus .names>div:first-child,.isPC #globalHeaderPC-profile-userName>a:hover .names>div:first-child {
-  color: #0990cc;
-}
-
-.isPC #globalHeaderPC-profile-userName .names {
-  max-width: 130px;
-}
-
-.isPC #globalHeaderPC-profile-userName .names>div {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .isPC #globalHeaderPC-info {
@@ -4483,18 +4566,6 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   color: #0081c2;
 }
 
-.isPC #widget-user-header #user-profile {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-  padding: 30px 0;
-}
-
 .isPC #widget-user-header #user-description {
   max-width: 600px;
 }
@@ -4540,21 +4611,6 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
 
 .isPC #widget-user-header #user-meta a:hover {
   color: #0081c2;
-}
-
-.isTouch #widget-user-header #user-profile {
-  margin: 16px 16px 0;
-}
-
-.isTouch #widget-user-header #user-profile-header {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
 }
 
 .isTouch #widget-user-header #user-description {
@@ -4724,6 +4780,15 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   margin: 140px auto 0;
 }
 
+.isPC .widget-works-work-navigation dl:after,.isPC .widget-works-work-navigation dl:before {
+  content: '';
+  display: table;
+}
+
+.isPC .widget-works-work-navigation dl:after {
+  clear: both;
+}
+
 .isPC .widget-works-work-navigation dd,.isPC .widget-works-work-navigation dt {
   float: left;
   margin: 0;
@@ -4772,6 +4837,15 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
 
 .isTouch .widget-works-work-navigation {
   padding: 0 16px;
+}
+
+.isTouch .widget-works-work-navigation dl:after,.isTouch .widget-works-work-navigation dl:before {
+  content: '';
+  display: table;
+}
+
+.isTouch .widget-works-work-navigation dl:after {
+  clear: both;
 }
 
 .isTouch .widget-works-work-navigation #workAuthor,.isTouch .widget-works-work-navigation #workTitle {
@@ -5405,12 +5479,6 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   color: #444;
 }
 
-.isPC .widget-official .widget-official-header-profile {
-  font-size: .95em;
-  line-height: 1.4!important;
-  color: #555;
-}
-
 .isTouch .widget-official .widget-official-header {
   margin-left: 16px;
 }
@@ -5474,13 +5542,6 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
 
 .isTouch .widget-official .widget-official-header-activityName i {
   color: #222;
-}
-
-.isTouch .widget-official .widget-official-header-profile {
-  font-size: 12px;
-  line-height: 1.5!important;
-  color: #999;
-  padding-right: 16px;
 }
 
 .isPC .widget-official-item .widget-official-item-content {
@@ -12931,11 +12992,15 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   min-height: 320px;
 }
 
+#page-my-news-edit #uploadArea {
+  margin: 0 0 24px;
+}
+
 #page-my-news-edit #input-image {
   display: none;
 }
 
-#page-my-news-edit #upload.isHidden {
+#page-my-news-edit #upload.isHidden,#page-my-news-edit #uploading.isHidden {
   display: none;
 }
 
@@ -12974,34 +13039,54 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   list-style-type: none;
 }
 
+#page-my-news-edit #uploading {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  border: 1px dashed #bbb;
+}
+
 #page-my-news-edit.isPC #main {
   padding: 0 34px;
 }
 
-#page-my-news-edit.isPC #upload {
+#page-my-news-edit.isPC #upload,#page-my-news-edit.isPC #uploading {
   height: 144px;
 }
 
 @media screen and (max-width:1255px) {
-  #page-my-news-edit.isPC #upload {
+  #page-my-news-edit.isPC #upload,  #page-my-news-edit.isPC #uploading {
     height: 163px;
   }
 }
 
 @media screen and (max-width:980px) {
-  #page-my-news-edit.isPC #upload {
+  #page-my-news-edit.isPC #upload,  #page-my-news-edit.isPC #uploading {
     height: 182px;
   }
 }
 
 @media screen and (max-width:920px) {
-  #page-my-news-edit.isPC #upload {
+  #page-my-news-edit.isPC #upload,  #page-my-news-edit.isPC #uploading {
     height: 144px;
   }
 }
 
 #page-my-news-edit.isPC #upload button:focus,#page-my-news-edit.isPC #upload button:hover {
   border-color: #666;
+}
+
+#page-my-news-edit.isPC #upload button.isDragging {
+  border-color: #0081c2;
 }
 
 #page-my-news-edit.isTouch #main {
@@ -13018,7 +13103,7 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   height: calc(100vh - 475px);
 }
 
-#page-my-news-edit.isTouch #upload {
+#page-my-news-edit.isTouch #upload,#page-my-news-edit.isTouch #uploading {
   height: 118px;
 }
 
@@ -14262,7 +14347,7 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   margin: .5em 0 0;
 }
 
-#page-my-works-episodes-edit #contentAside-inner h3,#page-my-works-episodes-edit #contentAside-inner h4,#page-my-works-episodes-edit #contentAside-inner ol {
+#page-my-works-episodes-edit #contentAside-inner dl,#page-my-works-episodes-edit #contentAside-inner h3,#page-my-works-episodes-edit #contentAside-inner h4,#page-my-works-episodes-edit #contentAside-inner ol {
   margin: 0;
 }
 
@@ -15814,6 +15899,15 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   position: relative;
 }
 
+#page-works-work #workHeader dl:after,#page-works-work #workHeader dl:before {
+  content: '';
+  display: table;
+}
+
+#page-works-work #workHeader dl:after {
+  clear: both;
+}
+
 #page-works-work #workHeader dd,#page-works-work #workHeader dt {
   float: left;
   margin: 0;
@@ -16212,17 +16306,6 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   margin: 0 0 30px;
 }
 
-#page-works-work #author-information-profile-inner header {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
 #page-works-work #author-information-name {
   margin: 0;
   -webkit-box-flex: 1;
@@ -16323,6 +16406,15 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   margin: 0 auto 32px;
   position: relative;
   box-sizing: border-box;
+}
+
+#page-works-workTouch #workHeader dl:after,#page-works-workTouch #workHeader dl:before {
+  content: '';
+  display: table;
+}
+
+#page-works-workTouch #workHeader dl:after {
+  clear: both;
 }
 
 #page-works-workTouch #workHeader #workAuthor,#page-works-workTouch #workHeader #workTitle {
@@ -16651,21 +16743,6 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
 
 #page-works-workTouch #author-information-table>section {
   margin: 0 0 16px;
-}
-
-#page-works-workTouch #author-information-profile-inner {
-  margin: 0 16px;
-}
-
-#page-works-workTouch #author-information-profile-inner header {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
 }
 
 #page-works-workTouch #author-information-name {
@@ -18173,38 +18250,34 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   color: #666;
 }
 
-#page-settings #loyalty,#page-settings #notification,#page-settings #profile,#page-settings #settings {
+#page-settings #loyalty,#page-settings #notification,#page-settings #settings {
   margin: 30px 0;
 }
 
-#page-settings #loyalty.isHidden,#page-settings #notification.isHidden,#page-settings #profile.isHidden,#page-settings #settings.isHidden {
+#page-settings #loyalty.isHidden,#page-settings #notification.isHidden,#page-settings #settings.isHidden {
   display: none;
 }
 
-#page-settings #loyalty h4,#page-settings #notification h4,#page-settings #profile h4,#page-settings #settings h4 {
+#page-settings #loyalty h4,#page-settings #notification h4,#page-settings #settings h4 {
   margin: 0;
 }
 
-#page-settings #loyalty p,#page-settings #notification p,#page-settings #profile p,#page-settings #settings p {
+#page-settings #loyalty p,#page-settings #notification p,#page-settings #settings p {
   margin: 0;
 }
 
-#page-settings #loyalty header h3,#page-settings #notification header h3,#page-settings #profile header h3,#page-settings #settings header h3 {
+#page-settings #loyalty header h3,#page-settings #notification header h3,#page-settings #settings header h3 {
   font-size: 14px;
   margin: 0;
 }
 
-#page-settings #loyalty header p,#page-settings #notification header p,#page-settings #profile header p,#page-settings #settings header p {
+#page-settings #loyalty header p,#page-settings #notification header p,#page-settings #settings header p {
   color: #666;
   font-size: 13px;
 }
 
-#page-settings #loyalty header span,#page-settings #notification header span,#page-settings #profile header span,#page-settings #settings header span {
+#page-settings #loyalty header span,#page-settings #notification header span,#page-settings #settings header span {
   display: inline-block;
-}
-
-#page-settings #profile>section {
-  padding-top: 30px;
 }
 
 #page-settings #no-blocklist-link {
@@ -18215,7 +18288,7 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   margin: 0 0 30px;
 }
 
-#page-settings.isPC #loyalty section,#page-settings.isPC #notification section,#page-settings.isPC #profile section,#page-settings.isPC #settings section {
+#page-settings.isPC #loyalty section,#page-settings.isPC #notification section,#page-settings.isPC #settings section {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -18228,23 +18301,23 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   padding: 16px 0;
 }
 
-#page-settings.isPC #loyalty section section:first-child,#page-settings.isPC #notification section section:first-child,#page-settings.isPC #profile section section:first-child,#page-settings.isPC #settings section section:first-child {
+#page-settings.isPC #loyalty section section:first-child,#page-settings.isPC #notification section section:first-child,#page-settings.isPC #settings section section:first-child {
   border: none;
   padding: 0 0 16px;
 }
 
-#page-settings.isPC #loyalty>section:first-child,#page-settings.isPC #notification>section:first-child,#page-settings.isPC #profile>section:first-child,#page-settings.isPC #settings>section:first-child {
+#page-settings.isPC #loyalty>section:first-child,#page-settings.isPC #notification>section:first-child,#page-settings.isPC #settings>section:first-child {
   border: none;
   padding-top: 0;
 }
 
-#page-settings.isPC #loyalty header,#page-settings.isPC #notification header,#page-settings.isPC #profile header,#page-settings.isPC #settings header {
+#page-settings.isPC #loyalty header,#page-settings.isPC #notification header,#page-settings.isPC #settings header {
   padding: 0 0 1em;
   width: 135px;
   margin: 0 30px 0 0;
 }
 
-#page-settings.isPC #loyalty header+div,#page-settings.isPC #notification header+div,#page-settings.isPC #profile header+div,#page-settings.isPC #settings header+div {
+#page-settings.isPC #loyalty header+div,#page-settings.isPC #notification header+div,#page-settings.isPC #settings header+div {
   -webkit-box-flex: 1;
   -webkit-flex: 1;
   -ms-flex: 1;
@@ -18252,11 +18325,11 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   min-width: 0;
 }
 
-#page-settings.isPC #loyalty header p,#page-settings.isPC #notification header p,#page-settings.isPC #profile header p,#page-settings.isPC #settings header p {
+#page-settings.isPC #loyalty header p,#page-settings.isPC #notification header p,#page-settings.isPC #settings header p {
   margin: 4px 0 0;
 }
 
-#page-settings.isPC #loyalty .section-description,#page-settings.isPC #notification .section-description,#page-settings.isPC #profile .section-description,#page-settings.isPC #settings .section-description {
+#page-settings.isPC #loyalty .section-description,#page-settings.isPC #notification .section-description,#page-settings.isPC #settings .section-description {
   margin: 0 0 .75em!important;
 }
 
@@ -18343,25 +18416,25 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
   margin: 0 0 .5em!important;
 }
 
-#page-settings.isTouch #loyalty section,#page-settings.isTouch #notification section,#page-settings.isTouch #profile section,#page-settings.isTouch #settings section {
+#page-settings.isTouch #loyalty section,#page-settings.isTouch #notification section,#page-settings.isTouch #settings section {
   margin: 16px 0;
 }
 
-#page-settings.isTouch #loyalty>section:first-child,#page-settings.isTouch #notification>section:first-child,#page-settings.isTouch #profile>section:first-child,#page-settings.isTouch #settings>section:first-child {
+#page-settings.isTouch #loyalty>section:first-child,#page-settings.isTouch #notification>section:first-child,#page-settings.isTouch #settings>section:first-child {
   padding-top: 0;
 }
 
-#page-settings.isTouch #loyalty header h3,#page-settings.isTouch #notification header h3,#page-settings.isTouch #profile header h3,#page-settings.isTouch #settings header h3 {
+#page-settings.isTouch #loyalty header h3,#page-settings.isTouch #notification header h3,#page-settings.isTouch #settings header h3 {
   border-bottom: 1px solid #ddd;
   padding: 0 16px 8px;
   font-size: 11px;
 }
 
-#page-settings.isTouch #loyalty>section>header+div,#page-settings.isTouch #notification>section>header+div,#page-settings.isTouch #profile>section>header+div,#page-settings.isTouch #settings>section>header+div {
+#page-settings.isTouch #loyalty>section>header+div,#page-settings.isTouch #notification>section>header+div,#page-settings.isTouch #settings>section>header+div {
   margin: 0 16px;
 }
 
-#page-settings.isTouch #loyalty .section-description,#page-settings.isTouch #notification .section-description,#page-settings.isTouch #profile .section-description,#page-settings.isTouch #settings .section-description {
+#page-settings.isTouch #loyalty .section-description,#page-settings.isTouch #notification .section-description,#page-settings.isTouch #settings .section-description {
   margin: 8px 0 16px!important;
   font-size: 12px;
   line-height: 1.5;
@@ -18444,35 +18517,6 @@ input[type=button],input[type=checkbox],input[type=radio],input[type=submit] {
 
 #page-settings.isTouch #blocklist div {
   margin: 16px!important;
-}
-
-#page-settings-profile.isPC #container {
-  width: auto;
-  margin: 50px 0 0;
-  padding: 0;
-}
-
-#page-settings-profile.isPC #updateButton {
-  margin: 0 auto 60px;
-  border-top: 1px solid #ddd;
-  padding: 16px 0 0 165px;
-}
-
-#page-settings-profile.isTouch #container {
-  padding-top: 0;
-  max-width: 100%;
-}
-
-#page-settings-profile.isTouch #updateButton {
-  margin: 16px auto 24px;
-  border-top: 1px solid #ddd;
-  padding: 16px 16px 0;
-}
-
-#page-settings-profile.isTouch #updateButton button {
-  width: 100%;
-  box-sizing: border-box;
-  text-align: center;
 }
 
 #page-settings-blocklist ul {

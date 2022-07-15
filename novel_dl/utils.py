@@ -3,16 +3,15 @@ import importlib.util
 from .info import __appname__
 
 class NovelDLException(Exception):
+    def __init__(self,msg,**kw):
+        id = kw.pop("id",0)
+        msg = msg.format(**kw)
+        self.msg = "novel-dl: "+msg
+        self.errmsg = msg
+        self.id = id
+        super().__init__(msg)
     def console_message(self):
-        print(self.return_message(),file=sys.stderr)
-    def return_message(self):
-        return "novel-dl: "+self.args[0]
-    def return_id(self):
-        return self.args[1]
-
-
-def raise_error(msg,id=0):
-    raise NovelDLException(msg,id)
+        print(self.msg,file=sys.stderr)
 
 def get_config_path():
     if os.name == 'nt':
@@ -35,6 +34,6 @@ def deepupdate(dict_base, other):
     if isinstance(v, dict) and k in dict_base:
       deepupdate(dict_base[k], v)
     elif isinstance(v,list) and k in dict_base:
-        dict_base[k]+=v
+        dict_base[k]+=[i for i in v if not i in dict_base[k]]
     else:
       dict_base[k] = v

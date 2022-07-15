@@ -9,24 +9,26 @@ import argparse
 import json
 import urllib.parse
 from datetime import datetime
-from .downloader import *
-from .utils import *
+from .downloader import get_downloader
+from .utils import (
+    NovelDLException as NDLE,
+    deepupdate,
+)
 from .info import __version__
 
-return_code=0
 root = os.path.abspath(os.path.dirname(__file__))+"/"
 THEMES = ["auto"]+os.listdir(root+"themes/")
 url_reg = re.compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
 
 
-def main(args, bar=False):
-    if bar:
-        bar_output = sys.stdout
-    else:
+def main(args):
+    if args["quiet"]:
         bar_output = open(os.devnull, "w")
+    else:
+        bar_output = sys.stdout
 
     if not args["theme"] in THEMES:
-        raise_error('Invalid theme name `'+args["theme"]+'`')
+        raise NDLE('Invalid theme name `'+args["theme"]+'`')
 
     if args["axel"]:
         delay = 0.1
@@ -37,13 +39,13 @@ def main(args, bar=False):
     if nd_klass:
         nd = nd_klass(args["url"], delay=delay, bar_output=bar_output)
     else:
-        raise_error("URL is not supported")
+        raise NDLE("URL is not supported")
 
     nd.extract_info()
 
     if args["episode"]:
         if not re.match(r'^\d*$', args["episode"]) or int(args["episode"]) > nd.info["num_parts"] or int(args["episode"]) < 0:
-            raise_error("Incorrect episode number `"+args["episode"]+"`")
+            raise NDLE("Incorrect episode number `"+args["episode"]+"`")
         nd.mark_all("skip")
         nd.mark_part("dl", int(args["episode"]))
         args["episode"] = int(args["episode"])
@@ -58,7 +60,7 @@ def main(args, bar=False):
         with open(conf_file, "r") as f:
             conf = json.load(f)
     else:
-        raise_error("Cannot load theme config. config.json not found")
+        raise NDLE("Cannot load theme config. config.json not found")
 
     if conf.get('parent'):
         env_paths = [THEME_DIR, os.path.join(root, "themes", conf['parent'])]
@@ -69,9 +71,10 @@ def main(args, bar=False):
             root, "themes", conf['parent'], "config.json")
         if os.path.isfile(pconf_file):
             with open(pconf_file, "r") as f:
-                deepupdate(conf,json.load(f))
+                deepupdate(conf, json.load(f))
         else:
-            raise_error("Cannot load theme config. parent config.json not found")
+            raise NDLE(
+                "Cannot load theme config. parent config.json not found")
     else:
         env_paths = THEME_DIR
         static_files = [os.path.join(THEME_DIR, "static", i)
@@ -82,24 +85,41 @@ def main(args, bar=False):
         MEDIAS = conf["medias"]
     if not args["media"] in MEDIAS:
         MEDIAS.remove("")
-        raise_error("Invalid media type\nAvailable medias in this theme: ({})".format(
+        raise NDLE("Invalid media type\nAvailable medias in this theme: ({})".format(
             " ".join(MEDIAS)))
+
     if args["media"]:
         htmls = {"base": "base_{}.html".format(args["media"]), "index": "index_{}.html".format(
             args["media"]), "single": "single_{}.html".format(args["media"])}
     else:
         htmls = {"base": "base.html",
                  "index": "index.html", "single": "single.html"}
+    env = Environment(loader=FileSystemLoader(env_paths, encoding='utf8'))
+    try:
+        htmls = {i: env.get_template(htmls[i]) for i in htmls}
+    except TemplateNotFound as e:
+        raise NDLE("Cannot load theme file: "+e.name)
+    loads = {"js": [], "css": []}
+    if conf.get('loads'):
+        if type(conf["loads"].get('js')) is list:
+            loads["js"] = conf['loads']['js']
+
+        if type(conf["loads"].get('css')) is dict:
+            loads["css"] = [[j, k] for k, v in conf["loads"]['css'].items()
+                            for j in v]
 
     try:
         if nd.info["num_parts"] == 0 or args["episode"]:
-            ntype="short"
+            ntype = "short"
         else:
-            ntype="series"
+            ntype = "series"
+        if args["episode"]:
+            args["name"] = args["name"].format("", ncode=nd.ncode, title=re.sub(
+                r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]), media=args["media"], theme=args["theme"], type=ntype,episode=args["episode"])
         args["name"] = args["name"].format("", ncode=nd.ncode, title=re.sub(
-            r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]),media=args["media"],theme=args["theme"],type=ntype)
+            r'[\\|/|:|?|.|"|<|>|\|]', '', nd.info["title"]), media=args["media"], theme=args["theme"], type=ntype)
     except KeyError:
-        raise_error("Incorrect directory name format")
+        raise NDLE("Incorrect directory name format")
     now = datetime.now()
     args["name"] = now.strftime(args["name"])
     db_data = {}
@@ -131,22 +151,8 @@ def main(args, bar=False):
     except NovelDLException as e:
         if e.return_id() == 1:
             e.console_message()
-            return_code=1
         else:
             raise e
-
-    env = Environment(loader=FileSystemLoader(env_paths, encoding='utf8'))
-    try:
-        htmls = {i: env.get_template(htmls[i]) for i in htmls}
-    except TemplateNotFound as e:
-        raise_error("Cannot load theme file: "+e.name)
-    loads = {"js": [], "css": []}
-    if conf.get('loads'):
-        if type(conf["loads"].get('js')) is list:
-            loads["js"] = conf['loads']['js']
-
-        if type(conf["loads"].get('css')) is dict:
-            loads["css"] = [[j, k] for k,v in conf["loads"]['css'].items() for j in v]
 
     # Create directory
     if not os.path.isdir(ndir):
@@ -156,12 +162,14 @@ def main(args, bar=False):
         style = []
         script = []
         for file in loads['css']:
-            paths=[re.match(".*/"+file[0],i).string for i in static_files if re.match(".*/"+file[0],i)]
+            paths = [re.match(
+                ".*/"+file[0], i).string for i in static_files if re.match(".*/"+file[0], i)]
             if paths:
                 with open(paths[0], "r", encoding="utf-8") as f:
-                    style.append([f.read(),file[1]])
+                    style.append([f.read(), file[1]])
         for file in loads['js']:
-            paths=[re.match(".*/"+file,i).string for i in static_files if re.match(".*/"+file,i)]
+            paths = [re.match(
+                ".*/"+file, i).string for i in static_files if re.match(".*/"+file, i)]
             if paths:
                 with open(paths[0], "r", encoding="utf-8") as f:
                     script.append(f.read())
@@ -213,42 +221,42 @@ def command_line():
     parser = argparse.ArgumentParser(**kw)
     parser.add_argument('url', help="URL")
     general = parser.add_argument_group("General Options")
-    general.add_argument('-h','--help',action="help",help="show this help text and exit")
-    general.add_argument('-v','--version',action="version",version="%(prog)s {}".format(__version__))
-    general.add_argument('-q', "--quiet", action='store_false',
-                        help="suppress non-messages")
-    downloader=parser.add_argument_group("Downloader Options")
+    general.add_argument('-h', '--help', action="help",
+                         help="show this help text and exit")
+    general.add_argument('-v', '--version', action="version",
+                         version="%(prog)s {}".format(__version__))
+    general.add_argument('-q', "--quiet", action='store_true',
+                         help="suppress non-messages")
+    downloader = parser.add_argument_group("Downloader Options")
     downloader.add_argument('-a', "--axel", action='store_true',
-                        help="turn on axceleration mode")
-    formatter=parser.add_argument_group("Formatter Options")
+                            help="turn on axceleration mode")
+    formatter = parser.add_argument_group("Formatter Options")
     formatter.add_argument('-e', "--episode", default="",
-                        help="set download single episode as short novel")
+                           help="set download single episode as short novel")
     formatter.add_argument('-t', "--theme", default="auto",
-                        help="set novel's theme")
+                           help="set novel's theme")
     formatter.add_argument('-m', "--media", default="",
-                        help="generate html supporting only one media type")
+                           help="generate html supporting only one media type")
     formatter.add_argument('-r', "--renew", action='store_true',
-                        help="force to update all files")
+                           help="force to update all files")
     output = parser.add_argument_group("Output Options")
     output.add_argument(
         '-n', "--name", default="{title}", help="set output directory/file name")
     output.add_argument('-d', "--dir", default="", help="set output directory")
-
+    print(parser.parse_args().__dict__)
     args = parser.parse_args()
     args = args.__dict__
-    output = args.pop("quiet")
+    return_code=0
     try:
-        main(args, bar=output)
+        main(args)
     except NovelDLException as e:
         e.console_message()
         return_code=1
     else:
-        if return_code==0:
-            if output:
-                print("Successfully downloaded")
+        if not args["quiet"]:
+            print("Successfully downloaded")
     finally:
-        sys.exit(return_code)
-
+        return return_code
 
 def args(url="", save_dir="", renew=False, axel=False, episode="", theme="", media=""):
     return {"url": url, "dir": save_dir, "renew": renew, "axel": axel, "episode": episode, "theme": theme, "media": media}

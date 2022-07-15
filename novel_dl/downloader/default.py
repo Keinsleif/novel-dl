@@ -7,7 +7,9 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup as bs4
 from tqdm import tqdm
-from ..utils import *
+from ..utils import (
+    NovelDLException as NDLE,
+)
 
 
 class NovelDownloader(object):
@@ -15,7 +17,8 @@ class NovelDownloader(object):
     COOKIE = {}
 
     def __init__(self, url, delay=1, params=None,bar_output=sys.stdout):
-        self.status = ["INIT"]
+        self.classname=self.__class__.__name__
+        self.status = []
         self.bar_output=bar_output
         self._markers = ["dl", "skip"]
         self.url = url
@@ -24,18 +27,19 @@ class NovelDownloader(object):
         self.session = requests.Session()
         self.set_headers(self.HEADER)
         self.set_cookies(self.COOKIE)
-        retries = Retry(total=3, backoff_factor=1)
+        retries = Retry(total=3, backoff_factor=1,status_forcelist=[500, 502, 503, 504])
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
-        self.info = {"title": "", "desc": "", "author": [], "type": "", "num_parts": 0, "index": [], "epis": {}}
-        self._mark = []
-        self.novels = {}
+        self.initialize()
 
     def __del__(self):
         self.close()
 
     def initialize(self):
-        self.info = {"title": "", "desc": "", "author": "", "type": "", "num_parts": 0, "index": [], "epis": {}}
+        self.info = {"title": "", "desc": "", "author": [], "type": "", "num_parts": 0, "index": [], "epis": {}}
+        self._mark = []
+        self.novels = {}
+        self.status.append("INIT")
 
     def close(self):
         self.session.close()
@@ -62,7 +66,7 @@ class NovelDownloader(object):
         if not "INFO" in self.status:
             self.extract_info()
         if not com in self._markers:
-            raise_error("Part mark error: Invalid mark name")
+            raise NDLE("[{klass}] mark error: Invalid mark name",klass=self.classname)
         if part>0 and part<=self.info["num_parts"]:
             if com == "skip" and part in self._mark:
                 self._mark.remove(part)
@@ -73,7 +77,7 @@ class NovelDownloader(object):
         if not "INFO" in self.status:
             self.extract_info()
         if not com in self._markers:
-            raise_error("Part mark error: Invalid mark name")
+            raise NDLE("[{klass}] mark error: Invalid mark name", klass=self.classname)
         if com == "skip":
             self._mark.clear()
         elif com == "dl":
@@ -84,26 +88,26 @@ class NovelDownloader(object):
 
     def extract_info(self):
         try:
-            self.initialize()
+            if "NOVELS" in self.status:
+                self.initialize()
             self._real_extract_info()
         except KeyboardInterrupt:
-            raise_error("Operation canceled by user")
+            raise NDLE("Operation canceled by user")
         except requests.exceptions.ConnectionError as e:
-            raise_error("Network Error")
-        self.status.append("INFO")
-        self._mark = list(range(1, self.info["num_parts"]+1))
+            raise NDLE("[{klass}] Network Error",klass=self.classname)
+        else:
+            self.status.append("INFO")
+            self._mark = list(range(1, self.info["num_parts"]+1))
 
     def extract_novels(self):
         if not "INFO" in self.status:
-            result = self.extract_info()
-            if result == -1:
-                return -1
+            self.extract_info()
         try:
             self._real_extract_novels()
         except KeyboardInterrupt:
-            raise_error("Operation was canceled by user",id=1)
+            raise NDLE("Operation was canceled by user")
         except requests.exceptions.ConnectionError as e:
-            raise_error("Network Error",id=1)
+            raise NDLE("Network Error",id=1,klass=self.classname)
         self.status.append("NOVELS")
 
     def _real_extract_info(self):
@@ -142,7 +146,7 @@ class NarouND(NovelDownloader):
         data = self.get(self.indexurl)
         top_data = bs4(data.content, "html.parser")
         if top_data.select_one(".maintenance-container"):
-            raise_error("Narou is under maintenance")
+            raise NDLE("[{klass}] Narou is under maintenance",klass=self.classname)
         self.info["title"] = top_data.select_one("title").text
         author_data = top_data.select_one(".novel_writername")
         if author_data.a:
