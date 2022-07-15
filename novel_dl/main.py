@@ -243,7 +243,6 @@ def command_line():
     output.add_argument(
         '-n', "--name", default="{title}", help="set output directory/file name")
     output.add_argument('-d', "--dir", default="", help="set output directory")
-    print(parser.parse_args().__dict__)
     args = parser.parse_args()
     args = args.__dict__
     return_code=0
