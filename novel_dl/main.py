@@ -148,8 +148,8 @@ def main(args):
 
     try:
         nd.extract_novels()
-    except NovelDLException as e:
-        if e.return_id() == 1:
+    except NDLE as e:
+        if e.id == 1:
             e.console_message()
         else:
             raise e
@@ -248,7 +248,7 @@ def command_line():
     return_code=0
     try:
         main(args)
-    except NovelDLException as e:
+    except NDLE as e:
         e.console_message()
         return_code=1
     else:
@@ -257,8 +257,8 @@ def command_line():
     finally:
         return return_code
 
-def args(url="", save_dir="", renew=False, axel=False, episode="", theme="", media=""):
-    return {"url": url, "dir": save_dir, "renew": renew, "axel": axel, "episode": episode, "theme": theme, "media": media}
+def args(url="", save_dir="", renew=False, axel=False, episode="", theme="", media="", quiet=False):
+    return {"url": url, "dir": save_dir, "renew": renew, "axel": axel, "episode": episode, "theme": theme, "media": media,"quiet":False}
 
 
 if __name__ == "__main__":

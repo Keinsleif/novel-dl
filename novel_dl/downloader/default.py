@@ -11,25 +11,13 @@ from ..utils import (
     NovelDLException as NDLE,
 )
 
-
 class NovelDownloader(object):
-    HEADER = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
-    COOKIE = {}
-
-    def __init__(self, url, delay=1, params=None,bar_output=sys.stdout):
+    def __init__(self, url, bar_output=sys.stdout):
         self.classname=self.__class__.__name__
         self.status = []
+        self._set_status=self.status.append
         self.bar_output=bar_output
-        self._markers = ["dl", "skip"]
-        self.url = url
-        self.delay = delay
-        self.params = params
-        self.session = requests.Session()
-        self.set_headers(self.HEADER)
-        self.set_cookies(self.COOKIE)
-        retries = Retry(total=3, backoff_factor=1,status_forcelist=[500, 502, 503, 504])
-        self.session.mount("https://", HTTPAdapter(max_retries=retries))
-        self.session.mount("http://", HTTPAdapter(max_retries=retries))
+        self._markers = ["get", "skip"]
         self.initialize()
 
     def __del__(self):
@@ -39,29 +27,11 @@ class NovelDownloader(object):
         self.info = {"title": "", "desc": "", "author": [], "type": "", "num_parts": 0, "index": [], "epis": {}}
         self._mark = []
         self.novels = {}
-        self.status.append("INIT")
+        self._set_status("INIT")
 
     def close(self):
-        self.session.close()
-
-    def set_cookies(self, cookies):
-        self.session.cookies.update(cookies)
-
-    def get_cookies(self):
-        return self.session.cookies
-
-    def set_headers(self, headers):
-        self.session.headers.update(headers)
-
-    def get_headers(self):
-        return self.session.headers
-
-    def get(self, url, params=None):
-        if not params:
-            params = self.params
-        result = self.session.get(url, params=params)
-        return result
-
+        pass
+ 
     def mark_part(self, com, part):
         if not "INFO" in self.status:
             self.extract_info()
@@ -83,7 +53,8 @@ class NovelDownloader(object):
         elif com == "dl":
             self._mark = list(range(1,self.info["num_parts"]+1))
 
-    def match_url(url):
+    @classmethod
+    def match_url(cls,url):
         pass
 
     def extract_info(self):
@@ -93,10 +64,8 @@ class NovelDownloader(object):
             self._real_extract_info()
         except KeyboardInterrupt:
             raise NDLE("Operation canceled by user")
-        except requests.exceptions.ConnectionError as e:
-            raise NDLE("[{klass}] Network Error",klass=self.classname)
         else:
-            self.status.append("INFO")
+            self._set_status("INFO")
             self._mark = list(range(1, self.info["num_parts"]+1))
 
     def extract_novels(self):
@@ -106,9 +75,7 @@ class NovelDownloader(object):
             self._real_extract_novels()
         except KeyboardInterrupt:
             raise NDLE("Operation was canceled by user")
-        except requests.exceptions.ConnectionError as e:
-            raise NDLE("Network Error",id=1,klass=self.classname)
-        self.status.append("NOVELS")
+        self._set_status("NOVELS")
 
     def _real_extract_info(self):
         pass
@@ -124,20 +91,95 @@ class NovelDownloader(object):
         return db
 
 
-class NarouND(NovelDownloader):
+
+class HttpNovelDownloader(NovelDownloader):
+    HEADER = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
+    COOKIE = {}
+
+    def __init__(self, url, delay=1, bar_output=sys.stdout):
+        super().__init__(url,bar_output)
+        if not self.match_url(url):
+            raise NDLE("[{klass}] Invalid url for this ND",klass=self.classname)
+        self.url = url
+        self.delay = delay
+        self.params = {}
+        self.session = requests.Session()
+        self.set_headers(self.HEADER)
+        self.set_cookies(self.COOKIE)
+        retries = Retry(total=3, backoff_factor=1,status_forcelist=[500, 502, 503, 504])
+        self.session.mount("https://", HTTPAdapter(max_retries=retries))
+        self.session.mount("http://", HTTPAdapter(max_retries=retries))
+
+    def close(self):
+        self.session.close()
+
+    @classmethod
+    def match_url(cls,url):
+        if re.match("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+", url):
+            return True
+        else:
+            return False
+
+    def set_cookies(self, cookies):
+        self.session.cookies.update(cookies)
+
+    def get_cookies(self):
+        return self.session.cookies
+
+    def set_headers(self, headers):
+        self.session.headers.update(headers)
+
+    def get_headers(self):
+        return self.session.headers
+
+    def get(self, url, params=None):
+        if not params:
+            params = self.params
+        result = self.session.get(url, params=params)
+        return result
+
+    def extract_info(self):
+        try:
+            if "NOVELS" in self.status:
+                self.initialize()
+            self._real_extract_info()
+        except KeyboardInterrupt:
+            raise NDLE("Operation canceled by user")
+        except requests.exceptions.ConnectionError as e:
+            raise NDLE("[{klass}] Network Error",klass=self.classname)
+        else:
+            self._set_status("INFO")
+            self._mark = list(range(1, self.info["num_parts"]+1))
+
+    def extract_novels(self):
+        if not "INFO" in self.status:
+            self.extract_info()
+        try:
+            self._real_extract_novels()
+        except KeyboardInterrupt:
+            raise NDLE("Operation was canceled by user")
+        except requests.exceptions.ConnectionError as e:
+            raise NDLE("Network Error",id=1,klass=self.classname)
+        self._set_status("NOVELS")
+
+
+class NarouND(HttpNovelDownloader):
     COOKIE = {'over18': 'yes'}
 
-    def __init__(self, url, delay=1, params=None, bar_output=sys.stdout):
+    def __init__(self, url, delay=1, bar_output=sys.stdout):
         self.auto_theme = "narou"
-        super().__init__(url, delay, params,bar_output=bar_output)
+        super().__init__(url, delay,bar_output=bar_output)
         ret = urllib.parse.urlparse(url)
         self.ncode = re.match(r'/(n[0-9a-zA-Z]+)', ret.path).group(1)
-        self.baseurl = "https://{}".format(ret.hostname)
+        self.baseurl = ret.scheme+"://"+ret.hostname
         self.indexurl = self.baseurl+"/"+self.ncode
 
-    def match_url(url):
+    @classmethod
+    def match_url(cls,url):
+        p = super().match_url(url)
         ret = urllib.parse.urlparse(url)
-        if ret.hostname == "ncode.syosetu.com" or ret.hostname == "novel18.syosetu.com":
+        f = ret.hostname == "ncode.syosetu.com" or ret.hostname == "novel18.syosetu.com" 
+        if p and f and re.match(r'/(n[0-9a-zA-Z]+)', ret.path):
             return True
         else:
             return False
@@ -165,7 +207,7 @@ class NarouND(NovelDownloader):
             [i.p.unwrap() for i in l]
             body = [str(i) for i in l]
             self.novels.update({0:(self.info["title"], body)})
-            self.status.append("NOVELS")
+            self._set_status("NOVELS")
             return
 
         eles = bs4(str(index_raw).replace("\n", ""),"html.parser").contents[0].contents
@@ -204,18 +246,20 @@ class NarouND(NovelDownloader):
                 time.sleep(self.delay)
 
 
-class KakuyomuND(NovelDownloader):
-    def __init__(self,url,delay=1,params=None, bar_output=sys.stdout):
+class KakuyomuND(HttpNovelDownloader):
+    def __init__(self,url,delay=1, bar_output=sys.stdout):
         self.auto_theme = "kakuyomu"
-        super().__init__(url,delay,params,bar_output=bar_output)
+        super().__init__(url,delay,bar_output=bar_output)
         ret = urllib.parse.urlparse(url)
         self.ncode = re.match(r'/works/([0-9]+)',ret.path).group(1)
-        self.baseurl = "https://{}".format(ret.hostname)
+        self.baseurl = ret.scheme+"://"+"kakuyomu.jp"
         self.indexurl = self.baseurl+"/works/"+self.ncode
 
-    def match_url(url):
+    @classmethod
+    def match_url(cls,url):
+        p = super().match_url(url)
         ret = urllib.parse.urlparse(url)
-        if ret.hostname == "kakuyomu.jp":
+        if p and ret.hostname == "kakuyomu.jp" and re.match(r'/works/([0-9]+)',ret.path):
             return True
         else:
             return False
@@ -265,3 +309,6 @@ class KakuyomuND(NovelDownloader):
                 self.novels.update({part:(subtitle, body)})
                 pbar.update()
                 time.sleep(self.delay)
+
+
+#TODO FileND
