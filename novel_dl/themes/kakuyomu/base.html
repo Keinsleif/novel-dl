@@ -173,7 +173,7 @@
           <li class="widget-toc-episode">
             <a href="{{i['part']}}.html" class="widget-toc-episode-episodeTitle">
               <span class="widget-toc-episode-titleLabel js-vertical-composition-item" data-vertical-composition-done="true">{{ i['text'] }}</span>
-              <time class="widget-toc-episode-datePublished" datetime="{{i['time'].strftime('%Y-%m-%dT%H:%M:%S+09:00')}}">{{i['time'].strftime('%Y年%m月%d日 %H:%M')}}</time>
+              <time class="widget-toc-episode-datePublished" datetime="{{i['time'].strftime('%Y-%m-%dT%H:%M:%SZ')}}">{{i['time'].strftime('%Y年%m月%d日 %H:%M')}}</time>
             </a>
           </li>
 {%- endif %}

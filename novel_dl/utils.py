@@ -1,4 +1,5 @@
 import sys,os
+from pathlib import Path
 import importlib.util
 from .info import __appname__
 
@@ -15,11 +16,11 @@ class NovelDLException(Exception):
 
 def get_config_path():
     if os.name == 'nt':
-        path = os.getenv('APPDATA')
+        path = Path(os.getenv('APPDATA'))
     else:
-        path = os.path.expanduser('~/.config')
+        path = Path('~/.config').expanduser()
 
-    return os.path.join(path, __appname__.lower())
+    return path / __appname__.lower()
 
 def import_from_file(name,path):
     if not os.path.isfile(path):

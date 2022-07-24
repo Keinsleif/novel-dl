@@ -2,7 +2,8 @@ import time, re, sys, json, os
 import urllib.parse
 from datetime import datetime as dtime
 from pytz import timezone
-import requests
+from requests import Session
+from requests.exceptions import ConnectionError
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup as bs4
@@ -12,75 +13,72 @@ from ..utils import (
 )
 
 class NovelDownloader(object):
-    def __init__(self, url, bar_output=sys.stdout):
+    def __init__(self, url, em):
         self.classname=self.__class__.__name__
         self.status = []
         self._set_status=self.status.append
-        self.bar_output=bar_output
+        self.bar_output=em.env["bar_output"]
         self._markers = ["get", "skip"]
         self.initialize()
 
     def __del__(self):
-        self.close()
+        pass
 
     def initialize(self):
         self.info = {"title": "", "desc": "", "author": [], "type": "", "num_parts": 0, "index": [], "epis": {}}
         self._mark = []
         self.novels = {}
         self._set_status("INIT")
-
-    def close(self):
-        pass
  
     def mark_part(self, com, part):
         if not "INFO" in self.status:
-            self.extract_info()
+            self.fetch_info()
         if not com in self._markers:
             raise NDLE("[{klass}] mark error: Invalid mark name",klass=self.classname)
         if part>0 and part<=self.info["num_parts"]:
             if com == "skip" and part in self._mark:
                 self._mark.remove(part)
-            elif com == "dl" and not part in self._mark:
+            elif com == "get" and not part in self._mark:
                 self._mark.append(part)
 
     def mark_all(self,com):
         if not "INFO" in self.status:
-            self.extract_info()
+            self.fetch_info()
         if not com in self._markers:
             raise NDLE("[{klass}] mark error: Invalid mark name", klass=self.classname)
         if com == "skip":
             self._mark.clear()
-        elif com == "dl":
+        elif com == "get":
             self._mark = list(range(1,self.info["num_parts"]+1))
 
     @classmethod
     def match_url(cls,url):
         pass
 
-    def extract_info(self):
+    def fetch_info(self):
         try:
             if "NOVELS" in self.status:
                 self.initialize()
-            self._real_extract_info()
+            self._real_fetch_info()
         except KeyboardInterrupt:
             raise NDLE("Operation canceled by user")
         else:
             self._set_status("INFO")
             self._mark = list(range(1, self.info["num_parts"]+1))
 
-    def extract_novels(self):
+    def fetch_novels(self):
         if not "INFO" in self.status:
-            self.extract_info()
+            self.fetch_info()
         try:
-            self._real_extract_novels()
+            self._real_fetch_novels()
         except KeyboardInterrupt:
             raise NDLE("Operation was canceled by user")
         self._set_status("NOVELS")
 
-    def _real_extract_info(self):
+    def _real_fetch_info(self):
         pass
 
-    def _real_extract_novels(self):
+    def _real_fetch_novels(self):
         pass
 
     def gen_db(self,db_data={}):
@@ -95,22 +93,23 @@ class NovelDownloader(object):
 class HttpNovelDownloader(NovelDownloader):
     HEADER = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
     COOKIE = {}
+    URL_REG = re.compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
 
-    def __init__(self, url, delay=1, bar_output=sys.stdout):
-        super().__init__(url,bar_output)
+    def __init__(self, url, em):
+        super().__init__(url,em)
         if not self.match_url(url):
             raise NDLE("[{klass}] Invalid url for this ND",klass=self.classname)
         self.url = url
-        self.delay = delay
+        self.delay = em.env["delay"]
         self.params = {}
-        self.session = requests.Session()
+        self.session = Session()
         self.set_headers(self.HEADER)
         self.set_cookies(self.COOKIE)
-        retries = Retry(total=3, backoff_factor=1,status_forcelist=[500, 502, 503, 504])
+        retries = Retry(total=em.conf["retries"], backoff_factor=1,status_forcelist=[500, 502, 503, 504])
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
 
-    def close(self):
+    def __del__(self):
         self.session.close()
 
     @classmethod
@@ -136,43 +135,45 @@ class HttpNovelDownloader(NovelDownloader):
         if not params:
             params = self.params
         result = self.session.get(url, params=params)
-        return result
+        return result.content
 
-    def extract_info(self):
+    def fetch_info(self):
         try:
             if "NOVELS" in self.status:
                 self.initialize()
-            self._real_extract_info()
+            self._real_fetch_info()
         except KeyboardInterrupt:
             raise NDLE("Operation canceled by user")
-        except requests.exceptions.ConnectionError as e:
+        except ConnectionError as e:
             raise NDLE("[{klass}] Network Error",klass=self.classname)
         else:
             self._set_status("INFO")
             self._mark = list(range(1, self.info["num_parts"]+1))
 
-    def extract_novels(self):
+    def fetch_novels(self):
         if not "INFO" in self.status:
-            self.extract_info()
+            self.fetch_info()
         try:
-            self._real_extract_novels()
+            self._real_fetch_novels()
         except KeyboardInterrupt:
             raise NDLE("Operation was canceled by user")
-        except requests.exceptions.ConnectionError as e:
+        except ConnectionError as e:
             raise NDLE("Network Error",id=1,klass=self.classname)
         self._set_status("NOVELS")
 
 
 class NarouND(HttpNovelDownloader):
     COOKIE = {'over18': 'yes'}
+    BASE_URL = "{scheme}://{host}"
+    INDEX_URL = "{base}/{ncode}"
 
-    def __init__(self, url, delay=1, bar_output=sys.stdout):
+    def __init__(self, url, em):
         self.auto_theme = "narou"
-        super().__init__(url, delay,bar_output=bar_output)
+        super().__init__(url, em)
         ret = urllib.parse.urlparse(url)
         self.ncode = re.match(r'/(n[0-9a-zA-Z]+)', ret.path).group(1)
-        self.baseurl = ret.scheme+"://"+ret.hostname
-        self.indexurl = self.baseurl+"/"+self.ncode
+        self.baseurl = self.BASE_URL.format(scheme=ret.scheme,host=ret.hostname)
+        self.indexurl = self.INDEX_URL.format(base=self.baseurl,ncode=self.ncode)
 
     @classmethod
     def match_url(cls,url):
@@ -184,9 +185,9 @@ class NarouND(HttpNovelDownloader):
         else:
             return False
 
-    def _real_extract_info(self):
+    def _real_fetch_info(self):
         data = self.get(self.indexurl)
-        top_data = bs4(data.content, "html.parser")
+        top_data = bs4(data, "html.parser")
         if top_data.select_one(".maintenance-container"):
             raise NDLE("[{klass}] Narou is under maintenance",klass=self.classname)
         self.info["title"] = top_data.select_one("title").text
@@ -202,13 +203,6 @@ class NarouND(HttpNovelDownloader):
         else:
             self.info["num_parts"] = 0
             self.info["type"] = "short"
-            body = top_data.select_one("#novel_honbun")
-            l = [bs4(str(i), "html.parser") for i in body("p")]
-            [i.p.unwrap() for i in l]
-            body = [str(i) for i in l]
-            self.novels.update({0:(self.info["title"], body)})
-            self._set_status("NOVELS")
-            return
 
         eles = bs4(str(index_raw).replace("\n", ""),"html.parser").contents[0].contents
         c = ""
@@ -226,14 +220,21 @@ class NarouND(HttpNovelDownloader):
                 part = part+1
         self.info["desc"] = "".join([str(i) for i in top_data.select_one("#novel_ex").contents])
 
-    def _real_extract_novels(self):
-        if self.info["num_parts"] == 0:
+    def _real_fetch_novels(self):
+        if self.info["type"] == "short":
+            data = self.get(self.indexurl)
+            top_data = bs4(data, "html.parser")
+            body = top_data.select_one("#novel_honbun")
+            l = [bs4(str(i), "html.parser") for i in body("p")]
+            [i.p.unwrap() for i in l]
+            body = [str(i) for i in l]
+            self.novels.update({0:(self.info["title"], body)})
             return
         with tqdm(total=len(self._mark),file=self.bar_output,unit="parts") as pbar:
             pbar.set_description("Downloading ")
             for part in self._mark:
                 res = self.get(self.info["epis"][part]["url"])
-                soup = bs4(res.content, "html.parser")
+                soup = bs4(res, "html.parser")
                 subtitle = soup.select_one(".novel_subtitle").text
                 body = soup.select_one("#novel_honbun")
 
@@ -247,13 +248,15 @@ class NarouND(HttpNovelDownloader):
 
 
 class KakuyomuND(HttpNovelDownloader):
-    def __init__(self,url,delay=1, bar_output=sys.stdout):
+    BASE_URL = "{scheme}://kakuyomu.jp"
+    INDEX_URL = "{base}/works/{ncode}"
+    def __init__(self,url,em):
         self.auto_theme = "kakuyomu"
-        super().__init__(url,delay,bar_output=bar_output)
+        super().__init__(url,em)
         ret = urllib.parse.urlparse(url)
         self.ncode = re.match(r'/works/([0-9]+)',ret.path).group(1)
-        self.baseurl = ret.scheme+"://"+"kakuyomu.jp"
-        self.indexurl = self.baseurl+"/works/"+self.ncode
+        self.baseurl = self.BASE_URL.format(scheme=ret.scheme)
+        self.indexurl = self.INDEX_URL.format(base=self.baseurl,ncode=self.ncode)
 
     @classmethod
     def match_url(cls,url):
@@ -264,9 +267,9 @@ class KakuyomuND(HttpNovelDownloader):
         else:
             return False
 
-    def _real_extract_info(self):
+    def _real_fetch_info(self):
         data = self.get(self.indexurl)
-        top_data = bs4(data.content, "html.parser")
+        top_data = bs4(data, "html.parser")
         index_raw=top_data.select_one(".widget-toc-items")
         raws=index_raw.select("li.widget-toc-episode")
         self.info["num_parts"] = len(raws)
@@ -283,7 +286,7 @@ class KakuyomuND(HttpNovelDownloader):
                 self.info["index"].append({"type": "chapter", "id": cid, "text": ele.text})
                 c = ele.text
             elif re.match(r'.+widget-toc-episode',str(ele)):
-                timestamp=dtime.strptime(ele.a.time.get('datetime'),"%Y-%m-%dT%H:%M:%SZ").astimezone(timezone('Asia/Tokyo'))
+                timestamp=dtime.strptime(ele.time.get('datetime'),"%Y-%m-%dT%H:%M:%SZ").astimezone(timezone('Asia/Tokyo'))
                 self.info["index"].append({"type": "episode", "part": part, "text": ele.span.text, "time": timestamp})
                 self.info["epis"][part]={"subtitle": ele.span.text, "url": self.baseurl+ele.a.attrs["href"], "chap": c, "time": timestamp}
                 part=part+1
@@ -293,12 +296,12 @@ class KakuyomuND(HttpNovelDownloader):
             desc.span.unwrap()
         self.info["desc"]="".join([str(i) for i in desc.contents])
 
-    def _real_extract_novels(self):
+    def _real_fetch_novels(self):
         with tqdm(total=len(self._mark),file=self.bar_output,unit="parts") as pbar:
             pbar.set_description("Downloading ")
             for part in self._mark:
                 res = self.get(self.info["epis"][part]["url"])
-                soup = bs4(res.content, "html.parser")
+                soup = bs4(res, "html.parser")
                 subtitle=soup.select_one(".widget-episodeTitle").text
                 body=soup.select_one(".widget-episodeBody")
 

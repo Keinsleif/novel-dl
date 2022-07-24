@@ -90,14 +90,11 @@
           <li class="widget-toc-episode">
             <a href="{{ dex['part']}}.html" class="widget-toc-episode-episodeTitle">
               <span class="widget-toc-episode-titleLabel js-vertical-composition-item">{{ dex['text'] }}</span>
-			  <time class="widget-toc-episode-datePublished" datetime="{{dex['time'].strftime('%Y-%m-%dT%H:%M:%S+09:00')}}">{{dex['time'].strftime('%Y年%m月%d日')}}</time>
+			  <time class="widget-toc-episode-datePublished" datetime="{{dex['time'].strftime('%Y-%m-%dT%H:%M:%SZ')}}">{{dex['time'].strftime('%Y年%m月%d日')}}</time>
             </a>
           </li>
 {%- endif %}
 {%- endfor %}
-          <li class="widget-toc-episode">
-              <span class="widget-toc-episode-titleLabel js-vertical-composition-item">&nbsp;</span>
-          </li>
     </ol>
   </div>
 </section>
@@ -195,9 +192,6 @@
           </li>
 {%- endif %}
 {%- endfor %}
-          <li class="widget-toc-episode">
-              <span class="widget-toc-episode-titleLabel js-vertical-composition-item">&nbsp;</span>
-          </li>
     </ol>
   </div>
 </section>
