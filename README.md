@@ -24,25 +24,26 @@ UbuntuやCentOSなどのMacOSおよびLinux、つまりUnix系OSで動作する�
     novel-dl [OPTIONS] <url>
 
 # Options
-- -d, --dir  
-    生成したファイル群の出力先フォルダを指定します。  
-    フォルダ名にはstrftimeの書式及び、以下のテンプレートが使用できます。  
-    "{"および"}"をエスケープする場合には  
-    "{"を"{{"に、"}"を"}}"に置き換えます。
-  - `title` Novel title (default)  
-  - `ncode` Novel identifier
+### General Options
+- -h, --help  
+    ヘルプを出力します
+- -v, --version  
+    バージョン情報を出力します
+- -q, --quiet  
+    エラー以外の出力を制限します。  
 
-- -r, --renew  
-    すでに存在する話をスキップせず、上書きし、更新します。  
-
+### Downloader Options
 - -a, --axel  
     遅延時間を無くすことでダウンロード速度を加速させます。  
     ※遅延時間を設けているのはサーバーに過度な負担をかけないためです。  
     何度もこのオプションを用いてダウンロードするとサイト側の利用規約の禁止事項に抵触する可能性があります。  
 
-- -e, --episode <episode num>  
-    特定の話を指定し、短編と同じような形で出力します。  
+- -f, --from-file  
+    すでにダウンロードされた小説からデータを取得します。  
+    `URL`には小説ディレクトリへのパスを指定します。  
+    短編形式で出力されたファイル(html単体)には非対応
 
+### Formatter Options
 - -t, --theme <theme name>  
     出力するファイルのテーマを指定します。  
     これにより、小説の取得元に関わらず、決まった見た目のファイルを出力することができます。  
@@ -53,13 +54,34 @@ UbuntuやCentOSなどのMacOSおよびLinux、つまりUnix系OSで動作する�
     多くの場合、これはファイルサイズ削減のために使用されます。  
     使用するテーマによって指定できるメディアタイプが違います。  
 
-- -q, --quiet
-    エラー以外の出力を制限します。
+- -r, --renew  
+    すでに存在する話をスキップせず、上書きし、更新します。  
+
+- -e, --episode <episode num>  
+    特定の話を指定し、短編と同じような形で出力します。  
+
+### Output Options
+
+- -n, --name  
+    出力フォルダ名、または出力ファイル名をのテンプレートを指定します。
+    フォルダ名にはstrftimeの書式及び、以下のテンプレートが使用できます。  
+    "{"および"}"をエスケープする場合には  
+    "{"を"{{"に、"}"を"}}"に置き換えます。
+  - `title` Novel title (default)  
+  - `ncode` Novel identifier  
+  - `theme` Novel format theme  
+  - `media` Novel format media type  
+  - `type` Novel type (series, single)  
+  - `episode` Novel episode number
+
+- -d, --dir  
+    生成したファイル群の出力先フォルダを指定します。  
+
 
 # Requirement (環境)
 
 - Unix-like operating systems
-- Python >= 3.3
+- Python >= 3.6
 - [Main libraries]
     - beautifulsoup4
     - Jinja2

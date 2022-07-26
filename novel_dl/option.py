@@ -159,14 +159,14 @@ class EnvManager(object):
         downloader.add_argument("-a", "--axel", action="store_true", help="turn on axceleration mode")
         downloader.add_argument("-f", "--from-file", action="store_true", help="turn on extract from downloaded file")
         formatter = self.parser.add_argument_group("Formatter Options")
-        formatter.add_argument(
-            "-e", "--episode", default=0, help="set download single episode as short novel", type=int
-        )
         formatter.add_argument("-t", "--theme", default=self.conf["default_theme"], help="set novel's theme", type=str)
         formatter.add_argument(
             "-m", "--media", default="", help="generate html supporting only one media type", type=str
         )
         formatter.add_argument("-r", "--renew", action="store_true", help="force to update all files")
+        formatter.add_argument(
+            "-e", "--episode", default=0, help="set download single episode as short novel", type=int
+        )
         output = self.parser.add_argument_group("Output Options")
         output.add_argument(
             "-n", "--name", default=self.conf["output_format"], help="set output directory/file name", type=str
