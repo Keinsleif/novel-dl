@@ -1,4 +1,4 @@
-import time, re, sys, json, os
+import time, re
 import urllib.parse
 from datetime import datetime as dtime
 from pytz import timezone
@@ -13,14 +13,15 @@ from ..utils import (
     cjoin,
 )
 
+
 class NovelDownloader(object):
     _markers = ["get", "skip"]
 
     def __init__(self, em):
-        self.classname=self.__class__.__name__
+        self.classname = self.__class__.__name__
         self.status = []
-        self._set_status=self.status.append
-        self.bar_output=em.env["bar_output"]
+        self._set_status = self.status.append
+        self.bar_output = em.env["bar_output"]
         self.initialize()
 
     def __del__(self):
@@ -31,19 +32,19 @@ class NovelDownloader(object):
         self._mark = []
         self.novels = {}
         self._set_status("INIT")
- 
+
     def mark_part(self, com, part):
         if not "INFO" in self.status:
             self.fetch_info()
         if not com in self._markers:
-            raise NDLE("[{klass}] mark error: Invalid mark name",klass=self.classname)
-        if part>0 and part<=self.info["num_parts"]:
+            raise NDLE("[{klass}] mark error: Invalid mark name", klass=self.classname)
+        if part > 0 and part <= self.info["num_parts"]:
             if com == "skip" and part in self._mark:
                 self._mark.remove(part)
             elif com == "get" and not part in self._mark:
                 self._mark.append(part)
 
-    def mark_all(self,com):
+    def mark_all(self, com):
         if not "INFO" in self.status:
             self.fetch_info()
         if not com in self._markers:
@@ -51,10 +52,10 @@ class NovelDownloader(object):
         if com == "skip":
             self._mark.clear()
         elif com == "get":
-            self._mark = list(range(1,self.info["num_parts"]+1))
+            self._mark = list(range(1, self.info["num_parts"] + 1))
 
     @classmethod
-    def match_url(cls,url):
+    def match_url(cls, url):
         pass
 
     def fetch_info(self):
@@ -66,7 +67,7 @@ class NovelDownloader(object):
             raise NDLE("Operation canceled by user")
         else:
             self._set_status("INFO")
-            self._mark = list(range(1, self.info["num_parts"]+1))
+            self._mark = list(range(1, self.info["num_parts"] + 1))
 
     def fetch_novels(self):
         if not "INFO" in self.status:
@@ -83,13 +84,18 @@ class NovelDownloader(object):
     def _real_fetch_novels(self):
         pass
 
-    def gen_db(self,db_data={}):
-        db = {"url": self.indexurl, "title": self.info["title"], "num_parts": self.info["num_parts"], "author": self.info["author"], "epis": {}}
+    def gen_db(self, db_data={}):
+        db = {
+            "url": self.indexurl,
+            "title": self.info["title"],
+            "num_parts": self.info["num_parts"],
+            "author": self.info["author"],
+            "epis": {},
+        }
         if db_data:
-            db["epis"]={int(i):j for i,j in db_data["epis"].items()}
-        db["epis"].update({i:self.info["epis"][i]["time"].isoformat() for i in self.novels})
+            db["epis"] = {int(i): j for i, j in db_data["epis"].items()}
+        db["epis"].update({i: self.info["epis"][i]["time"].isoformat() for i in self.novels})
         return db
-
 
 
 class HttpNovelDownloader(NovelDownloader):
@@ -105,7 +111,7 @@ class HttpNovelDownloader(NovelDownloader):
         self.session = Session()
         self.set_headers(self.HEADER)
         self.set_cookies(self.COOKIE)
-        retries = Retry(total=em.conf["retries"], backoff_factor=1,status_forcelist=[500, 502, 503, 504])
+        retries = Retry(total=em.conf["retries"], backoff_factor=1, status_forcelist=[500, 502, 503, 504])
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
 
@@ -113,7 +119,7 @@ class HttpNovelDownloader(NovelDownloader):
         self.session.close()
 
     @classmethod
-    def match_url(cls,url):
+    def match_url(cls, url):
         if re.match("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+", url):
             return True
         else:
@@ -145,10 +151,10 @@ class HttpNovelDownloader(NovelDownloader):
         except KeyboardInterrupt:
             raise NDLE("Operation canceled by user")
         except ConnectionError as e:
-            raise NDLE("[{klass}] Network Error",klass=self.classname)
+            raise NDLE("[{klass}] Network Error", klass=self.classname)
         else:
             self._set_status("INFO")
-            self._mark = list(range(1, self.info["num_parts"]+1))
+            self._mark = list(range(1, self.info["num_parts"] + 1))
 
     def fetch_novels(self):
         if not "INFO" in self.status:
@@ -158,12 +164,12 @@ class HttpNovelDownloader(NovelDownloader):
         except KeyboardInterrupt:
             raise NDLE("Operation was canceled by user")
         except ConnectionError as e:
-            raise NDLE("Network Error",id=1,klass=self.classname)
+            raise NDLE("Network Error", id=1, klass=self.classname)
         self._set_status("NOVELS")
 
 
 class NarouND(HttpNovelDownloader):
-    COOKIE = {'over18': 'yes'}
+    COOKIE = {"over18": "yes"}
     BASE_URL = "{scheme}://{host}"
     INDEX_URL = "{base}/{ncode}"
     AUTO_THEME = "narou"
@@ -171,16 +177,16 @@ class NarouND(HttpNovelDownloader):
     def __init__(self, em):
         super().__init__(em)
         ret = urllib.parse.urlparse(self.url)
-        self.ncode = re.match(r'/(n[0-9a-zA-Z]+)', ret.path).group(1)
-        self.baseurl = self.BASE_URL.format(scheme=ret.scheme,host=ret.hostname)
-        self.indexurl = self.INDEX_URL.format(base=self.baseurl,ncode=self.ncode)
+        self.ncode = re.match(r"/(n[0-9a-zA-Z]+)", ret.path).group(1)
+        self.baseurl = self.BASE_URL.format(scheme=ret.scheme, host=ret.hostname)
+        self.indexurl = self.INDEX_URL.format(base=self.baseurl, ncode=self.ncode)
 
     @classmethod
-    def match_url(cls,url):
+    def match_url(cls, url):
         p = super().match_url(url)
         ret = urllib.parse.urlparse(url)
-        f = ret.hostname == "ncode.syosetu.com" or ret.hostname == "novel18.syosetu.com" 
-        if p and f and re.match(r'/(n[0-9a-zA-Z]+)', ret.path):
+        f = ret.hostname == "ncode.syosetu.com" or ret.hostname == "novel18.syosetu.com"
+        if p and f and re.match(r"/(n[0-9a-zA-Z]+)", ret.path):
             return True
         else:
             return False
@@ -189,13 +195,13 @@ class NarouND(HttpNovelDownloader):
         data = self.get(self.indexurl)
         top_data = bs4(data, "html.parser")
         if top_data.select_one(".maintenance-container"):
-            raise NDLE("[{klass}] Narou is under maintenance",klass=self.classname)
+            raise NDLE("[{klass}] Narou is under maintenance", klass=self.classname)
         self.info["title"] = top_data.select_one("title").text
         author_data = top_data.select_one(".novel_writername")
         if author_data.a:
-            self.info["author"] = [author_data.a.text,author_data.a.attrs["href"]]
+            self.info["author"] = [author_data.a.text, author_data.a.attrs["href"]]
         else:
-            self.info["author"] = [author_data.text[4:][:-1],""]
+            self.info["author"] = [author_data.text[4:][:-1], ""]
         index_raw = top_data.select_one(".index_box")
         if index_raw:
             self.info["num_parts"] = len(index_raw.select(".novel_sublist2"))
@@ -204,20 +210,25 @@ class NarouND(HttpNovelDownloader):
             self.info["num_parts"] = 0
             self.info["type"] = "short"
 
-        eles = bs4(str(index_raw).replace("\n", ""),"html.parser").contents[0].contents
+        eles = bs4(str(index_raw).replace("\n", ""), "html.parser").contents[0].contents
         c = ""
         cid = 1
         part = 1
         for ele in eles:
-            if re.match(r'.+chapter_title', str(ele)):
-                self.info["index"].append({"type": "chapter", "id":cid, "text": ele.text})
+            if re.match(r".+chapter_title", str(ele)):
+                self.info["index"].append({"type": "chapter", "id": cid, "text": ele.text})
                 c = ele.text
-                cid = cid+1
-            elif re.match(r'.+novel_sublist2', str(ele)):
+                cid = cid + 1
+            elif re.match(r".+novel_sublist2", str(ele)):
                 timestamp = dtime.strptime(ele.dt.text.replace("（改）", ""), "%Y/%m/%d %H:%M")
-                self.info["index"].append({"type": "episode", "part": part, "text": ele.a.text,"time": timestamp})
-                self.info["epis"][part]={"subtitle": ele.a.text, "url": cjoin(self.baseurl,ele.a.attrs['href']), "chap": c, "time": timestamp}
-                part = part+1
+                self.info["index"].append({"type": "episode", "part": part, "text": ele.a.text, "time": timestamp})
+                self.info["epis"][part] = {
+                    "subtitle": ele.a.text,
+                    "url": cjoin(self.baseurl, ele.a.attrs["href"]),
+                    "chap": c,
+                    "time": timestamp,
+                }
+                part = part + 1
         self.info["desc"] = "".join([str(i) for i in top_data.select_one("#novel_ex").contents])
 
     def _real_fetch_novels(self):
@@ -228,9 +239,9 @@ class NarouND(HttpNovelDownloader):
             l = [bs4(str(i), "html.parser") for i in body("p")]
             [i.p.unwrap() for i in l]
             body = [str(i) for i in l]
-            self.novels.update({0:(self.info["title"], body)})
+            self.novels.update({0: (self.info["title"], body)})
             return
-        with tqdm(total=len(self._mark),file=self.bar_output,unit="parts") as pbar:
+        with tqdm(total=len(self._mark), file=self.bar_output, unit="parts") as pbar:
             pbar.set_description("Downloading ")
             for part in self._mark:
                 res = self.get(self.info["epis"][part]["url"])
@@ -242,7 +253,7 @@ class NarouND(HttpNovelDownloader):
                 [i.p.unwrap() for i in l]
                 body = [str(i) for i in l]
 
-                self.novels.update({part:(subtitle, body)})
+                self.novels.update({part: (subtitle, body)})
                 pbar.update()
                 time.sleep(self.delay)
 
@@ -252,18 +263,18 @@ class KakuyomuND(HttpNovelDownloader):
     INDEX_URL = "{base}/works/{ncode}"
     AUTO_THEME = "kakuyomu"
 
-    def __init__(self,em):
+    def __init__(self, em):
         super().__init__(em)
         ret = urllib.parse.urlparse(self.url)
-        self.ncode = re.match(r'/works/([0-9]+)',ret.path).group(1)
+        self.ncode = re.match(r"/works/([0-9]+)", ret.path).group(1)
         self.baseurl = self.BASE_URL.format(scheme=ret.scheme)
-        self.indexurl = self.INDEX_URL.format(base=self.baseurl,ncode=self.ncode)
+        self.indexurl = self.INDEX_URL.format(base=self.baseurl, ncode=self.ncode)
 
     @classmethod
-    def match_url(cls,url):
+    def match_url(cls, url):
         p = super().match_url(url)
         ret = urllib.parse.urlparse(url)
-        if p and ret.hostname == "kakuyomu.jp" and re.match(r'/works/([0-9]+)',ret.path):
+        if p and ret.hostname == "kakuyomu.jp" and re.match(r"/works/([0-9]+)", ret.path):
             return True
         else:
             return False
@@ -271,48 +282,55 @@ class KakuyomuND(HttpNovelDownloader):
     def _real_fetch_info(self):
         data = self.get(self.indexurl)
         top_data = bs4(data, "html.parser")
-        index_raw=top_data.select_one(".widget-toc-items")
-        raws=index_raw.select("li.widget-toc-episode")
+        index_raw = top_data.select_one(".widget-toc-items")
+        raws = index_raw.select("li.widget-toc-episode")
         self.info["num_parts"] = len(raws)
         self.info["type"] = "serial"
         author_data = top_data.select_one("#workAuthor-activityName")
-        self.info["author"] = [author_data.a.text,self.baseurl+author_data.a.attrs["href"]]
+        self.info["author"] = [author_data.a.text, self.baseurl + author_data.a.attrs["href"]]
         self.info["title"] = top_data.select_one("#workTitle").text
-        eles = bs4(str(index_raw).replace("\n",""),"html.parser").contents[0].contents
+        eles = bs4(str(index_raw).replace("\n", ""), "html.parser").contents[0].contents
         c = ""
         cid = 1
         part = 1
         for ele in eles:
-            if re.match(r'.+widget-toc-chapter',str(ele)):
+            if re.match(r".+widget-toc-chapter", str(ele)):
                 self.info["index"].append({"type": "chapter", "id": cid, "text": ele.text})
                 c = ele.text
-            elif re.match(r'.+widget-toc-episode',str(ele)):
-                timestamp=dtime.strptime(ele.time.get('datetime'),"%Y-%m-%dT%H:%M:%SZ").astimezone(timezone('Asia/Tokyo'))
+            elif re.match(r".+widget-toc-episode", str(ele)):
+                timestamp = dtime.strptime(ele.time.get("datetime"), "%Y-%m-%dT%H:%M:%SZ").astimezone(
+                    timezone("Asia/Tokyo")
+                )
                 self.info["index"].append({"type": "episode", "part": part, "text": ele.span.text, "time": timestamp})
-                self.info["epis"][part]={"subtitle": ele.span.text, "url": cjoin(self.baseurl,ele.a.attrs["href"]), "chap": c, "time": timestamp}
-                part=part+1
-        desc=top_data.select_one("#introduction")
+                self.info["epis"][part] = {
+                    "subtitle": ele.span.text,
+                    "url": cjoin(self.baseurl, ele.a.attrs["href"]),
+                    "chap": c,
+                    "time": timestamp,
+                }
+                part = part + 1
+        desc = top_data.select_one("#introduction")
         if desc.select_one(".ui-truncateTextButton-expandButton"):
             desc.select_one(".ui-truncateTextButton-expandButton").decompose()
             desc.span.unwrap()
-        self.info["desc"]="".join([str(i) for i in desc.contents])
+        self.info["desc"] = "".join([str(i) for i in desc.contents])
 
     def _real_fetch_novels(self):
-        with tqdm(total=len(self._mark),file=self.bar_output,unit="parts") as pbar:
+        with tqdm(total=len(self._mark), file=self.bar_output, unit="parts") as pbar:
             pbar.set_description("Downloading ")
             for part in self._mark:
                 res = self.get(self.info["epis"][part]["url"])
                 soup = bs4(res, "html.parser")
-                subtitle=soup.select_one(".widget-episodeTitle").text
-                body=soup.select_one(".widget-episodeBody")
+                subtitle = soup.select_one(".widget-episodeTitle").text
+                body = soup.select_one(".widget-episodeBody")
 
-                l=[bs4(str(i),"html.parser") for i in body("p")]
+                l = [bs4(str(i), "html.parser") for i in body("p")]
                 [i.p.unwrap() for i in l]
-                body=[str(i) for i in l]
+                body = [str(i) for i in l]
 
-                self.novels.update({part:(subtitle, body)})
+                self.novels.update({part: (subtitle, body)})
                 pbar.update()
                 time.sleep(self.delay)
 
 
-#TODO FileND
+# TODO FileND
