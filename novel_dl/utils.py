@@ -1,7 +1,10 @@
-import sys,os
+import sys,os,re
 from pathlib import Path
+from urllib.parse import urljoin
 import importlib.util
 from .info import __appname__
+
+URL_REG = re.compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
 
 class NovelDLException(Exception):
     def __init__(self,msg,**kw):
@@ -38,3 +41,9 @@ def deepupdate(dict_base, other):
         dict_base[k]+=[i for i in v if not i in dict_base[k]]
     else:
       dict_base[k] = v
+
+def cjoin(base,part):
+    if URL_REG.match(base):
+        return urljoin(base,part)
+    else:
+        return Path(base) / Path(part)

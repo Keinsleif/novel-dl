@@ -3,7 +3,6 @@ import re
 import sys
 import os
 import shutil
-import argparse
 import json
 import urllib.parse
 from pathlib import Path
@@ -23,13 +22,13 @@ root = Path(__file__).parent.resolve()
 THEMES = ["auto"]+[i.name for i in (root / "themes/").iterdir()]
 
 
-def main(em):
+def novel_dl(em):
     if em.opts["from_file"]:
         nd_klass = get_file_nd(em.opts["url"])
     else:
         nd_klass = get_downloader(em.opts["url"])
     if nd_klass:
-        nd = nd_klass(em.opts["url"],em)
+        nd = nd_klass(em)
     else:
         raise NDLE("URL is not supported")
 
@@ -43,7 +42,7 @@ def main(em):
 
         # Load themes
     if em.opts["theme"] == "auto":
-        em.update_args({"theme":nd.auto_theme})
+        em.update_args({"theme":nd.AUTO_THEME})
     THEME_DIR = root / "themes" / em.opts["theme"]
     conf_file = THEME_DIR / "config.json"
     conf = {}
@@ -146,13 +145,13 @@ def main(em):
         script = []
         for file in loads['css']:
             paths = [re.match(
-                ".*/"+file[0], i).string for i in static_files if re.match(".*/"+file[0], i)]
+                ".*/"+file[0], str(i)).string for i in static_files if re.match(".*/"+file[0], str(i))]
             if paths:
                 with open(paths[0], "r", encoding="utf-8") as f:
                     style.append([f.read(), file[1]])
         for file in loads['js']:
             paths = [re.match(
-                ".*/"+file, i).string for i in static_files if re.match(".*/"+file, i)]
+                ".*/"+file, str(i)).string for i in static_files if re.match(".*/"+file, str(i))]
             if paths:
                 with open(paths[0], "r", encoding="utf-8") as f:
                     script.append(f.read())
@@ -182,10 +181,10 @@ def main(em):
         static_dst.mkdir()
         if em.conf["symlink_static"]:
             for file in static_files:
-                (ndir / "static" / os.path.basename(file)).symlink_to(file)
+                (ndir / "static" / file.name).symlink_to(file)
         else:
             for file in static_files:
-                shutil.copyfile(file, ndir / "static" / os.path.basename(file))
+                shutil.copyfile(file, ndir / "static" / file.name)
 
         with (ndir / "static/db.json").open("w") as f:
             json.dump(nd.gen_db(db_data), f, ensure_ascii=False,
@@ -205,7 +204,7 @@ def command_line():
         em=EnvManager()
         em.load_usercfg()
         em.parse_args(sys.argv[1:])
-        main(em)
+        novel_dl(em)
     except NDLE as e:
         e.console_message()
         return_code=1
@@ -225,4 +224,4 @@ def setup_em(**kw):
 
 
 if __name__ == "__main__":
-    command_line()
+    sys.exit(1)

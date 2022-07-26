@@ -10,15 +10,17 @@ from bs4 import BeautifulSoup as bs4
 from tqdm import tqdm
 from ..utils import (
     NovelDLException as NDLE,
+    cjoin,
 )
 
 class NovelDownloader(object):
-    def __init__(self, url, em):
+    _markers = ["get", "skip"]
+
+    def __init__(self, em):
         self.classname=self.__class__.__name__
         self.status = []
         self._set_status=self.status.append
         self.bar_output=em.env["bar_output"]
-        self._markers = ["get", "skip"]
         self.initialize()
 
     def __del__(self):
@@ -95,11 +97,9 @@ class HttpNovelDownloader(NovelDownloader):
     COOKIE = {}
     URL_REG = re.compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
 
-    def __init__(self, url, em):
-        super().__init__(url,em)
-        if not self.match_url(url):
-            raise NDLE("[{klass}] Invalid url for this ND",klass=self.classname)
-        self.url = url
+    def __init__(self, em):
+        super().__init__(em)
+        self.url = em.opts["url"]
         self.delay = em.env["delay"]
         self.params = {}
         self.session = Session()
@@ -166,11 +166,11 @@ class NarouND(HttpNovelDownloader):
     COOKIE = {'over18': 'yes'}
     BASE_URL = "{scheme}://{host}"
     INDEX_URL = "{base}/{ncode}"
+    AUTO_THEME = "narou"
 
-    def __init__(self, url, em):
-        self.auto_theme = "narou"
-        super().__init__(url, em)
-        ret = urllib.parse.urlparse(url)
+    def __init__(self, em):
+        super().__init__(em)
+        ret = urllib.parse.urlparse(self.url)
         self.ncode = re.match(r'/(n[0-9a-zA-Z]+)', ret.path).group(1)
         self.baseurl = self.BASE_URL.format(scheme=ret.scheme,host=ret.hostname)
         self.indexurl = self.INDEX_URL.format(base=self.baseurl,ncode=self.ncode)
@@ -216,7 +216,7 @@ class NarouND(HttpNovelDownloader):
             elif re.match(r'.+novel_sublist2', str(ele)):
                 timestamp = dtime.strptime(ele.dt.text.replace("（改）", ""), "%Y/%m/%d %H:%M")
                 self.info["index"].append({"type": "episode", "part": part, "text": ele.a.text,"time": timestamp})
-                self.info["epis"][part]={"subtitle": ele.a.text, "url": self.baseurl+ele.a.attrs['href'], "chap": c, "time": timestamp}
+                self.info["epis"][part]={"subtitle": ele.a.text, "url": cjoin(self.baseurl,ele.a.attrs['href']), "chap": c, "time": timestamp}
                 part = part+1
         self.info["desc"] = "".join([str(i) for i in top_data.select_one("#novel_ex").contents])
 
@@ -250,10 +250,11 @@ class NarouND(HttpNovelDownloader):
 class KakuyomuND(HttpNovelDownloader):
     BASE_URL = "{scheme}://kakuyomu.jp"
     INDEX_URL = "{base}/works/{ncode}"
-    def __init__(self,url,em):
-        self.auto_theme = "kakuyomu"
-        super().__init__(url,em)
-        ret = urllib.parse.urlparse(url)
+    AUTO_THEME = "kakuyomu"
+
+    def __init__(self,em):
+        super().__init__(em)
+        ret = urllib.parse.urlparse(self.url)
         self.ncode = re.match(r'/works/([0-9]+)',ret.path).group(1)
         self.baseurl = self.BASE_URL.format(scheme=ret.scheme)
         self.indexurl = self.INDEX_URL.format(base=self.baseurl,ncode=self.ncode)
@@ -288,7 +289,7 @@ class KakuyomuND(HttpNovelDownloader):
             elif re.match(r'.+widget-toc-episode',str(ele)):
                 timestamp=dtime.strptime(ele.time.get('datetime'),"%Y-%m-%dT%H:%M:%SZ").astimezone(timezone('Asia/Tokyo'))
                 self.info["index"].append({"type": "episode", "part": part, "text": ele.span.text, "time": timestamp})
-                self.info["epis"][part]={"subtitle": ele.span.text, "url": self.baseurl+ele.a.attrs["href"], "chap": c, "time": timestamp}
+                self.info["epis"][part]={"subtitle": ele.span.text, "url": cjoin(self.baseurl,ele.a.attrs["href"]), "chap": c, "time": timestamp}
                 part=part+1
         desc=top_data.select_one("#introduction")
         if desc.select_one(".ui-truncateTextButton-expandButton"):

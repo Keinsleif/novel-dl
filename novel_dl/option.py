@@ -173,9 +173,7 @@ class EnvManager(object):
         self.opts = self.verify_options(option)
 
     def update_args(self, args):
-        options = deepcopy(self.opts)
-        deepupdate(options, args)
-        self.opts = self.verify_options(options)
+        deepupdate(self.opts, self.verify_options(args))
 
     def verify_options(self, opts):
         for key in list(opts):
@@ -186,7 +184,7 @@ class EnvManager(object):
 
         if opts.get("quiet"):
             self.env["bar_output"] = open(os.devnull, "w")
-        else:
+        elif opts.get("quiet") is False:
             self.env["bar_output"] = sys.stdout
 
         if opts.get("theme") and not opts["theme"] in self.env["THEMES"]:
@@ -194,7 +192,7 @@ class EnvManager(object):
 
         if opts.get("axel"):
             self.env["delay"] = self.conf["min_delay"]
-        else:
+        elif opts.get("axel") is False:
             self.env["delay"] = self.conf["default_delay"]
 
         return opts
