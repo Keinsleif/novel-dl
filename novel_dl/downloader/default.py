@@ -1,5 +1,5 @@
 import time, re
-import urllib.parse
+from urllib.parse import urlparse, urljoin
 from datetime import datetime as dtime
 from pytz import timezone
 from requests import Session
@@ -176,7 +176,7 @@ class NarouND(HttpNovelDownloader):
 
     def __init__(self, em):
         super().__init__(em)
-        ret = urllib.parse.urlparse(self.url)
+        ret = urlparse(self.url)
         self.ncode = re.match(r"/(n[0-9a-zA-Z]+)", ret.path).group(1)
         self.baseurl = self.BASE_URL.format(scheme=ret.scheme, host=ret.hostname)
         self.indexurl = self.INDEX_URL.format(base=self.baseurl, ncode=self.ncode)
@@ -184,7 +184,7 @@ class NarouND(HttpNovelDownloader):
     @classmethod
     def match_url(cls, url):
         p = super().match_url(url)
-        ret = urllib.parse.urlparse(url)
+        ret = urlparse(url)
         f = ret.hostname == "ncode.syosetu.com" or ret.hostname == "novel18.syosetu.com"
         if p and f and re.match(r"/(n[0-9a-zA-Z]+)", ret.path):
             return True
@@ -251,6 +251,14 @@ class NarouND(HttpNovelDownloader):
 
                 l = [bs4(str(i), "html.parser") for i in body("p")]
                 [i.p.unwrap() for i in l]
+                [
+                    (
+                        l[i].img.attrs.update({"src": urljoin("https://", l[i].img.attrs["src"])}),
+                        l[i].a.attrs.update({"href": urljoin("https://", l[i].a.attrs["href"])}),
+                    )
+                    for i in range(0, len(l))
+                    if l[i].img
+                ]
                 body = [str(i) for i in l]
 
                 self.novels.update({part: (subtitle, body)})
@@ -265,7 +273,7 @@ class KakuyomuND(HttpNovelDownloader):
 
     def __init__(self, em):
         super().__init__(em)
-        ret = urllib.parse.urlparse(self.url)
+        ret = urlparse(self.url)
         self.ncode = re.match(r"/works/([0-9]+)", ret.path).group(1)
         self.baseurl = self.BASE_URL.format(scheme=ret.scheme)
         self.indexurl = self.INDEX_URL.format(base=self.baseurl, ncode=self.ncode)
@@ -273,7 +281,7 @@ class KakuyomuND(HttpNovelDownloader):
     @classmethod
     def match_url(cls, url):
         p = super().match_url(url)
-        ret = urllib.parse.urlparse(url)
+        ret = urlparse(url)
         if p and ret.hostname == "kakuyomu.jp" and re.match(r"/works/([0-9]+)", ret.path):
             return True
         else:

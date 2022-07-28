@@ -158,6 +158,9 @@ class EnvManager(object):
         downloader = self.parser.add_argument_group("Downloader Options")
         downloader.add_argument("-a", "--axel", action="store_true", help="turn on axceleration mode")
         downloader.add_argument("-f", "--from-file", action="store_true", help="turn on extract from downloaded file")
+        downloader.add_argument(
+            "-u", "--update", action="store_true", help="fetch & update novels from internet"
+        )
         formatter = self.parser.add_argument_group("Formatter Options")
         formatter.add_argument("-t", "--theme", default=self.conf["default_theme"], help="set novel's theme", type=str)
         formatter.add_argument(
@@ -174,7 +177,7 @@ class EnvManager(object):
         output.add_argument(
             "-d", "--dir", default=str(self.conf["output_path"]), help="set output directory", type=str
         )
-        index = ["url", "quiet", "axel", "episode", "theme", "media", "renew", "name", "dir", "from_file"]
+        index = ["url", "quiet", "axel", "episode", "theme", "media", "renew", "name", "dir", "from_file","update"]
         self.opts = {i: self.parser.get_default(i) for i in index}
         self.opts["dir"] = Path(self.opts["dir"])
 
@@ -197,6 +200,9 @@ class EnvManager(object):
             self.env["bar_output"] = open(os.devnull, "w")
         elif opts.get("quiet") is False:
             self.env["bar_output"] = sys.stdout
+
+        if opts.get("update"):
+            opts["renew"] = True
 
         if opts.get("theme") and not opts["theme"] in self.env["THEMES"]:
             raise NDLE("Invalid theme name `" + opts["theme"] + "`")

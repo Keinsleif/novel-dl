@@ -20,8 +20,8 @@ THEMES = ["auto"] + [i.name for i in (root / "themes/").iterdir()]
 
 
 def novel_dl(em):
-    if em.opts["from_file"]:
-        nd_klass = get_file_nd(em.opts["url"])
+    if em.opts["from_file"] or em.opts["update"]:
+        nd_klass = get_file_nd(em)
     else:
         nd_klass = get_downloader(em.opts["url"])
     if nd_klass:
