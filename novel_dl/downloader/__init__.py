@@ -1,6 +1,6 @@
 from pathlib import Path
 import json
-from copy import copy
+from copy import deepcopy
 from .default import NarouND, KakuyomuND
 
 
@@ -14,7 +14,7 @@ def get_downloader(url):
 
 
 def get_file_nd(em):
-    path=em.opts["url"]
+    path=em.env["url"].url
     p = Path(path).expanduser()
     if p.is_dir():
         with open(p / "static/db.json", "r") as f:
@@ -22,7 +22,7 @@ def get_file_nd(em):
         bc = get_downloader(db["url"])
 
         def __init__(self, em_orig):
-            em = copy(em_orig)
+            em = deepcopy(em_orig)
             em.env["delay"] = em.conf["min_delay"]
             em.update_args({"url": db["url"]})
             super(self.__class__, self).__init__(em)

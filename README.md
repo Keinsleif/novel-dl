@@ -21,7 +21,7 @@ UbuntuやCentOSなどのMacOSおよびLinux、つまりUnix系OSで動作する�
 ![demo](https://raw.github.com/wiki/kazuto28/novel-dl/images/novel-dl_DEMO.gif)
 
 # Usage (使い方)
-    novel-dl [OPTIONS] <url>
+    novel-dl [OPTIONS] <url> [<url> ...]
 
 # Options
 ### General Options

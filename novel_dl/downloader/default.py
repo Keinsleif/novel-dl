@@ -105,7 +105,7 @@ class HttpNovelDownloader(NovelDownloader):
 
     def __init__(self, em):
         super().__init__(em)
-        self.url = em.opts["url"]
+        self.url = em.env["url"].url
         self.delay = em.env["delay"]
         self.params = {}
         self.session = Session()
@@ -159,6 +159,7 @@ class HttpNovelDownloader(NovelDownloader):
     def fetch_novels(self):
         if not "INFO" in self.status:
             self.fetch_info()
+        print("Downloading {title} / {author[0]} total {num_parts} parts".format(**self.info),file=self.bar_output)
         try:
             self._real_fetch_novels()
         except KeyboardInterrupt:
@@ -196,6 +197,8 @@ class NarouND(HttpNovelDownloader):
         top_data = bs4(data, "html.parser")
         if top_data.select_one(".maintenance-container"):
             raise NDLE("[{klass}] Narou is under maintenance", klass=self.classname)
+        if top_data.select_one(".nothing"):
+            raise NDLE("[{klass}] Novel not found: {detail}", klass=self.classname, detail = top_data.select_one(".nothing").text)
         self.info["title"] = top_data.select_one("title").text
         author_data = top_data.select_one(".novel_writername")
         if author_data.a:
@@ -242,7 +245,6 @@ class NarouND(HttpNovelDownloader):
             self.novels.update({0: (self.info["title"], body)})
             return
         with tqdm(total=len(self._mark), file=self.bar_output, unit="parts") as pbar:
-            pbar.set_description("Downloading ")
             for part in self._mark:
                 res = self.get(self.info["epis"][part]["url"])
                 soup = bs4(res, "html.parser")
@@ -325,7 +327,6 @@ class KakuyomuND(HttpNovelDownloader):
 
     def _real_fetch_novels(self):
         with tqdm(total=len(self._mark), file=self.bar_output, unit="parts") as pbar:
-            pbar.set_description("Downloading ")
             for part in self._mark:
                 res = self.get(self.info["epis"][part]["url"])
                 soup = bs4(res, "html.parser")
