@@ -18,29 +18,31 @@ from .info import (
 
 root = Path(__file__).parent.resolve()
 
+
 class MultipleUrl(object):
-    def __init__(self,urls):
+    def __init__(self, urls):
         self.__urls = urls
         self.url = urls[0]
         self.index = 0
         self.length = len(urls)
 
     def next(self):
-        if self.index+1 < self.length:
-            self.index+=1
+        if self.index + 1 < self.length:
+            self.index += 1
             self.url = self.__urls[self.index]
-    
+
     def has_next(self):
-        if self.index+1 < self.length:
+        if self.index + 1 < self.length:
             return True
         else:
             return False
+
 
 class EnvManager(object):
     def __init__(self):
         self.classname = self.__class__.__name__
         self.conf = dict()
-        self.env = {"THEMES": list(), "bar_output": sys.stdout, "delay": 1,"url": MultipleUrl([""])}
+        self.env = {"THEMES": list(), "bar_output": sys.stdout, "delay": 1, "url": MultipleUrl([""])}
         self._default_conf = {
             "default_theme": "auto",
             "theme_path": [root / "themes"],
@@ -57,21 +59,21 @@ class EnvManager(object):
         self.config_file = self.config_dir / "settings.json"
         self.init_parser()
 
-    def __deepcopy__(self,memo):
+    def __deepcopy__(self, memo):
         cls = self.__class__
         em = cls.__new__(cls)
-        memo[id(em)]=em
-        for k,v in self.__dict__.items():
+        memo[id(em)] = em
+        for k, v in self.__dict__.items():
             if k == "env":
-                tmp={}
-                for k2,v2 in self.env.items():
-                    if isinstance(v2,io.TextIOWrapper):
-                        tmp[k2]=v2
+                tmp = {}
+                for k2, v2 in self.env.items():
+                    if isinstance(v2, io.TextIOWrapper):
+                        tmp[k2] = v2
                     else:
-                        tmp[k2]=deepcopy(v2,memo)
-                setattr(em,"env",tmp)
+                        tmp[k2] = deepcopy(v2, memo)
+                setattr(em, "env", tmp)
             else:
-                setattr(em,k,deepcopy(v,memo))
+                setattr(em, k, deepcopy(v, memo))
         return em
 
     def load_default(self):
@@ -185,7 +187,7 @@ class EnvManager(object):
 
         self.parser = ArgumentParser(**kw)
         self.parser.error = error_handler
-        self.parser.add_argument("url", help="URL", default="", nargs="*")
+        self.parser.add_argument("url", help="URL", default="", nargs="+")
         general = self.parser.add_argument_group("General Options")
         general.add_argument("-h", "--help", action="help", help="show this help text and exit")
         general.add_argument("-v", "--version", action="version", version="%(prog)s {}".format(__version__))
@@ -193,9 +195,7 @@ class EnvManager(object):
         downloader = self.parser.add_argument_group("Downloader Options")
         downloader.add_argument("-a", "--axel", action="store_true", help="turn on axceleration mode")
         downloader.add_argument("-f", "--from-file", action="store_true", help="turn on extract from downloaded file")
-        downloader.add_argument(
-            "-u", "--update", action="store_true", help="fetch & update novels from internet"
-        )
+        downloader.add_argument("-u", "--update", action="store_true", help="fetch & update novels from internet")
         formatter = self.parser.add_argument_group("Formatter Options")
         formatter.add_argument("-t", "--theme", default=self.conf["default_theme"], help="set novel's theme", type=str)
         formatter.add_argument(
@@ -212,7 +212,7 @@ class EnvManager(object):
         output.add_argument(
             "-d", "--dir", default=str(self.conf["output_path"]), help="set output directory", type=str
         )
-        index = ["url", "quiet", "axel", "episode", "theme", "media", "renew", "name", "dir", "from_file","update"]
+        index = ["url", "quiet", "axel", "episode", "theme", "media", "renew", "name", "dir", "from_file", "update"]
         self.opts = {i: self.parser.get_default(i) for i in index}
         self.opts["dir"] = Path(self.opts["dir"])
         self.opts["url"] = [self.opts["url"]]
@@ -226,7 +226,7 @@ class EnvManager(object):
         deepupdate(self.opts, self.verify_options(args))
 
     def verify_options(self, opts):
-        if not isinstance(opts.get("url",[]),list):
+        if not isinstance(opts.get("url", []), list):
             opts["url"] = [opts["url"]]
 
         for key in list(opts):
@@ -236,7 +236,7 @@ class EnvManager(object):
                 opts.pop(key)
 
         if opts.get("url"):
-            self.env["url"]=MultipleUrl(opts["url"])
+            self.env["url"] = MultipleUrl(opts["url"])
 
         if opts.get("quiet"):
             self.env["bar_output"] = open(os.devnull, "w")

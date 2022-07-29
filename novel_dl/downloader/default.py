@@ -153,13 +153,18 @@ class HttpNovelDownloader(NovelDownloader):
         except ConnectionError as e:
             raise NDLE("[{klass}] Network Error", klass=self.classname)
         else:
-            self._set_status("INFO")
             self._mark = list(range(1, self.info["num_parts"] + 1))
+            self._set_status("INFO")
 
     def fetch_novels(self):
         if not "INFO" in self.status:
             self.fetch_info()
-        print("Downloading {title} / {author[0]} total {num_parts} parts".format(**self.info),file=self.bar_output)
+        print(
+            "Downloading {title} / {author[0]} {to_get} / {num_parts} parts".format(
+                **self.info, to_get=len(self._mark)
+            ),
+            file=self.bar_output,
+        )
         try:
             self._real_fetch_novels()
         except KeyboardInterrupt:
@@ -198,7 +203,11 @@ class NarouND(HttpNovelDownloader):
         if top_data.select_one(".maintenance-container"):
             raise NDLE("[{klass}] Narou is under maintenance", klass=self.classname)
         if top_data.select_one(".nothing"):
-            raise NDLE("[{klass}] Novel not found: {detail}", klass=self.classname, detail = top_data.select_one(".nothing").text)
+            raise NDLE(
+                "[{klass}] Novel not found: {detail}",
+                klass=self.classname,
+                detail=top_data.select_one(".nothing").text,
+            )
         self.info["title"] = top_data.select_one("title").text
         author_data = top_data.select_one(".novel_writername")
         if author_data.a:

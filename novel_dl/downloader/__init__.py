@@ -14,7 +14,7 @@ def get_downloader(url):
 
 
 def get_file_nd(em):
-    path=em.env["url"].url
+    path = em.env["url"].url
     p = Path(path).expanduser()
     if p.is_dir():
         with open(p / "static/db.json", "r") as f:
@@ -35,6 +35,7 @@ def get_file_nd(em):
 
         def gen_db(self, db_data={}):
             return db
+
         if em.opts["update"]:
             FileND = type(
                 "FileND",
@@ -45,7 +46,9 @@ def get_file_nd(em):
             FileND = type(
                 "FileND",
                 (bc,),
-                dict(BASE_URL=path.rstrip("/"), INDEX_URL="{base}/index.html", __init__=__init__, get=get, gen_db=gen_db),
+                dict(
+                    BASE_URL=path.rstrip("/"), INDEX_URL="{base}/index.html", __init__=__init__, get=get, gen_db=gen_db
+                ),
             )
         return FileND
     else:
