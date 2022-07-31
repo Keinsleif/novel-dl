@@ -28,7 +28,16 @@ class NovelDownloader(object):
         pass
 
     def initialize(self):
-        self.info = {"title": "", "desc": "", "author": [], "type": "", "num_parts": 0, "index": [], "epis": {}}
+        self.info = {
+            "title": "",
+            "desc": "",
+            "author": [],
+            "type": "",
+            "num_parts": 0,
+            "index": [],
+            "epis": {},
+            "indexurl": "",
+        }
         self._mark = []
         self.novels = {}
         self._set_status("INIT")
@@ -68,15 +77,21 @@ class NovelDownloader(object):
         else:
             self._set_status("INFO")
             self._mark = list(range(1, self.info["num_parts"] + 1))
+        return self
 
     def fetch_novels(self):
         if not "INFO" in self.status:
             self.fetch_info()
+        print(
+            "Fetching {title} / {author[0]} {to_get} / {num_parts} parts".format(**self.info, to_get=len(self._mark)),
+            file=self.bar_output,
+        )
         try:
             self._real_fetch_novels()
         except KeyboardInterrupt:
             raise NDLE("Operation was canceled by user")
         self._set_status("NOVELS")
+        return self
 
     def _real_fetch_info(self):
         pass
@@ -105,7 +120,7 @@ class HttpNovelDownloader(NovelDownloader):
 
     def __init__(self, em):
         super().__init__(em)
-        self.url = em.env["url"].url
+        self.url = em.env["src"].src
         self.delay = em.env["delay"]
         self.params = {}
         self.session = Session()
@@ -137,7 +152,7 @@ class HttpNovelDownloader(NovelDownloader):
     def get_headers(self):
         return self.session.headers
 
-    def get(self, url, params=None):
+    def __get(self, url, params=None):
         if not params:
             params = self.params
         result = self.session.get(url, params=params)
@@ -155,16 +170,11 @@ class HttpNovelDownloader(NovelDownloader):
         else:
             self._mark = list(range(1, self.info["num_parts"] + 1))
             self._set_status("INFO")
+        return self
 
     def fetch_novels(self):
         if not "INFO" in self.status:
             self.fetch_info()
-        print(
-            "Downloading {title} / {author[0]} {to_get} / {num_parts} parts".format(
-                **self.info, to_get=len(self._mark)
-            ),
-            file=self.bar_output,
-        )
         try:
             self._real_fetch_novels()
         except KeyboardInterrupt:
@@ -172,6 +182,7 @@ class HttpNovelDownloader(NovelDownloader):
         except ConnectionError as e:
             raise NDLE("Network Error", id=1, klass=self.classname)
         self._set_status("NOVELS")
+        return self
 
 
 class NarouND(HttpNovelDownloader):
@@ -186,6 +197,7 @@ class NarouND(HttpNovelDownloader):
         self.ncode = re.match(r"/(n[0-9a-zA-Z]+)", ret.path).group(1)
         self.baseurl = self.BASE_URL.format(scheme=ret.scheme, host=ret.hostname)
         self.indexurl = self.INDEX_URL.format(base=self.baseurl, ncode=self.ncode)
+        self.info["indexurl"] = self.indexurl
 
     @classmethod
     def match_url(cls, url):
@@ -198,7 +210,7 @@ class NarouND(HttpNovelDownloader):
             return False
 
     def _real_fetch_info(self):
-        data = self.get(self.indexurl)
+        data = self.__get(self.indexurl)
         top_data = bs4(data, "html.parser")
         if top_data.select_one(".maintenance-container"):
             raise NDLE("[{klass}] Narou is under maintenance", klass=self.classname)
@@ -245,7 +257,7 @@ class NarouND(HttpNovelDownloader):
 
     def _real_fetch_novels(self):
         if self.info["type"] == "short":
-            data = self.get(self.indexurl)
+            data = self.__get(self.indexurl)
             top_data = bs4(data, "html.parser")
             body = top_data.select_one("#novel_honbun")
             l = [bs4(str(i), "html.parser") for i in body("p")]
@@ -255,7 +267,7 @@ class NarouND(HttpNovelDownloader):
             return
         with tqdm(total=len(self._mark), file=self.bar_output, unit="parts") as pbar:
             for part in self._mark:
-                res = self.get(self.info["epis"][part]["url"])
+                res = self.__get(self.info["epis"][part]["url"])
                 soup = bs4(res, "html.parser")
                 subtitle = soup.select_one(".novel_subtitle").text
                 body = soup.select_one("#novel_honbun")
@@ -299,7 +311,7 @@ class KakuyomuND(HttpNovelDownloader):
             return False
 
     def _real_fetch_info(self):
-        data = self.get(self.indexurl)
+        data = self.__get(self.indexurl)
         top_data = bs4(data, "html.parser")
         index_raw = top_data.select_one(".widget-toc-items")
         raws = index_raw.select("li.widget-toc-episode")
@@ -337,7 +349,7 @@ class KakuyomuND(HttpNovelDownloader):
     def _real_fetch_novels(self):
         with tqdm(total=len(self._mark), file=self.bar_output, unit="parts") as pbar:
             for part in self._mark:
-                res = self.get(self.info["epis"][part]["url"])
+                res = self.__get(self.info["epis"][part]["url"])
                 soup = bs4(res, "html.parser")
                 subtitle = soup.select_one(".widget-episodeTitle").text
                 body = soup.select_one(".widget-episodeBody")
@@ -349,6 +361,3 @@ class KakuyomuND(HttpNovelDownloader):
                 self.novels.update({part: (subtitle, body)})
                 pbar.update()
                 time.sleep(self.delay)
-
-
-# TODO FileND

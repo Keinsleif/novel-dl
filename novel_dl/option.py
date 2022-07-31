@@ -19,17 +19,17 @@ from .info import (
 root = Path(__file__).parent.resolve()
 
 
-class MultipleUrl(object):
-    def __init__(self, urls):
-        self.__urls = urls
-        self.url = urls[0]
+class MultipleSrc(object):
+    def __init__(self, lists):
+        self.__sources = lists
+        self.src = lists[0]
         self.index = 0
-        self.length = len(urls)
+        self.length = len(lists)
 
     def next(self):
         if self.index + 1 < self.length:
             self.index += 1
-            self.url = self.__urls[self.index]
+            self.src = self.__sources[self.index]
 
     def has_next(self):
         if self.index + 1 < self.length:
@@ -42,7 +42,7 @@ class EnvManager(object):
     def __init__(self):
         self.classname = self.__class__.__name__
         self.conf = dict()
-        self.env = {"THEMES": list(), "bar_output": sys.stdout, "delay": 1, "url": MultipleUrl([""])}
+        self.env = {"THEMES": list(), "bar_output": sys.stdout, "delay": 1, "src": MultipleSrc([""])}
         self._default_conf = {
             "default_theme": "auto",
             "theme_path": [root / "themes"],
@@ -176,7 +176,7 @@ class EnvManager(object):
     def init_parser(self):
         kw = {
             "prog": __appname__.lower(),
-            "usage": "%(prog)s [OPTIONS] URL [URL ...]",
+            "usage": "%(prog)s [OPTIONS] URL [URL ...]\n       %(prog)s [-f] [-u] PATH [PATH ...]",
             "description": __description__,
             "conflict_handler": "resolve",
         }
@@ -187,7 +187,7 @@ class EnvManager(object):
 
         self.parser = ArgumentParser(**kw)
         self.parser.error = error_handler
-        self.parser.add_argument("url", help="URL", default="", nargs="+")
+        self.parser.add_argument("src", help="novel fetch source (URL or Path)", default="", nargs="+")
         general = self.parser.add_argument_group("General Options")
         general.add_argument("-h", "--help", action="help", help="show this help text and exit")
         general.add_argument("-v", "--version", action="version", version="%(prog)s {}".format(__version__))
@@ -212,10 +212,10 @@ class EnvManager(object):
         output.add_argument(
             "-d", "--dir", default=str(self.conf["output_path"]), help="set output directory", type=str
         )
-        index = ["url", "quiet", "axel", "episode", "theme", "media", "renew", "name", "dir", "from_file", "update"]
+        index = ["src", "quiet", "axel", "episode", "theme", "media", "renew", "name", "dir", "from_file", "update"]
         self.opts = {i: self.parser.get_default(i) for i in index}
         self.opts["dir"] = Path(self.opts["dir"])
-        self.opts["url"] = [self.opts["url"]]
+        self.opts["src"] = [self.opts["src"]]
 
     def parse_args(self, args):
         option = self.parser.parse_args(args).__dict__
@@ -226,8 +226,8 @@ class EnvManager(object):
         deepupdate(self.opts, self.verify_options(args))
 
     def verify_options(self, opts):
-        if not isinstance(opts.get("url", []), list):
-            opts["url"] = [opts["url"]]
+        if not isinstance(opts.get("src", []), list):
+            opts["src"] = [opts["src"]]
 
         for key in list(opts):
             if key not in self.opts:
@@ -235,8 +235,8 @@ class EnvManager(object):
             elif type(opts[key]) != type(self.opts[key]):
                 opts.pop(key)
 
-        if opts.get("url"):
-            self.env["url"] = MultipleUrl(opts["url"])
+        if opts.get("src"):
+            self.env["src"] = MultipleSrc(opts["src"])
 
         if opts.get("quiet"):
             self.env["bar_output"] = open(os.devnull, "w")

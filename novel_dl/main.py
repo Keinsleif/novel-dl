@@ -24,11 +24,11 @@ def novel_dl(em):
         if em.opts["from_file"] or em.opts["update"]:
             nd_klass = get_file_nd(em)
         else:
-            nd_klass = get_downloader(em.env["url"].url)
+            nd_klass = get_downloader(em.env["src"].src)
         if nd_klass:
             nd = nd_klass(em)
         else:
-            raise NDLE("URL is not supported")
+            raise NDLE("src is not supported")
 
         nd.fetch_info()
 
@@ -171,7 +171,7 @@ def novel_dl(em):
                     style=style,
                     script=script,
                     lines=len(nd.novels[em.opts["episode"]][1]),
-                    url=em.env["url"].url,
+                    url=nd.info["indexurl"],
                 )
             else:
                 contents = htmls["single"].render(
@@ -181,7 +181,7 @@ def novel_dl(em):
                     style=style,
                     script=script,
                     lines=len(nd.novels[0][1]),
-                    url=em.env["url"].url,
+                    url=nd.info["indexurl"],
                 )
             with (ndir / em.env["name"] + ".html").open(mode="w") as f:
                 f.write(contents)
@@ -194,7 +194,7 @@ def novel_dl(em):
                 desc=nd.info["desc"],
                 index=nd.info["index"],
                 total=nd.info["num_parts"],
-                url=nd.indexurl,
+                url=nd.info["indexurl"],
                 loads=loads,
             )
             with (ndir / "index.html").open(mode="w", encoding="utf-8") as f:
@@ -234,8 +234,8 @@ def novel_dl(em):
                 with (ndir / (str(part) + ".html")).open(mode="w", encoding="utf-8") as f:
                     f.write(contents)
         #            return ndir
-        if em.env["url"].has_next():
-            em.env["url"].next()
+        if em.env["src"].has_next():
+            em.env["src"].next()
         else:
             break
 
