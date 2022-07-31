@@ -152,7 +152,7 @@ class HttpNovelDownloader(NovelDownloader):
     def get_headers(self):
         return self.session.headers
 
-    def __get(self, url, params=None):
+    def _get(self, url, params=None):
         if not params:
             params = self.params
         result = self.session.get(url, params=params)
@@ -210,7 +210,7 @@ class NarouND(HttpNovelDownloader):
             return False
 
     def _real_fetch_info(self):
-        data = self.__get(self.indexurl)
+        data = self._get(self.indexurl)
         top_data = bs4(data, "html.parser")
         if top_data.select_one(".maintenance-container"):
             raise NDLE("[{klass}] Narou is under maintenance", klass=self.classname)
@@ -257,7 +257,7 @@ class NarouND(HttpNovelDownloader):
 
     def _real_fetch_novels(self):
         if self.info["type"] == "short":
-            data = self.__get(self.indexurl)
+            data = self._get(self.indexurl)
             top_data = bs4(data, "html.parser")
             body = top_data.select_one("#novel_honbun")
             l = [bs4(str(i), "html.parser") for i in body("p")]
@@ -267,7 +267,7 @@ class NarouND(HttpNovelDownloader):
             return
         with tqdm(total=len(self._mark), file=self.bar_output, unit="parts") as pbar:
             for part in self._mark:
-                res = self.__get(self.info["epis"][part]["url"])
+                res = self._get(self.info["epis"][part]["url"])
                 soup = bs4(res, "html.parser")
                 subtitle = soup.select_one(".novel_subtitle").text
                 body = soup.select_one("#novel_honbun")
@@ -311,7 +311,7 @@ class KakuyomuND(HttpNovelDownloader):
             return False
 
     def _real_fetch_info(self):
-        data = self.__get(self.indexurl)
+        data = self._get(self.indexurl)
         top_data = bs4(data, "html.parser")
         index_raw = top_data.select_one(".widget-toc-items")
         raws = index_raw.select("li.widget-toc-episode")
@@ -349,7 +349,7 @@ class KakuyomuND(HttpNovelDownloader):
     def _real_fetch_novels(self):
         with tqdm(total=len(self._mark), file=self.bar_output, unit="parts") as pbar:
             for part in self._mark:
-                res = self.__get(self.info["epis"][part]["url"])
+                res = self._get(self.info["epis"][part]["url"])
                 soup = bs4(res, "html.parser")
                 subtitle = soup.select_one(".widget-episodeTitle").text
                 body = soup.select_one(".widget-episodeBody")

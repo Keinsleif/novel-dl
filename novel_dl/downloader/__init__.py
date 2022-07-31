@@ -28,7 +28,7 @@ def get_file_nd(em):
             super(self.__class__, self).__init__(em)
             self.info["indexurl"] = db["url"]
 
-        def get(self, path):
+        def _get(self, path):
             p = Path(path).expanduser()
             with p.open() as f:
                 data = f.read()
@@ -48,7 +48,7 @@ def get_file_nd(em):
                 "FileND",
                 (bc,),
                 dict(
-                    BASE_URL=path.rstrip("/"), INDEX_URL="{base}/index.html", __init__=__init__, get=get, gen_db=gen_db
+                    BASE_URL=path.rstrip("/"), INDEX_URL="{base}/index.html", __init__=__init__, _get=_get, gen_db=gen_db
                 ),
             )
         return FileND
