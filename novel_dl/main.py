@@ -57,7 +57,9 @@ def novel_dl(em):
             pconf_file = root / "themes" / conf["parent"] / "config.json"
             if pconf_file.is_file():
                 with pconf_file.open() as f:
-                    deepupdate(conf, json.load(f))
+                    pconf = json.load(f)
+                    deepupdate(pconf, conf)
+                    conf = pconf
             else:
                 raise NDLE("Cannot load theme config. parent config.json not found")
         else:
