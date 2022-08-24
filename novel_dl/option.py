@@ -239,9 +239,7 @@ class EnvManager(object):
             self.env["src"] = MultipleSrc(opts["src"])
 
         if opts.get("quiet"):
-            self.env["bar_output"] = open(os.devnull, "w")
-        elif opts.get("quiet") is False:
-            self.env["bar_output"] = sys.stdout
+            self.env["bar_output"] = [sys.stdout, open(os.devnull, "w")][opts["quiet"]]
 
         if opts.get("update"):
             opts["renew"] = True
