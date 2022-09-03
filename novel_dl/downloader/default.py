@@ -101,7 +101,7 @@ class NovelDownloader(object):
 
     def gen_db(self, db_data={}):
         db = {
-            "url": self.indexurl,
+            "url": self.info["indexurl"],
             "title": self.info["title"],
             "num_parts": self.info["num_parts"],
             "author": self.info["author"],
