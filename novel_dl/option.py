@@ -77,15 +77,7 @@ class EnvManager(object):
         return em
 
     def load_default(self):
-        self.conf = deepcopy(self._default_conf)
-        valid_themes = ["auto"]
-        [
-            valid_themes.append(j.name)
-            for i in self.conf["theme_path"]
-            for j in i.iterdir()
-            if not j.name.startswith(".") and not j.name in valid_themes
-        ]
-        self.env["THEMES"] = valid_themes
+        self.conf = deepcopy(self.verify_config(self._default_conf))
 
     def load_usercfg(self):
         if not self.config_dir.is_dir():
@@ -102,14 +94,6 @@ class EnvManager(object):
 
     def update_config(self, data):
         deepupdate(self.conf, self.verify_config(data))
-        valid_themes = ["auto"]
-        [
-            valid_themes.append(j.name)
-            for i in self.conf["theme_path"]
-            for j in i.iterdir()
-            if not j.name.startswith(".") and not j.name in valid_themes
-        ]
-        self.env["THEMES"] = valid_themes
 
     def save_usercfg(self):
         if not self.config_dir.is_dir():
@@ -138,12 +122,14 @@ class EnvManager(object):
                 theme_paths.append(path)
 
         valid_themes = ["auto"]
+        theme_dirs = []
         [
             valid_themes.append(j.name)
             for i in theme_paths
             for j in i.iterdir()
             if not j.name.startswith(".") and not j.name in valid_themes
         ]
+        self.env["THEMES"] = valid_themes
 
         rules_dict = {
             "default_theme": valid_themes,
