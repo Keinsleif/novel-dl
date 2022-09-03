@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 import importlib.util
 from .info import __appname__
 
-URL_REG = re.compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
+URL_REG = re.compile(r"https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
 
 
 class NovelDLException(Exception):
@@ -33,9 +33,11 @@ def import_from_file(name, path):
     if not os.path.isfile(path):
         raise FileNotFoundError
     spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    if spec and spec.loader:
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    return None
 
 
 def deepupdate(dict_base, other):
