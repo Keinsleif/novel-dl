@@ -117,7 +117,7 @@ class EnvManager(object):
             (self.config_dir / "themes").mkdir()
             self.conf["theme_path"] += [self.config_dir / "themes"]
         sconf = deepcopy(self.conf)
-        sconf["theme_path"].remove(self._default_conf[0])
+        sconf["theme_path"].remove(self._default_conf["theme_path"][0])
         sconf["theme_path"] = list(map(str, sconf["theme_path"]))
         sconf["output_path"] = str(sconf["output_path"])
         with self.config_file.open(mode="w") as f:
@@ -181,9 +181,9 @@ class EnvManager(object):
             "conflict_handler": "resolve",
         }
 
-        def error_handler(msg):
+        def error_handler(message):
             self.parser.print_usage()
-            raise NDLE("[{klass}] " + msg, klass=self.classname)
+            raise NDLE("[{klass}] " + message, klass=self.classname)
 
         self.parser = ArgumentParser(**kw)
         self.parser.error = error_handler
