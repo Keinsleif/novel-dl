@@ -116,7 +116,7 @@ class NovelDownloader(object):
 class HttpNovelDownloader(NovelDownloader):
     HEADER = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0"}
     COOKIE = {}
-    URL_REG = re.compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
+    URL_REG = re.compile(r"https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
 
     def __init__(self, em):
         super().__init__(em)
@@ -135,7 +135,7 @@ class HttpNovelDownloader(NovelDownloader):
 
     @classmethod
     def match_url(cls, url):
-        if re.match("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+", url):
+        if re.match(r"https?://[\w/:%#\$&\?\(\)~\.=\+\-]+", url):
             return True
         else:
             return False
@@ -190,11 +190,14 @@ class NarouND(HttpNovelDownloader):
     BASE_URL = "{scheme}://{host}"
     INDEX_URL = "{base}/{ncode}"
     AUTO_THEME = "narou"
+    NCODE_PATTERN = re.compile(r"/(n[0-9a-zA-Z]+)")
 
     def __init__(self, em):
         super().__init__(em)
         ret = urlparse(self.url)
-        self.ncode = re.match(r"/(n[0-9a-zA-Z]+)", ret.path).group(1)
+        m = self.NCODE_PATTERN.match(ret.path)
+        assert m is not None
+        self.ncode = m.group(1)
         self.baseurl = self.BASE_URL.format(scheme=ret.scheme, host=ret.hostname)
         self.indexurl = self.INDEX_URL.format(base=self.baseurl, ncode=self.ncode)
         self.info["indexurl"] = self.indexurl
@@ -204,7 +207,7 @@ class NarouND(HttpNovelDownloader):
         p = super().match_url(url)
         ret = urlparse(url)
         f = ret.hostname == "ncode.syosetu.com" or ret.hostname == "novel18.syosetu.com"
-        if p and f and re.match(r"/(n[0-9a-zA-Z]+)", ret.path):
+        if p and f and cls.NCODE_PATTERN.match(ret.path):
             return True
         else:
             return False
