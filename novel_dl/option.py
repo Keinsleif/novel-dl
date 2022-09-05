@@ -77,7 +77,7 @@ class EnvManager(object):
         return em
 
     def load_default(self):
-        self.conf = deepcopy(self.verify_config(self._default_conf))
+        self.conf = self.verify_config(self._default_conf)
 
     def load_usercfg(self):
         if not self.config_dir.is_dir():
@@ -107,11 +107,12 @@ class EnvManager(object):
         with self.config_file.open(mode="w") as f:
             json.dump(self.conf, f, ensure_ascii=False, indent=4)
 
-    def verify_config(self, sd):
+    def verify_config(self, data):
+        sd = deepcopy(data)
         for key in list(sd):
-            if key not in self.conf:
+            if key not in self._default_conf:
                 sd.pop(key)
-            elif type(sd[key]) != type(self.conf[key]):
+            elif type(sd[key]) != type(self._default_conf[key]):
                 sd.pop(key)
 
         theme_paths = self._default_conf["theme_path"]
@@ -139,7 +140,7 @@ class EnvManager(object):
             if sd[key] not in valid_values:
                 sd.pop(key)
 
-        dd = self.conf["default_delay"]
+        dd = self._default_conf["default_delay"]
         if sd.get("default_delay"):
             if sd["default_delay"] < 0:
                 sd.pop("default_delay")
