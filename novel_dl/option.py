@@ -49,15 +49,15 @@ class EnvManager(object):
             "default_delay": 1,
             "min_delay": 0.1,
             "retries": 3,
-            "user_agant": "",
-            "output_path": ".",
+            "header": {},
+            "coocie": {},
+            "output_path": Path("."),
             "output_format": "{title}",
             "symlink_static": False,
         }
         self.load_default()
         self.config_dir = get_config_path()
         self.config_file = self.config_dir / "settings.json"
-        self.init_parser()
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -80,7 +80,7 @@ class EnvManager(object):
         self.conf = self.verify_config(self._default_conf)
 
     def load_usercfg(self):
-        if not self.config_dir.is_dir():
+        if not self.config_dir.is_dir() or not self.config_file.is_file():
             return
         try:
             with self.config_file.open(mode="r") as f:
@@ -88,8 +88,8 @@ class EnvManager(object):
         except json.decoder.JSONDecodeError as e:
             raise NDLE("[{klass}] Config load error: " + e.msg, klass=self.classname)
         else:
-            conf["theme_path"] = list(map(Path, conf["theme_path"]))
-            conf["output_path"] = Path(conf["output_path"])
+            conf["theme_path"] = list(map(lambda x:Path(x).expanduser(), conf["theme_path"]))
+            conf["output_path"] = Path(conf["output_path"]).expanduser()
             self.update_config(conf)
 
     def update_config(self, data):
@@ -105,7 +105,7 @@ class EnvManager(object):
         sconf["theme_path"] = list(map(str, sconf["theme_path"]))
         sconf["output_path"] = str(sconf["output_path"])
         with self.config_file.open(mode="w") as f:
-            json.dump(self.conf, f, ensure_ascii=False, indent=4)
+            json.dump(sconf, f, ensure_ascii=False, indent=4)
 
     def verify_config(self, data):
         sd = deepcopy(data)
@@ -201,20 +201,21 @@ class EnvManager(object):
         )
         index = ["src", "quiet", "axel", "episode", "theme", "media", "renew", "name", "dir", "from_file", "update"]
         self.opts = {i: self.parser.get_default(i) for i in index}
-        self.opts["dir"] = Path(self.opts["dir"])
+        self.opts["dir"] = Path(self.opts["dir"]).expanduser()
         self.opts["src"] = [self.opts["src"]]
 
     def parse_args(self, args):
         option = self.parser.parse_args(args).__dict__
-        option["dir"] = Path(option["dir"])
         self.opts = self.verify_options(option)
 
-    def update_args(self, args):
+    def update_options(self, args):
         deepupdate(self.opts, self.verify_options(args))
 
     def verify_options(self, opts):
         if not isinstance(opts.get("src", []), list):
             opts["src"] = [opts["src"]]
+        if not isinstance(opts.get("dir",Path()),Path):
+            opts["dir"] = Path(opts["dir"]).expanduser()
 
         for key in list(opts):
             if key not in self.opts:

@@ -40,7 +40,7 @@ def novel_dl(em):
 
             # Load themes
         if em.opts["theme"] == "auto":
-            em.update_args({"theme": nd.AUTO_THEME})
+            em.update_options({"theme": nd.AUTO_THEME})
         THEME_DIR = root / "themes" / em.opts["theme"]
         conf_file = THEME_DIR / "config.json"
         conf = {}
@@ -247,6 +247,7 @@ def command_line():
     try:
         em = EnvManager()
         em.load_usercfg()
+        em.init_parser()
         em.parse_args(sys.argv[1:])
         novel_dl(em)
     except NDLE as e:
@@ -258,13 +259,15 @@ def command_line():
         if not em.opts["quiet"]:
             print("Successfully downloaded")
     finally:
+        em.save_usercfg()
         return return_code
 
 
 def setup_em(**kw):
     em = EnvManager()
     em.load_usercfg()
-    em.update_args(kw)
+    em.init_parser()
+    em.update_options(kw)
     return em
 
 

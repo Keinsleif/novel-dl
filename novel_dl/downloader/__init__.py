@@ -24,7 +24,7 @@ def get_file_nd(em):
         def __init__(self, em_orig):
             em = deepcopy(em_orig)
             em.env["delay"] = em.conf["min_delay"]
-            em.update_args({"src": db["url"]})
+            em.update_options({"src": db["url"]})
             super(self.__class__, self).__init__(em)
             self.info["indexurl"] = db["url"]
 
