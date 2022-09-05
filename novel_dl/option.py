@@ -49,6 +49,7 @@ class EnvManager(object):
             "default_delay": 1,
             "min_delay": 0.1,
             "retries": 3,
+            "timeout": (15,30),
             "headers": {},
             "coocies": {},
             "output_path": Path("."),

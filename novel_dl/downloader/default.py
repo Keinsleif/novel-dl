@@ -126,6 +126,7 @@ class HttpNovelDownloader(NovelDownloader):
         self.session = Session()
         self.set_headers(self.HEADER,em.conf["headers"])
         self.set_cookies(self.COOKIE,em.conf["cookies"])
+        self.timeout=em.conf["timeout"]
         retries = Retry(total=em.conf["retries"], backoff_factor=1, status_forcelist=[500, 502, 503, 504])
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
@@ -152,10 +153,12 @@ class HttpNovelDownloader(NovelDownloader):
     def get_headers(self):
         return self.session.headers
 
-    def _get(self, url, params=None):
+    def _get(self, url, params=None, timeout=()):
         if not params:
             params = self.params
-        result = self.session.get(url, params=params)
+        if not timeout:
+            timeout = self.timeout
+        result = self.session.get(url, params=params, timeout=self.timeout)
         return result.content
 
     def fetch_info(self):
