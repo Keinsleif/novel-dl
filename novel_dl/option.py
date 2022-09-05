@@ -54,6 +54,8 @@ class EnvManager(object):
             "output_path": Path("."),
             "output_format": "{title}",
             "symlink_static": False,
+            "precmd": "",
+            "postcmd": "",
         }
         self.load_default()
         self.config_dir = get_config_path()
