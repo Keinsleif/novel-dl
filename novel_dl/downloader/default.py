@@ -124,8 +124,8 @@ class HttpNovelDownloader(NovelDownloader):
         self.delay = em.env["delay"]
         self.params = {}
         self.session = Session()
-        self.set_headers(self.HEADER)
-        self.set_cookies(self.COOKIE)
+        self.set_headers(self.HEADER,em.conf["headers"])
+        self.set_cookies(self.COOKIE,em.conf["cookies"])
         retries = Retry(total=em.conf["retries"], backoff_factor=1, status_forcelist=[500, 502, 503, 504])
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
@@ -140,14 +140,14 @@ class HttpNovelDownloader(NovelDownloader):
         else:
             return False
 
-    def set_cookies(self, cookies):
-        self.session.cookies.update(cookies)
+    def set_cookies(self, *cookies):
+        [self.session.cookies.update(c) for c in cookies]
 
     def get_cookies(self):
         return self.session.cookies
 
-    def set_headers(self, headers):
-        self.session.headers.update(headers)
+    def set_headers(self, *headers):
+        [self.session.headers.update(h) for h in headers]
 
     def get_headers(self):
         return self.session.headers
