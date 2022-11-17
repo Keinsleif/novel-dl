@@ -51,7 +51,7 @@ class EnvManager(object):
             "retries": 3,
             "timeout": (15,30),
             "headers": {},
-            "coocies": {},
+            "cookies": {},
             "output_path": Path("."),
             "output_format": "{title}",
             "symlink_static": False,
@@ -232,8 +232,8 @@ class EnvManager(object):
         if opts.get("quiet"):
             self.env["bar_output"] = [sys.stdout, open(os.devnull, "w")][opts["quiet"]]
 
-        if opts.get("update"):
-            opts["renew"] = True
+        if opts.get("from_file"):
+            opts["axel"] = True
 
         if opts.get("theme") and not opts["theme"] in self.env["THEMES"]:
             raise NDLE("Invalid theme name `" + opts["theme"] + "`")

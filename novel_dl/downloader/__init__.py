@@ -16,14 +16,13 @@ def get_downloader(src):
 def get_file_nd(em):
     path = em.env["src"].src
     p = Path(path).expanduser()
-    if p.is_dir():
+    if p.is_dir() and (p / "static/db.json").is_file():
         with open(p / "static/db.json", "r") as f:
             db = json.load(f)
         bc = get_downloader(db["url"])
 
         def __init__(self, em_orig):
             em = deepcopy(em_orig)
-            em.env["delay"] = em.conf["min_delay"]
             em.update_options({"src": db["url"]})
             super(self.__class__, self).__init__(em)
             self.info["indexurl"] = db["url"]
