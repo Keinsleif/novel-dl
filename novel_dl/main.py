@@ -253,8 +253,9 @@ def command_line():
     except NDLE as e:
         e.console_message()
         return_code = 1
-    except Exception as e:
-        print(traceback.format_exc())
+    except Exception:
+        e=NDLE("Unexpected error occurred.\n"+traceback.format_exc())
+        print(e.msg,file=sys.stderr)
     else:
         if not em.opts["quiet"]:
             print("Successfully downloaded")
