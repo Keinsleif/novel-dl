@@ -21,7 +21,8 @@ class NovelDownloader(object):
         self.classname = self.__class__.__name__
         self.status = []
         self._set_status = self.status.append
-        self.bar_output = em.env["bar_output"]
+        self._em = em
+        self.bar_output = self._em.env["bar_output"]
         self.initialize()
 
     def __del__(self):
@@ -120,14 +121,14 @@ class HttpNovelDownloader(NovelDownloader):
 
     def __init__(self, em):
         super().__init__(em)
-        self.url = em.env["src"].src
-        self.delay = em.env["delay"]
+        self.url = self._em.env["src"].src
+        self.delay = self._em.env["delay"]
         self.params = {}
         self.session = Session()
-        self.set_headers(self.HEADER,em.conf["headers"])
-        self.set_cookies(self.COOKIE,em.conf["cookies"])
-        self.timeout=em.conf["timeout"]
-        retries = Retry(total=em.conf["retries"], backoff_factor=1, status_forcelist=[500, 502, 503, 504])
+        self.set_headers(self.HEADER,self._em.conf["headers"])
+        self.set_cookies(self.COOKIE,self._em.conf["cookies"])
+        self.timeout=self._em.conf["timeout"]
+        retries = Retry(total=self._em.conf["retries"], backoff_factor=1, status_forcelist=[500, 502, 503, 504])
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
 
@@ -228,7 +229,9 @@ class NarouND(HttpNovelDownloader):
             )
         self.info["title"] = top_data.select_one("title").text
         author_data = top_data.select_one(".novel_writername")
-        if author_data.a:
+        if not author_data:
+            self.info["author"] = ["unknown",""]
+        elif author_data.find("a"):
             self.info["author"] = [author_data.a.text, author_data.a.attrs["href"]]
         else:
             self.info["author"] = [author_data.text[4:][:-1], ""]
