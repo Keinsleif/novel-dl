@@ -16,8 +16,6 @@ from .utils import (
 from .info import __version__
 
 root = Path(__file__).parent.resolve()
-THEMES = ["auto"] + [i.name for i in (root / "themes/").iterdir()]
-
 
 def novel_dl(em):
     while True:
