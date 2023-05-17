@@ -160,7 +160,7 @@ class HttpNovelDownloader(NovelDownloader):
         if not timeout:
             timeout = self.timeout
         result = self.session.get(url, params=params, timeout=self.timeout)
-        return result.content
+        return result.text
 
     def fetch_info(self):
         try:
@@ -218,7 +218,7 @@ class NarouND(HttpNovelDownloader):
 
     def _real_fetch_info(self):
         data = self._get(self.indexurl)
-        top_data = bs4(data, "html.parser")
+        top_data = bs4(data.replace("\n",""), "html.parser")
         if top_data.select_one(".maintenance-container"):
             raise NDLE("[{klass}] Narou is under maintenance", klass=self.classname)
         if top_data.select_one(".nothing"):
@@ -243,7 +243,8 @@ class NarouND(HttpNovelDownloader):
             self.info["num_parts"] = 0
             self.info["type"] = "short"
 
-        eles = bs4(str(index_raw).replace("\n", ""), "html.parser").contents[0].contents
+        eles = index_raw.contents.copy()
+        [eles.remove(" ") for i in range(0,eles.count(" "))]
         c = ""
         cid = 1
         part = 1
@@ -320,8 +321,8 @@ class KakuyomuND(HttpNovelDownloader):
             return False
 
     def _real_fetch_info(self):
-        data = self._get(self.indexurl)
-        top_data = bs4(data, "html.parser")
+        data = self._get(self.indexurl).replace("\n","")
+        top_data = bs4(data.replace("\n",""), "html.parser")
         index_raw = top_data.select_one(".widget-toc-items")
         raws = index_raw.select("li.widget-toc-episode")
         self.info["num_parts"] = len(raws)
@@ -329,7 +330,8 @@ class KakuyomuND(HttpNovelDownloader):
         author_data = top_data.select_one("#workAuthor-activityName")
         self.info["author"] = [author_data.a.text, self.baseurl + author_data.a.attrs["href"]]
         self.info["title"] = top_data.select_one("#workTitle").text
-        eles = bs4(str(index_raw).replace("\n", ""), "html.parser").contents[0].contents
+        eles = index_raw.contents.copy()
+        [eles.remove(" ") for i in range(0,eles.count(" "))]
         c = ""
         cid = 1
         part = 1

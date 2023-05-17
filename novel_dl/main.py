@@ -31,7 +31,7 @@ def novel_dl(em):
         nd.fetch_info()
 
         if em.opts["episode"]:
-            if not em.opts["episode"] > nd.info["num_parts"]:
+            if not (0 < em.opts["episode"] <= nd.info["num_parts"]):
                 raise NDLE("Incorrect episode number `{num}`",num = em.opts["episode"])
             nd.mark_all("skip")
             nd.mark_part("get", em.opts["episode"])
@@ -183,7 +183,7 @@ def novel_dl(em):
                     lines=len(nd.novels[0][1]),
                     url=nd.info["indexurl"],
                 )
-            with (ndir / em.env["name"] + ".html").open(mode="w") as f:
+            with (ndir / (em.env["name"] + ".html")).open(mode="w") as f:
                 f.write(contents)
         #            return ndir / em.env["name"] + ".html"
         else:
