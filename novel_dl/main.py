@@ -32,7 +32,7 @@ def novel_dl(em):
 
         if em.opts["episode"]:
             if not em.opts["episode"] > nd.info["num_parts"]:
-                raise NDLE("Incorrect episode number `" + em.opts["episode"] + "`")
+                raise NDLE("Incorrect episode number `{num}`",num = em.opts["episode"])
             nd.mark_all("skip")
             nd.mark_part("get", em.opts["episode"])
 
@@ -69,7 +69,7 @@ def novel_dl(em):
             MEDIAS = conf["medias"]
         if not em.opts["media"] in MEDIAS:
             MEDIAS.remove("")
-            raise NDLE("Invalid media type\nAvailable medias in this theme: ({})".format(", ".join(MEDIAS)))
+            raise NDLE("Invalid media type\nAvailable medias in this theme: ({m})", m=", ".join(MEDIAS))
 
         if em.opts["media"]:
             htmls = {i: i + "_" + em.opts["media"] for i in {"base", "index", "single"}}
@@ -79,7 +79,7 @@ def novel_dl(em):
         try:
             htmls = {i: env.get_template(htmls[i]) for i in htmls}
         except TemplateNotFound as e:
-            raise NDLE("Cannot load theme file: " + e.name)
+            raise NDLE("Cannot load theme file: {file}",file=e.name)
         loads = {"js": [], "css": []}
         if conf.get("loads"):
             if type(conf["loads"].get("js")) is list:
@@ -252,7 +252,7 @@ def command_line():
         e.console_message()
         return_code = 1
     except Exception:
-        e=NDLE("Unexpected error occurred.\n"+traceback.format_exc())
+        e=NDLE("Unexpected error occurred.\n{err}",err=traceback.format_exc())
         print(e.msg,file=sys.stderr)
     else:
         if not em.opts["quiet"]:

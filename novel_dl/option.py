@@ -89,7 +89,7 @@ class EnvManager(object):
             with self.config_file.open(mode="r") as f:
                 conf = json.load(f)
         except json.decoder.JSONDecodeError as e:
-            raise NDLE("[{klass}] Config load error: " + e.msg, klass=self.classname)
+            raise NDLE("[{klass}] Config load error: {err}", klass=self.classname, err=e.msg)
         else:
             conf["theme_path"] = list(map(lambda x:Path(x).expanduser(), conf["theme_path"]))
             conf["output_path"] = Path(conf["output_path"]).expanduser()
@@ -173,7 +173,7 @@ class EnvManager(object):
 
         def error_handler(message):
             self.parser.print_usage()
-            raise NDLE("[{klass}] " + message, klass=self.classname)
+            raise NDLE("[{klass}] {msg}", klass=self.classname, msg=message)
 
         self.parser = ArgumentParser(**kw)
         self.parser.error = error_handler
@@ -236,7 +236,7 @@ class EnvManager(object):
             opts["axel"] = True
 
         if opts.get("theme") and not opts["theme"] in self.env["THEMES"]:
-            raise NDLE("Invalid theme name `" + opts["theme"] + "`")
+            raise NDLE("Invalid theme name `{theme}`", theme = opts["theme"])
 
         if opts.get("axel"):
             self.env["delay"] = self.conf["min_delay"]
