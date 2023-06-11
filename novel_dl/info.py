@@ -3,7 +3,7 @@
 
 __author__ = "Kondo Kazuto"
 __contact__ = "mountaindull@gmail.com"
-__projecturl__ = "https://github.com/kazuto28/novel-dl/"
+__projecturl__ = "https://github.com/Keinsleif/novel-dl/"
 
 __version_info__ = (1, 6, 0)
 __version__ = ".".join(map(str, __version_info__))

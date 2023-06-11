@@ -18,7 +18,7 @@ UbuntuやCentOSなどのMacOSおよびLinux、つまりUnix系OSで動作する�
 これはパブリックドメインにリリースされます。つまり、好きなように変更、再配布、または使用することができます。  
 
 # DEMO
-![demo](https://raw.github.com/wiki/kazuto28/novel-dl/images/novel-dl_DEMO.gif)
+![demo](https://raw.github.com/wiki/Keinsleif/novel-dl/images/novel-dl_DEMO.gif)
 
 # Usage (使い方)
     novel-dl [OPTIONS] <url> [<url> ...]
@@ -101,11 +101,11 @@ $ pip3 install novel-dl
 ```
 or
 ```
-$ pip3 install git+https://github.com/kazuto28/novel-dl.git
+$ pip3 install git+https://github.com/Keinsleif/novel-dl.git
 ```
 or
 ```
-$ git clone https://github.com/kazuto28/novel-dl.git
+$ git clone https://github.com/Keinsleif/novel-dl.git
 $ cd novel-dl
 $ python3 setup.py install
 ```
