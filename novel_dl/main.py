@@ -128,7 +128,8 @@ def novel_dl(em):
                     db_data = json.load(f)
                 nd.mark_all("skip")
                 if nd.info["num_parts"] > db_data["num_parts"]:
-                    nd.mark_part("get", db_data["num_parts"])
+                    for i in range(db_data["num_parts"]+1, nd.info["num_parts"]+1):
+                        nd.mark_part("get", i)
                 for i in nd.info["epis"].keys():
                     if not str(i) in db_data["epis"]:
                         nd.mark_part("get", i)
