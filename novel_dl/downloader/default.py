@@ -242,6 +242,7 @@ class NarouND(HttpNovelDownloader):
         else:
             self.info["num_parts"] = 0
             self.info["type"] = "short"
+            return
 
         eles = index_raw.contents.copy()
         [eles.remove(" ") for i in range(0,eles.count(" "))]
