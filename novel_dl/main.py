@@ -153,17 +153,17 @@ def novel_dl(em):
             script = []
             for file in loads["css"]:
                 paths = [
-                    re.match(".*/" + file[0], str(i)).string for i in static_files if re.match(".*/" + file[0], str(i))
+                    i for i in static_files if Path(file[0]).name==i.name
                 ]
                 if paths:
-                    with open(paths[0], "r", encoding="utf-8") as f:
+                    with paths[0].open("r", encoding="utf-8") as f:
                         style.append([f.read(), file[1]])
             for file in loads["js"]:
-                paths = [re.match(".*/" + file, str(i)).string for i in static_files if re.match(".*/" + file, str(i))]
+                paths = [i for i in static_files if Path(file).name == i.name]
                 if paths:
-                    with open(paths[0], "r", encoding="utf-8") as f:
+                    with paths[0].open("r", encoding="utf-8") as f:
                         script.append(f.read())
-
+            print(loads)
             if em.opts["episode"]:
                 contents = htmls["single"].render(
                     title=nd.novels[em.opts["episode"]][0],
