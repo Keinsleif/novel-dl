@@ -7,6 +7,7 @@ import traceback
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound
+from pytz import timezone
 from .downloader import get_downloader, get_file_nd
 from .option import EnvManager
 from .utils import (
@@ -136,7 +137,7 @@ def novel_dl(em):
                 for i in nd.info["epis"].keys():
                     if not str(i) in db_data["epis"]:
                         nd.mark_part("get", i)
-                    elif nd.info["epis"][i]["time"] > datetime.fromisoformat(db_data["epis"][str(i)]):
+                    elif nd.info["epis"][i]["time"] > datetime.fromisoformat(db_data["epis"][str(i)]).replace(tzinfo=timezone("Asia/Tokyo")):
                         nd.mark_part("get", i)
 
         try:

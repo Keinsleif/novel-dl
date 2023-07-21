@@ -255,7 +255,7 @@ class NarouND(HttpNovelDownloader):
                 c = ele.text
                 cid = cid + 1
             elif re.match(r".+novel_sublist2", str(ele)):
-                timestamp = dtime.strptime(ele.dt.text.replace("（改）", ""), "%Y/%m/%d %H:%M")
+                timestamp = dtime.strptime(ele.dt.text.replace("（改）", ""), "%Y/%m/%d %H:%M").replace(tzinfo=timezone("Asia/Tokyo"))
                 self.info["index"].append({"type": "episode", "part": part, "text": ele.a.text, "time": timestamp})
                 self.info["epis"][part] = {
                     "subtitle": ele.a.text,
@@ -341,7 +341,7 @@ class KakuyomuND(HttpNovelDownloader):
                 self.info["index"].append({"type": "chapter", "id": cid, "text": ele.text})
                 c = ele.text
             elif re.match(r".+widget-toc-episode", str(ele)):
-                timestamp = dtime.strptime(ele.time.get("datetime"), "%Y-%m-%dT%H:%M:%SZ").astimezone(
+                timestamp = dtime.strptime(ele.time.get("datetime"), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=
                     timezone("Asia/Tokyo")
                 )
                 self.info["index"].append({"type": "episode", "part": part, "text": ele.span.text, "time": timestamp})
