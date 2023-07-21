@@ -89,7 +89,7 @@ class EnvManager(object):
             with self.config_file.open(mode="r", encoding="utf-8") as f:
                 conf = json.load(f)
         except json.decoder.JSONDecodeError as e:
-            raise NDLE("[{klass}] Config load error: {err}", klass=self.classname, err=e.msg)
+            raise NDLE("[{klass}] Config load error: {err}", klass=self.classname, err=str(e))
         else:
             conf["theme_path"] = list(map(lambda x:Path(x).expanduser(), conf["theme_path"]))
             conf["output_path"] = Path(conf["output_path"]).expanduser()
@@ -173,7 +173,7 @@ class EnvManager(object):
 
         def error_handler(message):
             self.parser.print_usage()
-            raise NDLE("[{klass}] {msg}", klass=self.classname, msg=message)
+            raise NDLE("[{klass}] {mes}", klass=self.classname, mes=message)
 
         self.parser = ArgumentParser(**kw)
         self.parser.error = error_handler
