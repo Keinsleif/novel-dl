@@ -165,7 +165,7 @@ def novel_dl(em):
                 if paths:
                     with paths[0].open("r", encoding="utf-8") as f:
                         script.append(f.read())
-            print(loads)
+
             if em.opts["episode"]:
                 contents = htmls["single"].render(
                     title=nd.novels[em.opts["episode"]][0],
