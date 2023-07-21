@@ -43,7 +43,7 @@ def novel_dl(em):
         conf_file = THEME_DIR / "config.json"
         conf = {}
         if conf_file.is_file():
-            with conf_file.open() as f:
+            with conf_file.open(encoding="utf-8") as f:
                 conf = json.load(f)
         else:
             raise NDLE("Cannot load theme config. config.json not found")
@@ -54,7 +54,7 @@ def novel_dl(em):
             static_files = list(lstatic) + [i for i in (env_paths[1] / "static").iterdir() if not i in lstatic]
             pconf_file = root / "themes" / conf["parent"] / "config.json"
             if pconf_file.is_file():
-                with pconf_file.open() as f:
+                with pconf_file.open(encoding="utf-8") as f:
                     pconf = json.load(f)
                     deepupdate(pconf, conf)
                     conf = pconf
@@ -124,7 +124,7 @@ def novel_dl(em):
             else:
                 ndir = Path.cwd() / em.env["name"]
             if (ndir / "static/db.json").is_file() and not em.opts["renew"]:
-                with (ndir / "static/db.json").open(mode="r") as f:
+                with (ndir / "static/db.json").open(mode="r", encoding="utf-8") as f:
                     db_data = json.load(f)
                 nd.mark_all("skip")
                 if nd.info["num_parts"] > db_data["num_parts"]:
@@ -184,7 +184,7 @@ def novel_dl(em):
                     lines=len(nd.novels[0][1]),
                     url=nd.info["indexurl"],
                 )
-            with (ndir / (em.env["name"] + ".html")).open(mode="w") as f:
+            with (ndir / (em.env["name"] + ".html")).open(mode="w", encoding="utf-8") as f:
                 f.write(contents)
         #            return ndir / em.env["name"] + ".html"
         else:
@@ -215,7 +215,7 @@ def novel_dl(em):
                 for file in static_files:
                     shutil.copyfile(file, ndir / "static" / file.name)
 
-            with (ndir / "static/db.json").open("w") as f:
+            with (ndir / "static/db.json").open("w", encoding="utf-8") as f:
                 json.dump(nd.gen_db(db_data), f, ensure_ascii=False, indent=4, sort_keys=True, separators=(",", ": "))
 
             for part in nd.novels:

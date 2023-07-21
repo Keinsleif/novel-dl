@@ -86,7 +86,7 @@ class EnvManager(object):
         if not self.config_dir.is_dir() or not self.config_file.is_file():
             return
         try:
-            with self.config_file.open(mode="r") as f:
+            with self.config_file.open(mode="r", encoding="utf-8") as f:
                 conf = json.load(f)
         except json.decoder.JSONDecodeError as e:
             raise NDLE("[{klass}] Config load error: {err}", klass=self.classname, err=e.msg)
@@ -107,7 +107,7 @@ class EnvManager(object):
         sconf["theme_path"].remove(self._default_conf["theme_path"][0])
         sconf["theme_path"] = list(map(str, sconf["theme_path"]))
         sconf["output_path"] = str(sconf["output_path"])
-        with self.config_file.open(mode="w") as f:
+        with self.config_file.open(mode="w", encoding="utf-8") as f:
             json.dump(sconf, f, ensure_ascii=False, indent=4)
 
     def verify_config(self, data):

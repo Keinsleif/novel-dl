@@ -10,15 +10,15 @@ root = os.path.abspath(os.path.dirname(__file__))
 PACKAGE_NAME = "novel_dl"
 info_path = os.path.join(root, PACKAGE_NAME, "info.py")
 ns = dict()
-with open(info_path, "r") as f:
+with open(info_path, "r", encoding="utf-8") as f:
     eval(compile(f.read(), info_path, "exec"), dict(), ns)
 __version__ = ns["__version__"]
 
-with open(os.path.join(root, "README.md"), "r") as f:
+with open(os.path.join(root, "README.md"), "r", encoding="utf-8") as f:
     LONG_DESCRIPTION = f.read()
 
 require_path = os.path.join(root, "requirements.txt")
-with open(require_path, "r") as f:
+with open(require_path, "r", encoding="utf-8") as f:
     REQUIRES = f.read().splitlines()
 
 setup(
