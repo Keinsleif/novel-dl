@@ -16,8 +16,8 @@ def get_downloader(src):
 def get_file_nd(em):
     path = em.env["src"].src
     p = Path(path).expanduser()
-    if p.is_dir() and (p / "static/db.json").is_file():
-        with open(p / "static/db.json", "r", encoding="utf-8") as f:
+    if p.is_dir() and (p / "static" / "db.json").is_file():
+        with open(p / "static" / "db.json", "r", encoding="utf-8") as f:
             db = json.load(f)
         bc = get_downloader(db["url"])
 
