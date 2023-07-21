@@ -184,8 +184,8 @@ class EnvManager(object):
         general.add_argument("-q", "--quiet", action="store_true", help="suppress non-messages")
         downloader = self.parser.add_argument_group("Downloader Options")
         downloader.add_argument("-a", "--axel", action="store_true", help="turn on axceleration mode")
-        downloader.add_argument("-f", "--from-file", action="store_true", help="turn on extract from downloaded file")
-        downloader.add_argument("-u", "--update", action="store_true", help="fetch & update novels from internet")
+        # downloader.add_argument("-f", "--from-file", action="store_true", help="turn on extract from downloaded file")
+        # downloader.add_argument("-u", "--update", action="store_true", help="fetch & update novels from internet")
         formatter = self.parser.add_argument_group("Formatter Options")
         formatter.add_argument("-t", "--theme", default=self.conf["default_theme"], help="set novel's theme", type=str)
         formatter.add_argument(

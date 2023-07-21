@@ -8,7 +8,7 @@ from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound
 from pytz import timezone
-from .downloader import get_downloader, get_file_nd
+from .downloader import get_downloader
 from .option import EnvManager
 from .utils import (
     NovelDLException as NDLE,
@@ -21,10 +21,7 @@ root = Path(__file__).parent.resolve()
 
 def novel_dl(em):
     while True:
-        if em.opts["from_file"] or em.opts["update"]:
-            nd_klass = get_file_nd(em)
-        else:
-            nd_klass = get_downloader(em.env["src"].src)
+        nd_klass = get_downloader(em.env["src"].src)
         if nd_klass:
             nd = nd_klass(em)
         else:
