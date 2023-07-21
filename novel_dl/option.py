@@ -166,7 +166,7 @@ class EnvManager(object):
     def init_parser(self):
         kw = {
             "prog": __appname__.lower(),
-            "usage": "%(prog)s [OPTIONS] URL [URL ...]\n       %(prog)s [-f] [-u] PATH [PATH ...]",
+            "usage": "%(prog)s [OPTIONS] src [src ...]",
             "description": __description__,
             "conflict_handler": "resolve",
         }
