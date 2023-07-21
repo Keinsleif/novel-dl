@@ -111,7 +111,9 @@ def novel_dl(em):
         except KeyError:
             raise NDLE("Incorrect directory name format")
         now = datetime.now()
-        em.env["name"] = now.strftime(em.env["name"])
+        em.env["name"] = (
+            now.strftime(em.env["name"].encode("unicode-escape").decode()).encode().decode("unicode-escape")
+        )
         db_data = {}
 
         if nd.info["type"] == "short" or em.opts["episode"]:
