@@ -49,7 +49,7 @@ class EnvManager(object):
             "default_delay": 1,
             "min_delay": 0.1,
             "retries": 3,
-            "timeout": (15,30),
+            "timeout": (15, 30),
             "headers": {},
             "cookies": {},
             "output_path": Path("."),
@@ -91,7 +91,7 @@ class EnvManager(object):
         except json.decoder.JSONDecodeError as e:
             raise NDLE("[{klass}] Config load error: {err}", klass=self.classname, err=str(e))
         else:
-            conf["theme_path"] = list(map(lambda x:Path(x).expanduser(), conf["theme_path"]))
+            conf["theme_path"] = list(map(lambda x: Path(x).expanduser(), conf["theme_path"]))
             conf["output_path"] = Path(conf["output_path"]).expanduser()
             self.update_config(conf)
 
@@ -217,7 +217,7 @@ class EnvManager(object):
     def verify_options(self, opts):
         if not isinstance(opts.get("src", []), list):
             opts["src"] = [opts["src"]]
-        if not isinstance(opts.get("dir",Path()),Path):
+        if not isinstance(opts.get("dir", Path()), Path):
             opts["dir"] = Path(opts["dir"]).expanduser()
 
         for key in list(opts):
@@ -236,7 +236,7 @@ class EnvManager(object):
             opts["axel"] = True
 
         if opts.get("theme") and not opts["theme"] in self.env["THEMES"]:
-            raise NDLE("Invalid theme name `{theme}`", theme = opts["theme"])
+            raise NDLE("Invalid theme name `{theme}`", theme=opts["theme"])
 
         if opts.get("axel"):
             self.env["delay"] = self.conf["min_delay"]

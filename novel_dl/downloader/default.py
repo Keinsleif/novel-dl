@@ -125,9 +125,9 @@ class HttpNovelDownloader(NovelDownloader):
         self.delay = self._em.env["delay"]
         self.params = {}
         self.session = Session()
-        self.set_headers(self.HEADER,self._em.conf["headers"])
-        self.set_cookies(self.COOKIE,self._em.conf["cookies"])
-        self.timeout=self._em.conf["timeout"]
+        self.set_headers(self.HEADER, self._em.conf["headers"])
+        self.set_cookies(self.COOKIE, self._em.conf["cookies"])
+        self.timeout = self._em.conf["timeout"]
         retries = Retry(total=self._em.conf["retries"], backoff_factor=1, status_forcelist=[500, 502, 503, 504])
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
         self.session.mount("http://", HTTPAdapter(max_retries=retries))
@@ -218,7 +218,7 @@ class NarouND(HttpNovelDownloader):
 
     def _real_fetch_info(self):
         data = self._get(self.indexurl)
-        top_data = bs4(data.replace("\n",""), "html.parser")
+        top_data = bs4(data.replace("\n", ""), "html.parser")
         if top_data.select_one(".maintenance-container"):
             raise NDLE("[{klass}] Narou is under maintenance", klass=self.classname)
         if top_data.select_one(".nothing"):
@@ -230,7 +230,7 @@ class NarouND(HttpNovelDownloader):
         self.info["title"] = top_data.select_one("title").text
         author_data = top_data.select_one(".novel_writername")
         if not author_data:
-            self.info["author"] = ["unknown",""]
+            self.info["author"] = ["unknown", ""]
         elif author_data.find("a"):
             self.info["author"] = [author_data.a.text, author_data.a.attrs["href"]]
         else:
@@ -245,7 +245,7 @@ class NarouND(HttpNovelDownloader):
             return
 
         eles = index_raw.contents.copy()
-        [eles.remove(" ") for i in range(0,eles.count(" "))]
+        [eles.remove(" ") for i in range(0, eles.count(" "))]
         c = ""
         cid = 1
         part = 1
@@ -322,8 +322,8 @@ class KakuyomuND(HttpNovelDownloader):
             return False
 
     def _real_fetch_info(self):
-        data = self._get(self.indexurl).replace("\n","")
-        top_data = bs4(data.replace("\n",""), "html.parser")
+        data = self._get(self.indexurl).replace("\n", "")
+        top_data = bs4(data.replace("\n", ""), "html.parser")
         index_raw = top_data.select_one(".widget-toc-items")
         raws = index_raw.select("li.widget-toc-episode")
         self.info["num_parts"] = len(raws)
@@ -332,7 +332,7 @@ class KakuyomuND(HttpNovelDownloader):
         self.info["author"] = [author_data.a.text, self.baseurl + author_data.a.attrs["href"]]
         self.info["title"] = top_data.select_one("#workTitle").text
         eles = index_raw.contents.copy()
-        [eles.remove(" ") for i in range(0,eles.count(" "))]
+        [eles.remove(" ") for i in range(0, eles.count(" "))]
         c = ""
         cid = 1
         part = 1

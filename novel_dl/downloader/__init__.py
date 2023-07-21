@@ -47,7 +47,11 @@ def get_file_nd(em):
                 "FileND",
                 (bc,),
                 dict(
-                    BASE_URL=path.rstrip("/"), INDEX_URL="{base}/index.html", __init__=__init__, _get=_get, gen_db=gen_db
+                    BASE_URL=path.rstrip("/"),
+                    INDEX_URL="{base}/index.html",
+                    __init__=__init__,
+                    _get=_get,
+                    gen_db=gen_db,
                 ),
             )
         return FileND

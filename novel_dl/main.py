@@ -17,6 +17,7 @@ from .info import __version__
 
 root = Path(__file__).parent.resolve()
 
+
 def novel_dl(em):
     while True:
         if em.opts["from_file"] or em.opts["update"]:
@@ -32,7 +33,7 @@ def novel_dl(em):
 
         if em.opts["episode"]:
             if not (0 < em.opts["episode"] <= nd.info["num_parts"]):
-                raise NDLE("Incorrect episode number `{num}`",num = em.opts["episode"])
+                raise NDLE("Incorrect episode number `{num}`", num=em.opts["episode"])
             nd.mark_all("skip")
             nd.mark_part("get", em.opts["episode"])
 
@@ -79,7 +80,7 @@ def novel_dl(em):
         try:
             htmls = {i: env.get_template(htmls[i]) for i in htmls}
         except TemplateNotFound as e:
-            raise NDLE("Cannot load theme file: {file}",file=e.name)
+            raise NDLE("Cannot load theme file: {file}", file=e.name)
         loads = {"js": [], "css": []}
         if conf.get("loads"):
             if type(conf["loads"].get("js")) is list:
@@ -128,7 +129,7 @@ def novel_dl(em):
                     db_data = json.load(f)
                 nd.mark_all("skip")
                 if nd.info["num_parts"] > db_data["num_parts"]:
-                    for i in range(db_data["num_parts"]+1, nd.info["num_parts"]+1):
+                    for i in range(db_data["num_parts"] + 1, nd.info["num_parts"] + 1):
                         nd.mark_part("get", i)
                 for i in nd.info["epis"].keys():
                     if not str(i) in db_data["epis"]:
@@ -152,9 +153,7 @@ def novel_dl(em):
             style = []
             script = []
             for file in loads["css"]:
-                paths = [
-                    i for i in static_files if Path(file[0]).name==i.name
-                ]
+                paths = [i for i in static_files if Path(file[0]).name == i.name]
                 if paths:
                     with paths[0].open("r", encoding="utf-8") as f:
                         style.append([f.read(), file[1]])
@@ -253,8 +252,8 @@ def command_line():
         e.console_message()
         return_code = 1
     except Exception:
-        e=NDLE("Unexpected error occurred.\n{err}",err=traceback.format_exc())
-        print(e.msg,file=sys.stderr)
+        e = NDLE("Unexpected error occurred.\n{err}", err=traceback.format_exc())
+        print(e.msg, file=sys.stderr)
     else:
         if not em.opts["quiet"]:
             print("Successfully downloaded")
