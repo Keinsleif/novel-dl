@@ -21,7 +21,7 @@ UbuntuやCentOSなどのMacOSおよびLinux、つまりUnix系OSで動作する�
 ![demo](https://raw.github.com/wiki/Keinsleif/novel-dl/images/novel-dl_DEMO.gif)
 
 # Usage (使い方)
-    novel-dl [OPTIONS] <url> [<url> ...]
+    novel-dl [OPTIONS] <src> [<src> ...]
 
 # Options
 ### General Options
@@ -40,12 +40,12 @@ UbuntuやCentOSなどのMacOSおよびLinux、つまりUnix系OSで動作する�
 
 - -f, --from-file  
     すでにダウンロードされた小説からデータを取得します。  
-    `URL`には小説ディレクトリへのパスを指定します。  
+    `src`には小説ディレクトリへのパスを指定します。  
     短編形式で出力されたファイル(html単体)には非対応
 
 - -u, --update  
     すでにダウンロードされた小説のアップデートを行います。
-    `URL`には小説ディレクトリへのパスを指定します。  
+    `src`には小説ディレクトリへのパスを指定します。  
     短編形式で出力されたファイル(html単体)には非対応
 
 ### Formatter Options
