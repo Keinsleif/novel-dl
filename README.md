@@ -13,7 +13,7 @@ It is released to the public domain, which means you can modify it, redistribute
 
 novel-dlは、「小説家になろう」や「カクヨム」から小説をダウンロードするためのコマンドラインプログラムです。  
 小説のデータをダウンロードし、オフラインでも使用するためにcss、javascript、画像などとhtmlを生成します。  
-Pythonのバージョン3.3以降が必要であり、UNIXベースのプラットフォームで実行する必要があります。  
+Pythonのバージョン3.6以降が必要であり、UNIXベースのプラットフォームで実行する必要があります。  
 UbuntuやCentOSなどのMacOSおよびLinux、つまりUnix系OSで動作するはずです。 **Windowsではテストされていません**  
 これはパブリックドメインにリリースされます。つまり、好きなように変更、再配布、または使用することができます。  
 
